@@ -1,58 +1,50 @@
 #ifndef PACKAGE_H
 #define PACKAGE_H
 
-#include <array>
-#include <string>
-#include <variant>
+#include <common.h>
+#include <json/json.h>
+#include <json/value.h>
 #include <boost/asio/buffer.hpp>
+#include <boost/serialization/access.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
+#include <string>
 
 namespace vchat {
 
-// define method
-enum Method {
-  log_in = 1,
-  log_out,
-  sign_in,
-  sign_out,
-  add_friend,
-  delete_friend,
+enum request {
+  login = 1, logout,
+  signin, signout,
   chat,
+  addfriend, deletefriend
 };
 
-// define signal
-enum Signal {
+enum response {
   success = 100,
-  error_client = 300, // client error
-  error_server = 400, // server error
+  error = 400
 };
 
-// package
 typedef struct Head {
-  bool type; // false stand for ResponseHead, true stand for RequsetHead
+  bool type;
   int size;
-  std::variant<Method, Signal> operate;
-} Head;
+  int method;
+  // serialization
+  friend class boost::serialization::access;
+  template<typename Archive>
+  void serialize(Archive& ar, const unsigned int) {
+      ar & type;
+      ar & size;
+      ar & method;
+  }
+}Head;
 
-template<typename Type>
-struct Package {
-  Head head;
-  Type body;
-};
-
-namespace Packer {
-  template<typename Type>
-  int getbodysize(Type);
-  const int head_size = 16;
-  const int body_size = 8192;
-  /// enpack the message into a package
-  template<typename Type>
-  std::string enpack(Type, bool);
-  /// depack the package into a message
-  Head depack(std::array<char, head_size>&); // depack head
-  template<typename Type>
-  Type depack(std::array<char, body_size>&); // depack body
+namespace packer {
+int getheadsize();
+// enpack
+std::string enpack(int, Json::Value);
+// depack
+Head depackhead(std::shared_ptr<std::string>);
+Json::Value depackbody(std::shared_ptr<std::string>);
 } // namespace packer
 
 } // namespace vchat

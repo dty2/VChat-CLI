@@ -3,13 +3,8 @@
 
 #include <string>
 #include <list>
-#include <boost/serialization/access.hpp>
-#include <boost/serialization/list.hpp>
 
-/*
- * struct for transmission message
- */
-struct MessageInfo {
+typedef struct MessageInfo {
   int sender;
   int receiver;
   std::string msg;
@@ -17,35 +12,14 @@ struct MessageInfo {
     sender(sender_),
     receiver(receiver_),
     msg(msg_) {}
-  // serialization
-  friend class boost::serialization::access;
-  template<typename Archive>
-  void serialize(Archive& ar, const unsigned int) {
-      ar & sender;
-      ar & receiver;
-      ar & msg;
-  }
-};
+}MessageInfo;
 
-/*
- * struct for transmission friendinfo 
- */
-struct FriendInfo {
+typedef struct FriendInfo {
   int friendid;
   FriendInfo(int id_) : friendid(id_) {}
-  // serialization
-  friend class boost::serialization::access;
-  template<typename Archive>
-  void serialize(Archive& ar, const unsigned int) {
-    ar & friendid;
-  }
-};
+}FriendInfo;
 
-/*
- * struct for transmission userinfo
- */
-
-struct PersionalInfo {
+typedef struct PersionalInfo {
   int id;
   int password;
   std::string username;
@@ -53,28 +27,12 @@ struct PersionalInfo {
     id(id_),
     password(password_),
     username(username_) {}
-  // serialization
-  friend class boost::serialization::access;
-  template<typename Archive>
-  void serialize(Archive& ar, const unsigned int) {
-    ar & id;
-    ar & password;
-    ar & username;
-  }
-};
+}PersionalInfo;
 
-struct UserInfo {
+typedef struct UserInfo {
   PersionalInfo persionalinfo;
   std::list<FriendInfo> friendlist;
   std::list<MessageInfo> messagelist;
-  // serialization
-  friend class boost::serialization::access;
-  template<typename Archive>
-  void serialize(Archive& ar, const unsigned int) {
-    ar & persionalinfo;
-    ar & friendlist;
-    ar & messagelist;
-  }
-};
+}UserInfo;
 
 #endif // USERINFO_HPP

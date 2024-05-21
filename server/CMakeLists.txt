@@ -9,7 +9,7 @@ list(APPEND SOURCES
 )
 
 # .out
-add_executable(server "${SOURCES}")
+add_executable(server ${SOURCES})
 
 # .hpp
 target_include_directories(server PUBLIC
@@ -24,6 +24,7 @@ target_link_libraries(server
   boost_thread
   boost_serialization
   pthread
+  jsoncpp
   SQLiteCpp
   glog::glog
 )

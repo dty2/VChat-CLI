@@ -2,10 +2,10 @@
 #define CONNECTION_H
 
 #include <boost/asio.hpp>
-#include <glog/logging.h>
-#include <array>
+#include <json/value.h>
 #include <set>
 #include <memory>
+#include <string>
 
 #include "package.h"
 
@@ -25,12 +25,10 @@ public:
 private:
   boost::asio::io_context& io;
   tcp::socket socket;
-  std::array<char, Packer::head_size> head;
-  std::array<char, Packer::body_size> body;
   ConnectionManager& connection_manager;
   void do_readhead();
-  void do_readbody(int);
-  void do_write();
+  void do_readbody(Head);
+  void do_write(int, Json::Value);
 };
 typedef std::shared_ptr<Connection> connection_ptr;
 

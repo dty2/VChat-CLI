@@ -28,33 +28,39 @@ Connection::Connection( tcp::socket socket,
   : socket(std::move(socket)), connection_manager(connection_manager_), io(io_) {}
 
 void Connection::do_readhead() {
+  std::shared_ptr<std::string> head = std::make_shared<std::string>();
   auto self(shared_from_this());
-  async_read(socket, boost::asio::buffer(head, Packer::head_size),
-    [this, self](boost::system::error_code ec, std::size_t bytes_transferred) {
+  async_read(socket, boost::asio::buffer(*head, packer::getheadsize()),
+    [&](boost::system::error_code ec, std::size_t bytes_transferred) {
       if (!ec) {
-        Packer::depack(head);
-        do_readbody();
+        LOG(INFO) << "read head" << '\n';
+        Head head_ = packer::depackhead(head);
+        do_readbody(head_);
       }
     }
   );
 }
 
-void Connection::do_readbody(int size) {
+void Connection::do_readbody(Head head) {
   auto self(shared_from_this());
-  async_read(socket, boost::asio::buffer(buffer, size),
-    [this, self](boost::system::error_code ec, std::size_t bytes_transferred) {
+  std::shared_ptr<std::string> body = std::make_shared<std::string>();
+  async_read(socket, boost::asio::buffer(*body, head.size),
+    [&](boost::system::error_code ec, std::size_t bytes_transferred) {
       if(!ec) {
+        LOG(INFO) << "read body" << '\n';
       }
-      boost::asio::defer(io, [this]{ do_readhead(); });
+      boost::asio::defer(io, [&]{ do_readhead(); });
     }
   );
 }
 
-void Connection::do_write() {
+void Connection::do_write(int method, Json::Value target) {
   auto self(shared_from_this());
-  async_write(socket, boost::asio::buffer(),
+  std::string message = packer::enpack(method, target);
+  async_write(socket, boost::asio::buffer(message, message.size()),
     [this, self](boost::system::error_code ec, std::size_t bytes_transferred) {
       if (!ec) {
+        LOG(INFO) << "send message successful" << '\n';
       }
   });
 }

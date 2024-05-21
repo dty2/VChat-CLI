@@ -1,44 +1,50 @@
 #include "package.h"
 
 namespace vchat {
+namespace packer {
 
-template<typename Type>
-int Packer::getbodysize(Type target) {
-  return log_in;
-}
-
-template<typename Type>
-std::string Packer::enpack(Type target, bool type) {
-  struct Package<Type> temp;
+int getheadsize() {
+  Head head;
   std::ostringstream os;
   boost::archive::text_oarchive oa(os);
-  temp.head.type = type;
-  temp.head.size = getbodysize(target);
-  temp.head.operate = getbodysize(target);
-  temp.body = target;
-  oa << temp;
-  return os.str();
+  oa << head;
+  return os.str().size();
 }
 
-template<typename Type>
-Type Packer::depack(std::array<char, body_size>& target) {
-  Type temp;
-  std::string tran;
-  for(int i = 0; i < body_size; i ++) tran.push_back(target[i]);
-  std::istringstream is(tran);
+std::string enpack(int method, Json::Value body) {
+  // enpack head
+  Json::StreamWriterBuilder builder;
+  std::string output = Json::writeString(builder, body);
+  Head head;
+  head.type = method >= 100;
+  head.size = body.size();
+  head.method = method;
+  std::ostringstream os;
+  boost::archive::text_oarchive oa(os);
+  oa << head;
+  output = os.str() + output;
+  return output;
+}
+Head depackhead(std::shared_ptr<std::string> target) {
+  Head head;
+  std::istringstream is(*target);
   boost::archive::text_iarchive ia(is);
-  ia >> temp;
-  return temp;
+  ia >> head;
+  return head;
 }
 
-Head Packer::depack(std::array<char, head_size>& target) {
-  Head temp;
-  std::string tran;
-  for(int i = 0; i < head_size; i ++) tran.push_back(target[i]);
-  std::istringstream is(tran);
-  boost::archive::text_iarchive ia(is);
-  ia >> temp;
-  return temp;
+Json::Value depackbody(std::shared_ptr<std::string> target) {
+  Json::Value root;
+  std::string errors;
+  Json::CharReaderBuilder builder;
+  std::stringstream ss(*target);
+  if(Json::parseFromStream(builder, ss, &root, &errors)) {
+    return root;
+  } else {
+    LOG(ERROR) << "parse json error" << '\n';
+    return 0;
+  }
 }
 
-} // namespace packages
+} // namespace packer
+} // namespace vchat
