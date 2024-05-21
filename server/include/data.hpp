@@ -1,8 +1,7 @@
 #ifndef USERINFO_HPP
 #define USERINFO_HPP
 
-#include <string>
-#include <list>
+#include "common.h"
 
 typedef struct MessageInfo {
   int sender;

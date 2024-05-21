@@ -3,7 +3,14 @@
 namespace vchat {
 using boost::asio::ip::tcp;
 
-ConnectionManager::ConnectionManager(boost::asio::io_context& io_) : io(io_) {}
+ConnectionManager* ConnectionManager::getInstance(boost::asio::io_context& io_) {
+  ConnectionManager* instance = new ConnectionManager(io_);
+  return instance;
+}
+
+ConnectionManager::ConnectionManager(boost::asio::io_context& io_) : io(io_) {
+  work_manager = WorkManager::getInstance();
+}
 
 void ConnectionManager::start(connection_ptr cp) {
   connections.insert(cp);
@@ -33,7 +40,7 @@ void Connection::do_readhead() {
   async_read(socket, boost::asio::buffer(*head, packer::getheadsize()),
     [&](boost::system::error_code ec, std::size_t bytes_transferred) {
       if (!ec) {
-        LOG(INFO) << "read head" << '\n';
+        LOG(INFO) << "start read head" << '\n';
         Head head_ = packer::depackhead(head);
         do_readbody(head_);
       }
@@ -47,7 +54,10 @@ void Connection::do_readbody(Head head) {
   async_read(socket, boost::asio::buffer(*body, head.size),
     [&](boost::system::error_code ec, std::size_t bytes_transferred) {
       if(!ec) {
-        LOG(INFO) << "read body" << '\n';
+          LOG(INFO) << "start read body" << '\n';
+          WorkManager::push_work(head, packer::depackbody(body), 
+          std::bind(&Connection::do_write, this, std::placeholders::_1, std::placeholders::_2)
+        );
       }
       boost::asio::defer(io, [&]{ do_readhead(); });
     }

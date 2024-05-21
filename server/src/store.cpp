@@ -1,5 +1,4 @@
 #include "store.h"
-#include <list>
 
 Store::Store() {
   try {

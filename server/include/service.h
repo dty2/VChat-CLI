@@ -1,28 +1,34 @@
-#ifndef WORK_H
-#define WORK_H
+#ifndef SERVICE_H
+#define SERVICE_H
 
 #include "common.h"
-#include "macro.h"
+#include "package.h"
+#include "store.h"
+#include "data.hpp"
 
-extern std::unordered_map<std::string, UserInfo> userlist;
+namespace vchat {
 
-class Work {
+class Service {
 private:
-  static std::unordered_map<std::string, std::shared_ptr<Chat_server>> chat_server_list;
-  boost::asio::io_context& io_context;
-  std::shared_ptr<tcp::socket> socket;
-
-  void receive_msg();
-  void send_msg(Message);
-  void find_receiver(Message);
-  
+  // online user
+  std::unordered_set<int> online;
 public:
-  Chat_server(boost::asio::io_context&, std::shared_ptr<tcp::socket>);
-  static void create(std::string, boost::asio::io_context&, std::shared_ptr<tcp::socket>);
-  void get_info(std::shared_ptr<tcp::socket>); // 读取登录信息
-  bool log_judge(std::shared_ptr<LogInfo>);
-  void return_permission(std::shared_ptr<tcp::socket>, std::shared_ptr<LogInfo>); // 返回登录许可
-  void return_userinfo(std::shared_ptr<tcp::socket>, std::string); // 登录许可为1，返回用户信息
+  static Service* service;
+  static Service* getInstance();
+  Service(const Service&) = delete;
+  Service& operator=(const Service&) = delete;
+
+  // request service
+  bool do_login(Json::Value, std::function<void(int, Json::Value)>);
+  bool do_logout(Json::Value, std::function<void(int, Json::Value)>);
+  bool do_signin(Json::Value, std::function<void(int, Json::Value)>);
+  bool do_signout(Json::Value, std::function<void(int, Json::Value)>);
+  bool do_chat(Json::Value, std::function<void(int, Json::Value)>);
+  bool do_addfriend(Json::Value, std::function<void(int, Json::Value)>);
+  bool do_deletefriend(Json::Value, std::function<void(int, Json::Value)>);
 
 };
-#endif // BUSINESS_H
+
+} // namespace vchat
+
+#endif // SERVICE_H

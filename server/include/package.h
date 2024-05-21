@@ -1,14 +1,7 @@
 #ifndef PACKAGE_H
 #define PACKAGE_H
 
-#include <common.h>
-#include <json/json.h>
-#include <json/value.h>
-#include <boost/asio/buffer.hpp>
-#include <boost/serialization/access.hpp>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
-#include <string>
+#include "common.h"
 
 namespace vchat {
 

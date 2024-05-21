@@ -1,10 +1,8 @@
 #ifndef STORE_H
 #define STORE_H
 
-#include <memory>
-#include <SQLiteCpp/SQLiteCpp.h>
-#include "common.h"
 #include "data.hpp"
+#include "common.h"
 
 class Store {
 private:

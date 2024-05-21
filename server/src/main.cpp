@@ -1,9 +1,11 @@
-#include "transmission.h"
+#include "acceptor.h"
+#include "service.h"
 
 int main() {
   try {
-    vchat::Transmission* transmission = vchat::Transmission::getInstance();
-    transmission->run();
+    vchat::Service::service = vchat::Service::getInstance();
+    vchat::Acceptor* accept = vchat::Acceptor::getInstance();
+    accept->run();
   } catch (const std::exception& e) {
     LOG(ERROR) << "exception: " << e.what() << "\n";
   }
