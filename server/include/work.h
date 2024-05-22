@@ -13,7 +13,6 @@ public:
   WorkManager& operator=(const WorkManager&) = delete;
   static WorkManager* getInstance();
   static void push_work(Head, Json::Value, std::function<void(int, Json::Value)>);
-  void do_work(std::function<void(Json::Value, std::function<void(int, Json::Value)>)>);
 };
 
 } // namespace vchat

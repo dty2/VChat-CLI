@@ -23,6 +23,8 @@ private:
   void do_readhead();
   void do_readbody(Head);
   void do_write(int, Json::Value);
+  void do_chat(int, Json::Value);
+  void update(int);
 };
 typedef std::shared_ptr<Connection> connection_ptr;
 
@@ -40,9 +42,10 @@ public:
 private:
   WorkManager* work_manager;
   explicit ConnectionManager(boost::asio::io_context&);
-  std::set<connection_ptr> connections;
+  friend Connection;
 
 protected:
+  std::unordered_map<connection_ptr, int> connections;
   boost::asio::io_context& io;
 };
 

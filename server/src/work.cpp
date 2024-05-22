@@ -25,8 +25,8 @@ void WorkManager::push_work(
     }
   } else {
     switch (head.method) {
-      case success      : LOG(INFO)  << "request success" << '\n'; break;
-      case error        : LOG(ERROR) << "request error"   << '\n'; break;
+      case chat_success      : LOG(INFO)  << "request success" << '\n'; break;
+      case chat_error        : LOG(ERROR) << "request error"   << '\n'; break;
       default: LOG(ERROR) << "no response service error" << '\n';
     }
   }

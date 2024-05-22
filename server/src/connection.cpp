@@ -2,7 +2,7 @@
 
 namespace vchat {
 using boost::asio::ip::tcp;
-
+extern void push_work(Head, Json::Value, std::function<void(int, Json::Value)>, std::unordered_set<connection_ptr> connection_list);
 ConnectionManager* ConnectionManager::getInstance(boost::asio::io_context& io_) {
   ConnectionManager* instance = new ConnectionManager(io_);
   return instance;
@@ -13,7 +13,7 @@ ConnectionManager::ConnectionManager(boost::asio::io_context& io_) : io(io_) {
 }
 
 void ConnectionManager::start(connection_ptr cp) {
-  connections.insert(cp);
+  connections[cp] = -1;
   cp->start();
 }
 
@@ -23,12 +23,18 @@ void ConnectionManager::stop(connection_ptr cp) {
 }
 
 void ConnectionManager::stop_all() {
-  for (auto temp: connections)
-    temp->stop();
+  for(auto& [item, id] : connections)
+    item->stop();
   connections.clear();
 }
 
 void Connection::start() { do_readhead(); }
+
+void Connection::update(int id) {
+  auto self(shared_from_this());
+  connection_manager.connections[self] = id;
+}
+
 void Connection::stop() { socket.close(); }
 Connection::Connection( tcp::socket socket,
     ConnectionManager& connection_manager_, boost::asio::io_context& io_)
@@ -54,8 +60,8 @@ void Connection::do_readbody(Head head) {
   async_read(socket, boost::asio::buffer(*body, head.size),
     [&](boost::system::error_code ec, std::size_t bytes_transferred) {
       if(!ec) {
-          LOG(INFO) << "start read body" << '\n';
-          WorkManager::push_work(head, packer::depackbody(body), 
+        LOG(INFO) << "start read body" << '\n';
+        WorkManager::push_work(head, packer::depackbody(body), 
           std::bind(&Connection::do_write, this, std::placeholders::_1, std::placeholders::_2)
         );
       }
@@ -64,15 +70,46 @@ void Connection::do_readbody(Head head) {
   );
 }
 
-void Connection::do_write(int method, Json::Value target) {
+void Connection::do_chat(int status, Json::Value target) {
   auto self(shared_from_this());
-  std::string message = packer::enpack(method, target);
-  async_write(socket, boost::asio::buffer(message, message.size()),
-    [this, self](boost::system::error_code ec, std::size_t bytes_transferred) {
-      if (!ec) {
-        LOG(INFO) << "send message successful" << '\n';
-      }
-  });
+  int receiver = target["receiver"].asInt();
+  for(auto& [item, id] : connection_manager.connections)
+    if(id == receiver) {
+      std::string message = packer::enpack(status, target);
+      async_write(item->socket, boost::asio::buffer(message, message.size()),
+        [&](boost::system::error_code ec, std::size_t bytes_transferred) {
+          if (!ec) {
+            LOG(INFO) << "send message successful" << '\n';
+            if(status == login_success) {
+              update(target["id"].asInt());
+            } else {
+              this->stop();
+              connection_manager.connections.erase(self);
+            }
+          }
+        }
+      );
+    }
+}
+
+void Connection::do_write(int status, Json::Value target) {
+  auto self(shared_from_this());
+  if(status == chat_success) { do_chat(status, target); }
+  else {
+    std::string message = packer::enpack(status, target);
+    async_write(socket, boost::asio::buffer(message, message.size()),
+      [&](boost::system::error_code ec, std::size_t bytes_transferred) {
+        if (!ec) {
+          LOG(INFO) << "send successful" << '\n';
+          if(status == login_success) {
+            update(target["id"].asInt());
+          } else {
+            this->stop();
+            connection_manager.connections.erase(self);
+          }
+        }
+    });
+  }
 }
 
 } // namespace vchat
