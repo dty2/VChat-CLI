@@ -8,6 +8,7 @@ list(APPEND SOURCES
   ${SRC_DIR}/store.cpp
   ${SRC_DIR}/package.cpp
   ${SRC_DIR}/connection.cpp
+  ${SRC_DIR}/work.cpp
 )
 
 # .out
@@ -22,9 +23,9 @@ target_include_directories(server PUBLIC
 
 # .lib
 target_link_libraries(server
-  boost_system
-  boost_thread
-  boost_serialization
+  ${BOOST_LIB}/lib/libboost_system.a
+  ${BOOST_LIB}/lib/libboost_thread.a
+  ${BOOST_LIB}/lib/libboost_serialization.a
   pthread
   jsoncpp
   SQLiteCpp

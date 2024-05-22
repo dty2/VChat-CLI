@@ -1,10 +1,19 @@
 #include "store.h"
 
+namespace vchat {
+
+Store* Store::store = nullptr;
+
+Store* Store::getInstance() {
+  Store* instance = new Store();
+  return instance;
+}
+
 Store::Store() {
   try {
     this->db = std::make_unique<SQLite::Database>(
       db_address,
-      SQLite::OPEN_READWRITE|SQLite::OPEN_CREATE
+      SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE
     );
   }
   catch (const std::exception& e) {
@@ -101,3 +110,5 @@ bool Store::insertMessage(MessageInfo& messageinfo) {
     return false;
   }
 }
+
+} // namespace vchat

@@ -2,8 +2,15 @@
 
 namespace vchat {
 
+Service* Service::service = nullptr;
+
 Service::Service() {
   Store::store = Store::getInstance();
+}
+
+Service* Service::getInstance() {
+  Service* instance = new Service();
+  return instance;
 }
 
 void Service::do_login(Json::Value value, std::function<void(int, Json::Value)> callback) {

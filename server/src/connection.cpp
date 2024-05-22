@@ -2,7 +2,7 @@
 
 namespace vchat {
 using boost::asio::ip::tcp;
-extern void push_work(Head, Json::Value, std::function<void(int, Json::Value)>, std::unordered_set<connection_ptr> connection_list);
+
 ConnectionManager* ConnectionManager::getInstance(boost::asio::io_context& io_) {
   ConnectionManager* instance = new ConnectionManager(io_);
   return instance;
@@ -32,13 +32,12 @@ void Connection::start() { do_readhead(); }
 
 void Connection::update(int id) {
   auto self(shared_from_this());
-  connection_manager.connections[self] = id;
+  connection_manager->connections[self] = id;
 }
 
 void Connection::stop() { socket.close(); }
-Connection::Connection( tcp::socket socket,
-    ConnectionManager& connection_manager_, boost::asio::io_context& io_)
-  : socket(std::move(socket)), connection_manager(connection_manager_), io(io_) {}
+Connection::Connection(tcp::socket socket, ConnectionManager* connection_manager_)
+  : socket(std::move(socket)), connection_manager(connection_manager_) {}
 
 void Connection::do_readhead() {
   std::shared_ptr<std::string> head = std::make_shared<std::string>();
@@ -65,7 +64,7 @@ void Connection::do_readbody(Head head) {
           std::bind(&Connection::do_write, this, std::placeholders::_1, std::placeholders::_2)
         );
       }
-      boost::asio::defer(io, [&]{ do_readhead(); });
+      boost::asio::defer(connection_manager->io, [&]{ do_readhead(); });
     }
   );
 }
@@ -73,7 +72,7 @@ void Connection::do_readbody(Head head) {
 void Connection::do_chat(int status, Json::Value target) {
   auto self(shared_from_this());
   int receiver = target["receiver"].asInt();
-  for(auto& [item, id] : connection_manager.connections)
+  for(auto& [item, id] : connection_manager->connections)
     if(id == receiver) {
       std::string message = packer::enpack(status, target);
       async_write(item->socket, boost::asio::buffer(message, message.size()),
@@ -84,7 +83,7 @@ void Connection::do_chat(int status, Json::Value target) {
               update(target["id"].asInt());
             } else {
               this->stop();
-              connection_manager.connections.erase(self);
+              connection_manager->connections.erase(self);
             }
           }
         }
@@ -105,7 +104,7 @@ void Connection::do_write(int status, Json::Value target) {
             update(target["id"].asInt());
           } else {
             this->stop();
-            connection_manager.connections.erase(self);
+            connection_manager->connections.erase(self);
           }
         }
     });

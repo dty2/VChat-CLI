@@ -16,7 +16,7 @@ std::string enpack(int method, Json::Value body) {
   Json::StreamWriterBuilder builder;
   std::string output = Json::writeString(builder, body);
   Head head;
-  //head.type = method >= 100;
+  head.type = method >= 100;
   head.size = body.size();
   head.method = method;
   std::ostringstream os;

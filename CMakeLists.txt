@@ -17,7 +17,7 @@ set(SQLITECPP_LIB ${LIB}/sqlitecpp)
 set(GLOG_LIB ${LIB}/glog)
 
 find_package(ftxui REQUIRED PATHS ${FTXUI_LIB})
-find_package(Boost REQUIRED PATHS ${BOOST_LIB})
+find_package(Boost 1.85.0 REQUIRED COMPONENTS system thread serialization PATHS ${BOOST_LIB})
 find_package(jsoncpp REQUIRED PATHS ${JSONCPP_LIB})
 find_package(SQLiteCpp REQUIRED PATHS ${SQLITECPP_LIB})
 find_package(glog REQUIRED PATHS ${GLOG_LIB})

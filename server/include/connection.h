@@ -10,16 +10,15 @@ class ConnectionManager;
 
 class Connection : public std::enable_shared_from_this<Connection> {
 public:
-  Connection(tcp::socket, ConnectionManager&, boost::asio::io_context&); 
+  explicit Connection(tcp::socket, ConnectionManager*);
   Connection(const Connection&) = delete;
   Connection& operator=(const Connection&) = delete;
   void start();
   void stop();
 
 private:
-  boost::asio::io_context& io;
+  ConnectionManager* connection_manager;
   tcp::socket socket;
-  ConnectionManager& connection_manager;
   void do_readhead();
   void do_readbody(Head);
   void do_write(int, Json::Value);
@@ -30,7 +29,7 @@ typedef std::shared_ptr<Connection> connection_ptr;
 
 class ConnectionManager {
 public:
-  static ConnectionManager* connection_manager;
+ // static ConnectionManager* connection_manager;
 
   static ConnectionManager* getInstance(boost::asio::io_context&);
   ConnectionManager(const ConnectionManager&) = delete;
@@ -48,6 +47,8 @@ protected:
   std::unordered_map<connection_ptr, int> connections;
   boost::asio::io_context& io;
 };
+
+extern ConnectionManager* connection_manager;
 
 } // namespace vchat
 

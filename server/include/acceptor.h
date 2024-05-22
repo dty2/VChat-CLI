@@ -8,6 +8,8 @@ using boost::asio::ip::tcp;
 
 class Acceptor {
 public:
+  static Acceptor* accept;
+
   Acceptor(const Acceptor&) = delete;
   Acceptor& operator=(const Acceptor&) = delete;
   static Acceptor* getInstance();

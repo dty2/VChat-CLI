@@ -4,6 +4,8 @@
 #include "data.hpp"
 #include "common.h"
 
+namespace vchat {
+
 class Store {
 private:
   const std::string db_address = "/home/hunter/project/vchat/resource/sql/vchat.db";
@@ -22,5 +24,7 @@ public:
   bool insertFriend(FriendInfo&);
   bool insertMessage(MessageInfo&);
 };
+
+} // namespace vchat
 
 #endif // STORE_H
