@@ -1,16 +1,12 @@
-// Copyright 2024 Arthur Hunter. All rights reserved.
-// Use of this source code is governed by the GPL-3.0 license 
-// that can be found in the LICENSE file.
+#ifndef HELP_H
+#define HELP_H
 
-#ifndef HELP_HPP
-#define HELP_HPP
+#include "common.h"
 
-#include "common.hpp"
-
-namespace tui {
+namespace vchat {
 
 static std::string HELP = "\
----------------------使用说明书---------------------- \n\
+-------------------- 使用说明书 --------------------- \n\
                                                       \n\
                       操作方式                        \n\
                 两种模式: chat / command              \n\
@@ -31,6 +27,5 @@ static std::string HELP = "\
             |  enter    |      确认       |           \n\
             |    q      |      关闭       |           \n";
 
-}
-
-#endif
+} // namespace vchat
+#endif // HELP_HPP

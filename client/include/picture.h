@@ -1,11 +1,10 @@
-// Copyright 2024 Arthur Hunter. All rights reserved.
-// Use of this source code is governed by the GPL-3.0 license 
-// that can be found in the LICENSE file.
+#ifndef LOG_H
+#define LOG_H
 
-#ifndef LOG_HPP
-#define LOG_HPP
+#include "common.h"
 
-namespace tui {
+namespace vchat {
+
 static std::string LOGO = "\
                                            \n\
  ██╗   ██╗ ██████╗██╗  ██╗ █████╗ ████████╗\n\
@@ -20,7 +19,6 @@ static std::string LOGO = "\
           by Hunter(执着) el al.           \n\
 VChat is open source and freely distributed\n\
                                            \n";
-}
 
 static std::string MASCOT = "\
         *   ^__^               \n\
@@ -44,4 +42,7 @@ static std::string TALK_SIGN = "\
  ______________________________________ \n\
 < Input username and password for sign >\n\
  -------------------------------------- \n";
-#endif
+
+} // namespace vchat
+
+#endif // LOG_HPP

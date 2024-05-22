@@ -1,26 +1,19 @@
-// Copyright 2024 Arthur Hunter. All rights reserved.
-// Use of this source code is governed by the GPL-3.0 license 
-// that can be found in the LICENSE file.
+#include "tui.h"
 
-#include "tui.hpp"
+namespace vchat {
 
-using namespace tui;
-
-Module::Module()
-{
+Tui::Tui() : screen(ScreenInteractive::Fullscreen()) {
   this->mode = 1;
+  this->start();
 }
 
-/// @brief Show the start interface
-/// @param
-/// @ingroup tui::Module
-void Module::start()
-{
-  auto screen = ScreenInteractive::Fullscreen();
+Tui* Tui::getinstance() {
+  Tui* instance = new vchat::Tui();
+  return instance;
+}
 
-  // ------------------------------------------------------
-  // Start
-  // ------------------------------------------------------
+void Tui::start() {
+  // start
   option selected = start_option;
   auto menu_container = Container::Horizontal({
     Button("Log", [&]{ selected = log_option; }, ButtonOption::Ascii()),
@@ -37,10 +30,8 @@ void Module::start()
       menu_container->Render() | center
     }) | color(Color::Blue);
   });
-  
-  // ------------------------------------------------------
+
   // log
-  // ------------------------------------------------------
   std::string logusername;
   std::string logpassword;
   InputOption password_option;
@@ -85,15 +76,14 @@ void Module::start()
       if (event == Event::Character('j'))
         selected_log += 2;
       if (event == Event::Return)
+      // TODO:
         selected = start_option;
       return true;
     }
     return false;
   });
 
-  // ------------------------------------------------------
   // sign
-  // ------------------------------------------------------
   std::string signusername;
   std::string signpassword;
   auto signinputusername = Input(&signusername, "Username");
@@ -142,9 +132,7 @@ void Module::start()
     return false;
   });
 
-  // ------------------------------------------------------
   // Help
-  // ------------------------------------------------------
   // why "bool focuse"? see more for 
   // https://github.com/ArthurSonzogni/FTXUI/issues/623
   auto help_render = Renderer([&](bool focuse){ 
@@ -178,19 +166,16 @@ void Module::start()
       case start_option: 
         show = vbox({
           start_render->Render(),
-          //text(std::to_string(mode)),
         }) | center;
         break;
       case log_option: 
         show = vbox({
           log_render->Render() | center,
-          //text(std::to_string(mode)),
         }) | center;
         break;
       case sign_option: 
         show = vbox({
           sign_render->Render() | center,
-          //text(std::to_string(mode)),
         }) | center;
         break;
       case help_option:
@@ -208,7 +193,7 @@ void Module::start()
 }
 
 // offered by ftxui author see more for https://github.com/ArthurSonzogni/FTXUI/issues/336
-Elements Module::split(std::string the_text) {
+Elements Tui::split(std::string the_text) {
   Elements output;
   std::stringstream ss(the_text);
   std::string word;
@@ -217,16 +202,17 @@ Elements Module::split(std::string the_text) {
   return output;
 }
 
-Element Module::paragraph_imp(std::string the_text) {
+Element Tui::paragraph_imp(std::string the_text) {
   Elements lines;
   for(Element &line : split(std::move(the_text)))
     lines.push_back(line);
   return vbox(std::move(lines));
 }
 
-bool Module::getmode(Event &event)
-{
+bool Tui::getmode(Event &event) {
   if(event == Event::Escape)
     return mode = mode ? 0 : 1;
   return mode;
 }
+
+} // namespace vchat
