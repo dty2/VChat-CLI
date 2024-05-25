@@ -17,6 +17,4 @@
 #include <json/json.h>
 #include <glog/logging.h>
 
-#include "macro.h"
-
 #endif // COMMON_H

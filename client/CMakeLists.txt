@@ -3,9 +3,11 @@ set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(SOURCES)
 list(APPEND SOURCES
   "${SRC_DIR}/main.cpp"
+  "${SRC_DIR}/function.cpp"
   "${SRC_DIR}/connection.cpp"
   "${SRC_DIR}/package.cpp"
-  "${SRC_DIR}/tui.cpp"
+  "${SRC_DIR}/tool.cpp"
+  "${SRC_DIR}/start.cpp"
 )
 
 # .out
