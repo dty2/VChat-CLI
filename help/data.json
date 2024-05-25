@@ -1,29 +1,9 @@
 {
-  "head" : {
-    "type" : 1,
-    "method" : 100,
-    "size" : 6799,
-  }
-  "body" : {
-    "persionalinfo" : {
-      "id" : 123456,
-      "password" : 123456,
-      "username" : "hunter"
-    },
-    "friendlist" : {
-      "friendinfo" : {
-        "friendid" : 123455
-      },
-      "friendinfo" : {
-        "friendid" : 123454
-      },
-    },
-    "messagelist" : {
-      "messageinfo" : {
-        "sender" : 123456,
-        "receiver" : 123455,
-        "message" : "hello, word"
-      }
-    }
-  }
+  "id" : 1,
+  "password" : 123456
+}
+{
+  "id" : 1,
+  "password" : 123456,
+  "username" : "hunter"
 }

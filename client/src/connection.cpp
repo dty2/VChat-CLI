@@ -9,10 +9,7 @@ Connection::Connection()
   endpoint = resolver.resolve(address, port);
 }
 
-Connection* Connection::getinstance() {
-  Connection* instance = new vchat::Connection();
-  return instance;
-}
+Connection* Connection::getinstance() { return new vchat::Connection(); }
 
 void Connection::do_connect() {
   async_connect(socket, endpoint,

@@ -12,10 +12,10 @@ public:
   boost::asio::io_context io;
 
   void do_connect();
+  void stop();
   static Connection* getinstance();
   Connection(const Connection&) = delete;
   Connection& operator=(const Connection&) = delete;
-  void stop();
 
 private:
   const std::string port = "3000";

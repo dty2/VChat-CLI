@@ -9,9 +9,11 @@ namespace vchat {
 
 class Function {
 private:
-  std::unordered_set<int> online;
-  Function();
   static Connection* control;
+  static std::thread* t;
+
+  Function();
+
 public:
   static Function* function;
   static void getinstance();
@@ -19,13 +21,13 @@ public:
   Function& operator=(const Function&) = delete;
 
   // request service
-  void do_login();
-  void do_logout();
-  void do_signin();
-  void do_signout();
-  void do_chat();
-  void do_addfriend();
-  void do_deletefriend();
+  bool do_login(int, int);
+  bool do_logout(int);
+  bool do_signin(int, int, std::string);
+  bool do_signout(int);
+  bool do_chat(int, int, std::string);
+  bool do_addfriend(int);
+  bool do_deletefriend(int);
 
   // information operation
   void info_read();

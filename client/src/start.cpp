@@ -1,4 +1,5 @@
 #include "start.h"
+#include <string>
 
 namespace vchat {
 // c: component
@@ -46,7 +47,8 @@ Start::Start() : screen(ScreenInteractive::FitComponent()) {
       return true;
     } else if(event == Event::Return) {
       if(!log_id.empty() && !log_password.empty()) {
-        Function::function->do_login();
+        bool status = Function::function->do_login(std::stoi(log_id), std::stoi(log_password));
+        LOG(INFO) << status << '\n';
       }
       return true;
     }
@@ -85,7 +87,7 @@ Start::Start() : screen(ScreenInteractive::FitComponent()) {
       return true;
     } else if(event == Event::Return) {
       if(!log_id.empty() && !log_password.empty()) {
-        Function::function->do_signin();
+        Function::function->do_signin(std::stoi(sign_id), std::stoi(sign_password), sign_username);
       }
       return true;
     }
