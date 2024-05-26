@@ -1,5 +1,4 @@
 #include "start.h"
-#include <string>
 
 namespace vchat {
 // c: component
@@ -45,14 +44,12 @@ Start::Start() : screen(ScreenInteractive::FitComponent()) {
     } else if(event == Event::CtrlJ) {
       c_logpassword->TakeFocus();
       return true;
-    } else if(event == Event::Return) {
+    } else if(event == Event::CtrlY) {
       if(!log_id.empty() && !log_password.empty()) {
-        bool status = Function::function->do_login(std::stoi(log_id), std::stoi(log_password));
-        LOG(INFO) << status << '\n';
+        Function::function->do_login(std::stoi(log_id), std::stoi(log_password));
       }
       return true;
-    }
-    return false;
+    } else return false;
   });
 
   // -------------------

@@ -7,6 +7,7 @@ list(APPEND SOURCES
   "${SRC_DIR}/connection.cpp"
   "${SRC_DIR}/package.cpp"
   "${SRC_DIR}/tool.cpp"
+  "${SRC_DIR}/info.cpp"
   "${SRC_DIR}/start.cpp"
 )
 

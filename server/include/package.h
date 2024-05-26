@@ -6,33 +6,23 @@
 namespace vchat {
 
 enum request {
-  login = 1, logout,
-  signin, signout,
+  login = 1,
+  signin,
   chat,
-  addfriend, deletefriend
+  addfriend,
 };
 
 enum response {
   login_success = 101,
-  login_error = 401,
-  logout_success = 102,
-  logout_error = 402,
   signin_success = 103,
-  signin_error = 403,
-  signout_success = 104,
-  signout_error = 404,
   chat_success = 105,
-  chat_error = 405,
   addfriend_success = 106,
-  addfriend_error = 406,
-  deletefriend_success = 107,
-  deletefriend_error = 407,
 };
 
 typedef struct Head {
-  bool type;
-  int size;
-  int method;
+  bool type = 0;
+  int size = 0;
+  int method = 0;
   // serialization
   friend class boost::serialization::access;
   template<typename Archive>

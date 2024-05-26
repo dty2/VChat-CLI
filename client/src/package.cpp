@@ -8,6 +8,7 @@ int getheadsize() {
   std::ostringstream os;
   boost::archive::text_oarchive oa(os);
   oa << head;
+  LOG(INFO) << "get head size: " << os.str().size() << '\n';
   return os.str().size();
 }
 
@@ -25,6 +26,7 @@ std::string enpack(int method, Json::Value body) {
   output = os.str() + output;
   return output;
 }
+
 Head depackhead(std::shared_ptr<std::string> target) {
   Head head;
   std::istringstream is(*target);

@@ -29,8 +29,6 @@ typedef std::shared_ptr<Connection> connection_ptr;
 
 class ConnectionManager {
 public:
- // static ConnectionManager* connection_manager;
-
   static ConnectionManager* getInstance(boost::asio::io_context&);
   ConnectionManager(const ConnectionManager&) = delete;
   ConnectionManager& operator=(const ConnectionManager&) = delete;

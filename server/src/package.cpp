@@ -8,6 +8,7 @@ int getheadsize() {
   std::ostringstream os;
   boost::archive::text_oarchive oa(os);
   oa << head;
+  LOG(INFO) << "get head size: " << os.str().size() << '\n';
   return os.str().size();
 }
 

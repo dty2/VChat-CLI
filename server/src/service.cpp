@@ -26,38 +26,23 @@ void Service::do_login(Json::Value value, std::function<void(int, Json::Value)> 
     persionalinfo["password"] = userinfo.persionalinfo.password;
     persionalinfo["username"] = userinfo.persionalinfo.username;
     for(auto x : userinfo.friendlist) {
-      Json::Value e;
-      e["friendid"] = x.friendid;
-      friendlist.append(e);
+      Json::Value friendinfo;
+      friendinfo["id"] = x.friendid;
+      friendlist.append(friendinfo);
     }
     for(auto x : userinfo.messagelist) {
-      Json::Value e;
-      e["sender"] = x.sender;
-      e["receiver"] = x.receiver;
-      e["message"] = x.msg;
-      messagelist.append(e);
+      Json::Value messageinfo;
+      messageinfo["sender"] = x.sender;
+      messageinfo["receiver"] = x.receiver;
+      messageinfo["message"] = x.msg;
+      messagelist.append(messageinfo);
     }
     root.append(persionalinfo);
     root.append(friendlist);
     root.append(messagelist);
     callback(login_success, root);
-  } else {
-    Json::Value root;
-    callback(login_error, root);
   }
   online.insert(id);
-}
-
-void Service::do_logout(Json::Value value, std::function<void(int, Json::Value)> callback) {
-  int id = value["id"].asInt();
-  if(online.find(19) != online.end()) {
-    online.erase(19);
-    Json::Value root;
-    callback(logout_success, root);
-  } else {
-    Json::Value root;
-    callback(logout_error, root);
-  }
 }
 
 void Service::do_signin(Json::Value value, std::function<void(int, Json::Value)> callback) {
@@ -68,16 +53,6 @@ void Service::do_signin(Json::Value value, std::function<void(int, Json::Value)>
   bool op = Store::store->insertPersional(persionalinfo);
   Json::Value root;
   if(op) { callback(signin_success, root); }
-  else { callback(signin_error, root); }
-}
-
-void Service::do_signout(Json::Value value, std::function<void(int, Json::Value)> callback) {
-  int id = value["id"].asInt();
-  PersionalInfo persionalinfo;
-  bool op = Store::store->getPersional(persionalinfo, id);
-  Json::Value root;
-  if(op) { callback(signout_success, root); }
-  else { callback(signout_error, root); }
 }
 
 void Service::do_chat(Json::Value value, std::function<void(int, Json::Value)> callback) {
@@ -87,7 +62,6 @@ void Service::do_chat(Json::Value value, std::function<void(int, Json::Value)> c
   messageinfo.msg = value["message"].asString();
   bool op = Store::store->insertMessage(messageinfo);
   if(op) { callback(chat_success, value); }
-  else { callback(chat_error, value); }
 }
 
 void Service::do_addfriend(Json::Value value, std::function<void(int, Json::Value)> callback) {

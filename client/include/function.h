@@ -7,31 +7,28 @@
 
 namespace vchat {
 
+class Connection;
+
 class Function {
-private:
-  static Connection* control;
-  static std::thread* t;
-
-  Function();
-
 public:
   static Function* function;
+  static Connection* connect;
   static void getinstance();
   Function(const Function&) = delete;
   Function& operator=(const Function&) = delete;
 
   // request service
-  bool do_login(int, int);
-  bool do_logout(int);
-  bool do_signin(int, int, std::string);
-  bool do_signout(int);
-  bool do_chat(int, int, std::string);
-  bool do_addfriend(int);
-  bool do_deletefriend(int);
+  void do_login(int, int);
+  void do_logout(int);
+  void do_signin(int, int, std::string);
+  void do_signout(int);
+  void do_chat(int, int, std::string);
+  void do_addfriend(int);
+  void do_deletefriend(int);
 
-  // information operation
-  void info_read();
-  void info_write();
+private:
+  Function();
+  ~Function();
 
 };
 

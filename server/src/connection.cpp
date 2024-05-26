@@ -31,8 +31,7 @@ void ConnectionManager::stop_all() {
 void Connection::start() { do_readhead(); }
 
 void Connection::update(int id) {
-  auto self(shared_from_this());
-  connection_manager->connections[self] = id;
+  connection_manager->connections[shared_from_this()] = id;
 }
 
 void Connection::stop() { socket.close(); }
@@ -40,12 +39,12 @@ Connection::Connection(tcp::socket socket, ConnectionManager* connection_manager
   : socket(std::move(socket)), connection_manager(connection_manager_) {}
 
 void Connection::do_readhead() {
-  std::shared_ptr<std::string> head = std::make_shared<std::string>();
-  auto self(shared_from_this());
+  LOG(INFO) << "start read head" << '\n';
+  std::shared_ptr<std::string> head = std::make_shared<std::string>(packer::getheadsize(), '\0');
   async_read(socket, boost::asio::buffer(*head, packer::getheadsize()),
     [&](boost::system::error_code ec, std::size_t bytes_transferred) {
       if (!ec) {
-        LOG(INFO) << "start read head" << '\n';
+        LOG(INFO) << "deal with head " << '\n';
         Head head_ = packer::depackhead(head);
         do_readbody(head_);
       }
@@ -54,12 +53,12 @@ void Connection::do_readhead() {
 }
 
 void Connection::do_readbody(Head head) {
-  auto self(shared_from_this());
-  std::shared_ptr<std::string> body = std::make_shared<std::string>();
+  LOG(INFO) << "start read body" << '\n';
+  std::shared_ptr<std::string> body = std::make_shared<std::string>(packer::getheadsize(), '\0');
   async_read(socket, boost::asio::buffer(*body, head.size),
     [&](boost::system::error_code ec, std::size_t bytes_transferred) {
       if(!ec) {
-        LOG(INFO) << "start read body" << '\n';
+        LOG(INFO) << "deal with body" << '\n';
         WorkManager::push_work(head, packer::depackbody(body), 
           std::bind(&Connection::do_write, this, std::placeholders::_1, std::placeholders::_2)
         );
@@ -70,7 +69,6 @@ void Connection::do_readbody(Head head) {
 }
 
 void Connection::do_chat(int status, Json::Value target) {
-  auto self(shared_from_this());
   int receiver = target["receiver"].asInt();
   for(auto& [item, id] : connection_manager->connections)
     if(id == receiver) {
@@ -83,7 +81,7 @@ void Connection::do_chat(int status, Json::Value target) {
               update(target["id"].asInt());
             } else {
               this->stop();
-              connection_manager->connections.erase(self);
+              connection_manager->connections.erase(shared_from_this());
             }
           }
         }
@@ -92,7 +90,6 @@ void Connection::do_chat(int status, Json::Value target) {
 }
 
 void Connection::do_write(int status, Json::Value target) {
-  auto self(shared_from_this());
   if(status == chat_success) { do_chat(status, target); }
   else {
     std::string message = packer::enpack(status, target);
@@ -104,7 +101,7 @@ void Connection::do_write(int status, Json::Value target) {
             update(target["id"].asInt());
           } else {
             this->stop();
-            connection_manager->connections.erase(self);
+            connection_manager->connections.erase(shared_from_this());
           }
         }
     });

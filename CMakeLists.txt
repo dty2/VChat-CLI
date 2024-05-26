@@ -6,8 +6,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 # generate compile_commands.json for clangd
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-# debug and test
-#set_target_properties(server PROPERTIES COMPILE_FLAGS "-g")
 
 set(LIB ${CMAKE_SOURCE_DIR}/lib)
 set(FTXUI_LIB ${LIB}/ftxui)
@@ -24,3 +22,7 @@ find_package(glog REQUIRED PATHS ${GLOG_LIB})
 
 add_subdirectory(client)
 add_subdirectory(server)
+
+# debug and test
+set_target_properties(client PROPERTIES COMPILE_FLAGS "-g")
+set_target_properties(server PROPERTIES COMPILE_FLAGS "-g")

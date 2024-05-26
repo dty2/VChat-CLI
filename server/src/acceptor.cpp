@@ -10,17 +10,14 @@ Acceptor* Acceptor::getInstance() {
   return accept;
 }
 
-Acceptor::Acceptor()
-  : signals(io),
-    acceptor(io, endpoint),
-    endpoint(tcp::v4(), port) {
+Acceptor::Acceptor() : signals(io), acceptor(io, endpoint), endpoint(tcp::v4(), port) {
   /// add signals
   signals.add(SIGINT);
   signals.add(SIGTERM);
   signals.add(SIGQUIT);
   connection_manager = ConnectionManager::getInstance(io);
   do_await_stop();
-  /// start accept
+  LOG(INFO) << "start accept..." << '\n';
   do_accept();
 }
 
@@ -38,18 +35,22 @@ void Acceptor::do_accept() {
        * can't write do_accept directly
        * so need to use defer
       */
-      boost::asio::defer(io, [this]{ do_accept(); });
+      boost::asio::defer(io, [&]{ do_accept(); });
     }
   );
 }
 
-void Acceptor::do_await_stop()
-{
+void Acceptor::do_await_stop() {
   signals.async_wait(
-    [&](boost::system::error_code ec, int signo) {
+    [&](boost::system::error_code ec, int sign) {
+      LOG(INFO) << "acceptor start close..." << '\n';
       acceptor.close();
+      LOG(INFO) << "connection_manager start stop..." << '\n';
       connection_manager->stop_all();
-    });
+      LOG(INFO) << "server quit..." << '\n';
+      exit(0);
+    }
+  );
 }
 
 } // namespace vchat 

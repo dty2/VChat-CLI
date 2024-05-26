@@ -7,3 +7,28 @@
   "password" : 123456,
   "username" : "hunter"
 }
+{
+  "sender" : 1,
+  "receiver" : 2,
+  "message" : "hello, vchat"
+}
+{
+  "sender" : 2,
+  "receiver" : 1,
+  "message" : "hello, vchat too"
+}
+{
+  "persionalinfo" : {
+    "id" : 1,
+    "password" : 123456,
+    "username" : "hunter"
+  },
+  "friendlist" : [
+    { "id" : 1 },
+    { "id" : 3 }
+  ],
+  "messagelist" : [
+    { "sender" : 1, "receiver" : 2, "message": "hello, world" },
+    { "sender" : 2, "receiver" : 1, "message": "hello, world" }
+  ]
+}
