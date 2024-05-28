@@ -10,13 +10,15 @@ class Info {
 public:
   static Info* info;
   UserInfo userinfo;
-  std::unique_lock<std::mutex> lock;
+  std::vector<int> messageupdate;
+  std::mutex mtx;
+  std::condition_variable cv;
+  bool dataReady = false;
 
   static void getinstance();
   Info(const Info&) = delete;
   Info& operator=(const Info&) = delete;
-  void info_write(std::function<void()>);
-  void info_read();
+  void opinfo(std::function<void()>);
 
 private:
   Info();

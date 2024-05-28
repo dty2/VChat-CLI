@@ -1,0 +1,27 @@
+Log file created at: 2024/05/27 12:36:04
+Running on machine: Hunter
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20240527 12:36:04.619163 138494145089152 connection.cpp:10] start connect
+I20240527 12:36:04.619766 138494145089152 main.cpp:19] tui start...
+I20240527 12:36:04.619808 138494143891136 main.cpp:16] IO running...
+I20240527 12:36:04.619918 138494143891136 connection.cpp:24] connect successful
+I20240527 12:36:04.619933 138494143891136 connection.cpp:34] start read head
+I20240527 12:36:07.620429 138494145089152 function.cpp:17] do_login
+I20240527 12:36:07.620577 138494145089152 package.cpp:22] output: {
+	"id" : 1,
+	"password" : 123456
+}
+I20240527 12:36:07.620600 138494145089152 package.cpp:23] output size: 35
+I20240527 12:36:07.620620 138494145089152 package.cpp:14] size: 35000
+I20240527 12:36:07.620634 138494145089152 package.cpp:28] head0135000
+I20240527 12:36:07.620676 138494145089152 package.cpp:22] output: {
+	"id" : 1,
+	"password" : 123456
+}
+I20240527 12:36:07.620692 138494145089152 package.cpp:23] output size: 35
+I20240527 12:36:07.620704 138494145089152 package.cpp:14] size: 35000
+I20240527 12:36:07.620717 138494145089152 package.cpp:28] head0135000
+I20240527 12:36:07.620732 138494145089152 connection.cpp:101] do_write message
+I20240527 12:36:07.620901 138494143891136 connection.cpp:104] write success
+E20240527 12:36:07.622418 138494143891136 connection.cpp:44] read head error: Connection reset by peer [system:104 at /home/hunter/project/vchat/lib/boost/include/boost/asio/detail/reactive_socket_recv_op.hpp:133 in function 'do_complete']

@@ -1,0 +1,28 @@
+Log file created at: 2024/05/27 14:48:00
+Running on machine: Hunter
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20240527 14:48:00.290859 132351020162688 connection.cpp:12] start connect
+I20240527 14:48:00.291478 132351020162688 main.cpp:19] tui start...
+I20240527 14:48:00.291590 132351015257792 main.cpp:16] IO running...
+I20240527 14:48:00.291679 132351015257792 connection.cpp:31] connect successful
+I20240527 14:48:00.291693 132351015257792 connection.cpp:41] start read head
+I20240527 14:48:02.084287 132351020162688 function.cpp:17] do_login
+I20240527 14:48:02.084419 132351020162688 package.cpp:22] output: {
+	"id" : 1,
+	"password" : 123456
+}
+I20240527 14:48:02.084441 132351020162688 package.cpp:23] output size: 35
+I20240527 14:48:02.084463 132351020162688 package.cpp:14] size: 35000
+I20240527 14:48:02.084478 132351020162688 package.cpp:39] head010035000
+I20240527 14:48:02.084522 132351020162688 package.cpp:22] output: {
+	"id" : 1,
+	"password" : 123456
+}
+I20240527 14:48:02.084542 132351020162688 package.cpp:23] output size: 35
+I20240527 14:48:02.084557 132351020162688 package.cpp:14] size: 35000
+I20240527 14:48:02.084572 132351020162688 package.cpp:39] head010035000
+I20240527 14:48:02.084589 132351020162688 connection.cpp:113] message size:44
+I20240527 14:48:02.084638 132351020162688 connection.cpp:118] do_write message
+I20240527 14:48:02.084791 132351015257792 connection.cpp:121] write success
+E20240527 14:49:07.153213 132351015257792 connection.cpp:50] read head error: End of file [asio.misc:2 at /home/hunter/project/vchat/lib/boost/include/boost/asio/detail/reactive_socket_recv_op.hpp:133 in function 'do_complete']

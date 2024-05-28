@@ -1,0 +1,22 @@
+Log file created at: 2024/05/27 12:30:14
+Running on machine: Hunter
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20240527 12:30:14.665594 139907113315968 connection.cpp:10] start connect
+I20240527 12:30:14.666515 139907113315968 main.cpp:19] tui start...
+I20240527 12:30:14.666536 139907106342592 main.cpp:16] IO running...
+E20240527 12:30:14.666650 139907106342592 connection.cpp:27] connect error: Connection refused [system:111 at /home/hunter/project/vchat/lib/boost/include/boost/asio/detail/reactive_socket_connect_op.hpp:97 in function 'do_complete']
+I20240527 12:30:16.343759 139907113315968 function.cpp:17] do_login
+I20240527 12:30:16.343879 139907113315968 package.cpp:21] output: {
+	"id" : 1,
+	"password" : 123456
+}
+I20240527 12:30:16.343904 139907113315968 package.cpp:13] size: 
+I20240527 12:30:16.343917 139907113315968 package.cpp:26] head01
+I20240527 12:30:16.343971 139907113315968 package.cpp:21] output: {
+	"id" : 1,
+	"password" : 123456
+}
+I20240527 12:30:16.343991 139907113315968 package.cpp:13] size: 
+I20240527 12:30:16.344005 139907113315968 package.cpp:26] head01
+I20240527 12:30:16.344023 139907113315968 connection.cpp:101] do_write message

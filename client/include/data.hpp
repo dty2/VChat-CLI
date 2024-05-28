@@ -7,11 +7,13 @@ typedef struct MessageInfo {
   int sender;
   int receiver;
   std::string msg;
+  std::time_t time;
   MessageInfo(){};
-  MessageInfo(int sender_, int receiver_, std::string msg_) :
+  MessageInfo(int sender_, int receiver_, std::string msg_, std::time_t time_) :
     sender(sender_),
     receiver(receiver_),
-    msg(msg_) {}
+    msg(msg_),
+    time(time_) {}
 }MessageInfo;
 
 typedef struct FriendInfo {

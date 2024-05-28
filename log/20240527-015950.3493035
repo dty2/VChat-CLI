@@ -1,0 +1,5 @@
+Log file created at: 2024/05/27 01:59:50
+Running on machine: Hunter
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20240527 01:59:50.708494 138387764432512 connection.cpp:10] start connect

@@ -6,15 +6,19 @@
 int main(int argc, char **argv) {
   google::InitGoogleLogging("VChat-client");
   google::SetLogDestination(google::GLOG_INFO, "/home/hunter/project/vchat/log/");
+  FLAGS_colorlogtostderr = 1;
+  FLAGS_alsologtostderr = 1;
   try {
-    vchat::Function::getinstance();
     vchat::Info::getinstance();
-    vchat::Start start;
-    std::thread t([&](){
+    vchat::Connection::getinstance();
+    vchat::Function::getinstance();
+    std::thread t([&]{
       LOG(INFO) << "IO running..." << '\n';
       vchat::Connection::connection->io.run();
     });
-    t.detach();
+    LOG(INFO) << "tui start..." << '\n';
+    vchat::Start start;
+    t.join();
   } catch (const std::exception& e) {
     LOG(ERROR) << "exception: " << e.what() << '\n';
   }

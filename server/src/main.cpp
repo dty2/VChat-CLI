@@ -10,7 +10,9 @@ int main() {
     LOG(INFO) << "start server" << '\n';
     vchat::Service::service = vchat::Service::getInstance();
     vchat::Acceptor::accept = vchat::Acceptor::getInstance();
-    vchat::Acceptor::accept->run();
+    std::thread t([&]{vchat::Acceptor::accept->run();});
+    //vchat::Acceptor::accept->t.join();
+    t.join();
   } catch (const std::exception& e) {
     LOG(ERROR) << "exception: " << e.what() << '\n';
   }

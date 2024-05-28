@@ -2,6 +2,7 @@
 #define START_H
 
 #include "common.h"
+#include "chat.h"
 #include "cowsay.h"
 #include "function.h"
 
@@ -30,7 +31,6 @@ enum {
 
 class Start {
 private:
-  bool mode = 1;
   int selected = start_page;
   ScreenInteractive screen;
 

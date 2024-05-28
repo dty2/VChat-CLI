@@ -7,22 +7,18 @@
 
 namespace vchat {
 
-class Connection;
-
 class Function {
 public:
   static Function* function;
-  static Connection* connect;
   static void getinstance();
   Function(const Function&) = delete;
   Function& operator=(const Function&) = delete;
 
   // request service
-  void do_login(int, int);
-  void do_logout(int);
-  void do_signin(int, int, std::string);
-  void do_signout(int);
+  bool do_login(int, int);
+  bool do_signin(int, int, std::string);
   void do_chat(int, int, std::string);
+  std::string checkmessage(int);
   void do_addfriend(int);
   void do_deletefriend(int);
 

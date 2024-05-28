@@ -43,11 +43,11 @@ void Acceptor::do_accept() {
 void Acceptor::do_await_stop() {
   signals.async_wait(
     [&](boost::system::error_code ec, int sign) {
-      LOG(INFO) << "acceptor start close..." << '\n';
+      LOG(INFO) << "Acceptor start close..." << '\n';
       acceptor.close();
-      LOG(INFO) << "connection_manager start stop..." << '\n';
+      LOG(INFO) << "Connection_manager start stop..." << '\n';
       connection_manager->stop_all();
-      LOG(INFO) << "server quit..." << '\n';
+      LOG(INFO) << "Server quit..." << '\n';
       exit(0);
     }
   );

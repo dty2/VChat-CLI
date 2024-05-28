@@ -1,0 +1,8 @@
+Log file created at: 2024/05/27 14:22:31
+Running on machine: Hunter
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20240527 14:22:31.194257 123352396746368 connection.cpp:12] start connect
+I20240527 14:22:31.194701 123352396746368 main.cpp:19] tui start...
+I20240527 14:22:31.194707 123352391878336 main.cpp:16] IO running...
+E20240527 14:22:31.194738 123352391878336 connection.cpp:34] connect error: Connection refused [system:111 at /home/hunter/project/vchat/lib/boost/include/boost/asio/detail/reactive_socket_connect_op.hpp:97 in function 'do_complete']

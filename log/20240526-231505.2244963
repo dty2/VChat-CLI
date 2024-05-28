@@ -1,0 +1,18 @@
+Log file created at: 2024/05/26 23:15:05
+Running on machine: Hunter
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20240526 23:15:05.873434 128074772086400 connection.cpp:11] start connect
+I20240526 23:15:11.183932 128074772086400 connection.cpp:101] start write
+I20240526 23:15:12.148000 128074772086400 connection.cpp:101] start write
+I20240526 23:15:12.310204 128074772086400 connection.cpp:101] start write
+I20240526 23:15:12.467075 128074772086400 connection.cpp:101] start write
+I20240526 23:15:12.619283 128074772086400 connection.cpp:101] start write
+I20240526 23:15:12.776389 128074772086400 connection.cpp:101] start write
+I20240526 23:15:12.924069 128074772086400 connection.cpp:101] start write
+I20240526 23:15:13.054238 128074772086400 connection.cpp:101] start write
+I20240526 23:15:19.286491 128074772086400 connection.cpp:101] start write
+I20240526 23:15:19.472582 128074772086400 connection.cpp:101] start write
+I20240526 23:15:19.639701 128074772086400 connection.cpp:101] start write
+I20240526 23:15:19.791575 128074772086400 connection.cpp:101] start write
+I20240526 23:15:52.379515 128074756654784 main.cpp:14] IO running...

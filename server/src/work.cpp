@@ -10,6 +10,8 @@ WorkManager* WorkManager::getInstance() {
 }
 
 void WorkManager::push_work(Head head, Json::Value value, std::function<void(int, Json::Value)> callback) {
+  LOG(INFO) << head.size << ' ' << head.type << ' ' << head.method;
+  LOG(INFO) << "push a work";
   if(!head.type) {
     switch (head.method) {
       case login        : Service::service->do_login(value, callback);        break;

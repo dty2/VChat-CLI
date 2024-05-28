@@ -1,0 +1,15 @@
+Log file created at: 2024/05/27 14:36:37
+Running on machine: Hunter
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20240527 14:36:37.028553 137156583648896 main.cpp:10] start server
+I20240527 14:36:37.029392 137156583648896 acceptor.cpp:21] start accept...
+I20240527 14:36:40.148098 137156582442688 acceptor.cpp:32] A Client Connect
+I20240527 14:36:40.148163 137156582442688 connection.cpp:51] start read head
+I20240527 14:36:41.486725 137156582442688 connection.cpp:55] deal with head 
+I20240527 14:36:41.486782 137156582442688 package.cpp:50] depackstd::string successful
+I20240527 14:36:41.486791 137156582442688 connection.cpp:59] 35 0 100
+I20240527 14:36:41.486806 137156582442688 connection.cpp:67] start read body
+I20240527 14:37:39.060828 137156582442688 acceptor.cpp:48] acceptor start close...
+I20240527 14:37:39.060900 137156582442688 acceptor.cpp:50] connection_manager start stop...
+I20240527 14:37:39.060990 137156582442688 acceptor.cpp:52] server quit...

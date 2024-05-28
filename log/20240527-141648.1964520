@@ -1,0 +1,9 @@
+Log file created at: 2024/05/27 14:16:48
+Running on machine: Hunter
+Running duration (h:mm:ss): 0:00:01
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20240527 14:16:48.825801 140737352646272 main.cpp:10] start server
+I20240527 14:16:57.219932 140737352646272 acceptor.cpp:20] start accept...
+I20240527 14:17:13.903803 140737352646272 acceptor.cpp:30] A Client Connect
+I20240527 14:17:13.903835 140737352646272 connection.cpp:51] start read head
+I20240527 14:17:20.518346 140737352646272 connection.cpp:55] deal with head 

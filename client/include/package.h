@@ -7,40 +7,31 @@
 namespace vchat {
 
 enum request {
-  login = 1,
-  signin,
-  chat,
-  addfriend
+  login = 100,
+  signin = 200,
+  chat = 300,
+  addfriend = 400
 };
 
 enum response {
   login_success = 101,
-  signin_success = 103,
-  chat_success = 105,
-  addfriend_success = 106,
+  signin_success = 201,
+  chat_success = 301,
+  addfriend_success = 401,
 };
 
 typedef struct Head {
   bool type = 0;
   int size = 0;
   int method = 0;
-  // serialization
-  friend class boost::serialization::access;
-  template<typename Archive>
-  void serialize(Archive& ar, const unsigned int) {
-    ar & type;
-    ar & size;
-    ar & method;
-  }
 }Head;
 
 namespace packer {
-int getheadsize();
 // enpack
 std::string enpack(int, Json::Value);
 // depack
-Head depackhead(std::shared_ptr<std::string>);
-Json::Value depackbody(std::shared_ptr<std::string>);
+Head depackhead(char*);
+Json::Value depackbody(char*, int);
 } // namespace packer
 
 } // namespace vchat

@@ -9,13 +9,14 @@ void Info::getinstance() {
   info = new Info();
 }
 
-void Info::info_write(std::function<void()> op) {
-  lock.lock();
+void Info::opinfo(std::function<void()> op) {
+  std::lock_guard<std::mutex> lock(mtx);
+  LOG(INFO) << "start info write";
   op();
-  lock.unlock();
-}
-
-void Info::info_read() {
+  LOG(INFO) << "finish info write";
+  dataReady = true;
+  cv.notify_one();
+  LOG(INFO) << "ready new data";
 }
 
 } // namespace vchat

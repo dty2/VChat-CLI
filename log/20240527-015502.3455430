@@ -1,0 +1,13 @@
+Log file created at: 2024/05/27 01:55:02
+Running on machine: Hunter
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20240527 01:55:02.564306 130072942644864 main.cpp:10] start server
+I20240527 01:55:02.564679 130072942644864 acceptor.cpp:20] start accept...
+I20240527 01:55:22.820183 130072942644864 acceptor.cpp:30] A Client Connect
+I20240527 01:55:22.820269 130072942644864 connection.cpp:42] start read head
+I20240527 01:55:22.820389 130072942644864 package.cpp:11] get head size: 38
+I20240527 01:55:22.820437 130072942644864 package.cpp:11] get head size: 38
+I20240527 01:56:18.537933 130072942644864 acceptor.cpp:46] acceptor start close...
+I20240527 01:56:18.538021 130072942644864 acceptor.cpp:48] connection_manager start stop...
+I20240527 01:56:18.538106 130072942644864 acceptor.cpp:50] server quit...

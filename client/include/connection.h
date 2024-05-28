@@ -17,12 +17,16 @@ public:
 
   void stop();
   void do_write(int, Json::Value);
-  static Connection* getinstance();
+  ~Connection();
+  static void getinstance();
   Connection(const Connection&) = delete;
   Connection& operator=(const Connection&) = delete;
 
 private:
   static std::thread* t;
+  char *head;
+  char *body;
+  Head hhead;
   const std::string port = "3864";
   const std::string address = "127.0.0.1";
   tcp::resolver resolver;
@@ -32,7 +36,7 @@ private:
 
   void do_connect();
   void do_readhead();
-  void do_readbody(Head);
+  void do_readbody();
 
 };
 

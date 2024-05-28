@@ -1,0 +1,107 @@
+Log file created at: 2024/05/28 13:51:04
+Running on machine: Hunter
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20240528 13:51:04.572085 134755341377152 main.cpp:10] start server
+I20240528 13:51:04.572791 134755341377152 acceptor.cpp:21] start accept...
+I20240528 13:51:06.152776 134755341305536 acceptor.cpp:32] A Client Connect
+I20240528 13:51:06.152807 134755341305536 connection.cpp:51] start read head
+I20240528 13:51:14.136009 134755341305536 connection.cpp:55] deal with chead 
+I20240528 13:51:14.136043 134755341305536 connection.cpp:56] read size: 9
+I20240528 13:51:14.136058 134755341305536 package.cpp:51] depackstd::string successful
+I20240528 13:51:14.136066 134755341305536 connection.cpp:60] 35 0 100
+I20240528 13:51:14.136077 134755341305536 connection.cpp:70] start read body
+I20240528 13:51:14.136103 134755341305536 connection.cpp:74] deal with body
+I20240528 13:51:14.136116 134755341305536 connection.cpp:75] read size: 35
+I20240528 13:51:14.136211 134755341305536 work.cpp:13] 35 0 100
+I20240528 13:51:14.136223 134755341305536 work.cpp:14] push a work
+I20240528 13:51:14.136239 134755341305536 service.cpp:17] someone login
+I20240528 13:51:14.136257 134755341305536 service.cpp:20] id: 1password: 123456
+I20240528 13:51:14.137149 134755341305536 connection.cpp:110] do write
+I20240528 13:51:14.137197 134755341305536 package.cpp:14] size: 32700
+I20240528 13:51:14.137213 134755341305536 connection.cpp:112] message :010132700{
+	"friendlist" : 
+	[
+		{
+			"id" : 2
+		},
+		{
+			"id" : 3
+		}
+	],
+	"messagelist" : 
+	[
+		{
+			"message" : "hello, world",
+			"receiver" : 2,
+			"sender" : 1
+		},
+		{
+			"message" : "hello, world",
+			"receiver" : 3,
+			"sender" : 1
+		}
+	],
+	"persionalinfo" : 
+	{
+		"id" : 1,
+		"password" : 123456,
+		"username" : "hunter"
+	}
+}
+I20240528 13:51:14.137367 134755341305536 connection.cpp:79] push_work finish
+I20240528 13:51:14.137382 134755341305536 connection.cpp:118] send successful
+I20240528 13:51:14.137438 134755341305536 connection.cpp:51] start read head
+E20240528 13:51:14.137450 134755341305536 connection.cpp:63] read head error: Bad file descriptor [system:9 at /home/hunter/project/vchat/lib/boost/include/boost/asio/detail/reactive_socket_recv_op.hpp:133 in function 'do_complete']
+I20240528 13:59:47.703352 134755341305536 acceptor.cpp:32] A Client Connect
+I20240528 13:59:47.703428 134755341305536 connection.cpp:51] start read head
+I20240528 13:59:55.865050 134755341305536 connection.cpp:55] deal with chead 
+I20240528 13:59:55.865107 134755341305536 connection.cpp:56] read size: 9
+I20240528 13:59:55.865126 134755341305536 package.cpp:51] depackstd::string successful
+I20240528 13:59:55.865134 134755341305536 connection.cpp:60] 35 0 100
+I20240528 13:59:55.865143 134755341305536 connection.cpp:70] start read body
+I20240528 13:59:55.865174 134755341305536 connection.cpp:74] deal with body
+I20240528 13:59:55.865189 134755341305536 connection.cpp:75] read size: 35
+I20240528 13:59:55.865273 134755341305536 work.cpp:13] 35 0 100
+I20240528 13:59:55.865289 134755341305536 work.cpp:14] push a work
+I20240528 13:59:55.865301 134755341305536 service.cpp:17] someone login
+I20240528 13:59:55.865310 134755341305536 service.cpp:20] id: 2password: 123456
+I20240528 13:59:55.865947 134755341305536 connection.cpp:110] do write
+I20240528 13:59:55.866032 134755341305536 package.cpp:14] size: 32600
+I20240528 13:59:55.866056 134755341305536 connection.cpp:112] message :010132600{
+	"friendlist" : 
+	[
+		{
+			"id" : 1
+		},
+		{
+			"id" : 3
+		}
+	],
+	"messagelist" : 
+	[
+		{
+			"message" : "hello, world",
+			"receiver" : 1,
+			"sender" : 2
+		},
+		{
+			"message" : "hello, world",
+			"receiver" : 3,
+			"sender" : 2
+		}
+	],
+	"persionalinfo" : 
+	{
+		"id" : 2,
+		"password" : 123456,
+		"username" : "test1"
+	}
+}
+I20240528 13:59:55.866312 134755341305536 connection.cpp:79] push_work finish
+I20240528 13:59:55.866349 134755341305536 connection.cpp:118] send successful
+I20240528 13:59:55.866430 134755341305536 connection.cpp:51] start read head
+E20240528 13:59:55.866465 134755341305536 connection.cpp:63] read head error: Bad file descriptor [system:9 at /home/hunter/project/vchat/lib/boost/include/boost/asio/detail/reactive_socket_recv_op.hpp:133 in function 'do_complete']
+I20240528 14:08:01.681380 134755341305536 acceptor.cpp:48] acceptor start close...
+I20240528 14:08:01.681507 134755341305536 acceptor.cpp:50] connection_manager start stop...
+I20240528 14:08:01.681525 134755341305536 acceptor.cpp:52] server quit...

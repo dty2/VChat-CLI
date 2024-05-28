@@ -11,6 +11,7 @@ class ConnectionManager;
 class Connection : public std::enable_shared_from_this<Connection> {
 public:
   explicit Connection(tcp::socket, ConnectionManager*);
+  ~Connection();
   Connection(const Connection&) = delete;
   Connection& operator=(const Connection&) = delete;
   void start();
@@ -19,8 +20,11 @@ public:
 private:
   ConnectionManager* connection_manager;
   tcp::socket socket;
+  char* chead;
+  Head hhead;
+  char* body;
   void do_readhead();
-  void do_readbody(Head);
+  void do_readbody();
   void do_write(int, Json::Value);
   void do_chat(int, Json::Value);
   void update(int);

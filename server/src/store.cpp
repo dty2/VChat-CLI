@@ -23,13 +23,15 @@ Store::Store() {
 
 bool Store::getPersional(PersionalInfo& persionalinfo, const int id) {
   try {
-    SQLite::Statement query(*this->db, "SELECT * FROM userinfo where id == ?");
-    query.bind(1, std::to_string(id));
-    persionalinfo.id = query.getColumn(0);
-    persionalinfo.password = query.getColumn(1);
-    persionalinfo.username = std::string(query.getColumn(2));
+    SQLite::Statement query(*this->db, "SELECT * FROM userinfo WHERE id = ?");
+    query.bind(1, id);
+    while(query.executeStep()) {
+      persionalinfo.id = query.getColumn(0).getInt();
+      persionalinfo.password = query.getColumn(1).getInt();
+      persionalinfo.username = query.getColumn(2).getString();
+    }
   } catch (std::exception& e) {
-    LOG(INFO) << "exception: " << e.what() << "\n";
+    LOG(ERROR) << "exception: " << e.what() << "\n";
   } 
   if(persionalinfo.id && persionalinfo.password && persionalinfo.username.empty()) return true;
   else return false;
@@ -37,10 +39,10 @@ bool Store::getPersional(PersionalInfo& persionalinfo, const int id) {
 
 bool Store::getFriend(std::list<FriendInfo>& friendlist, const int id) {
   try {
-    SQLite::Statement query(*this->db, "SELECT * FROM friendinfo WHERE id == ?");
-    query.bind(1, std::to_string(id));
+    SQLite::Statement query(*this->db, "SELECT * FROM friendinfo WHERE id = ?");
+    query.bind(1, id);
     while (query.executeStep())
-      friendlist.push_back(FriendInfo(query.getColumn(0)));
+      friendlist.push_back(FriendInfo(query.getColumn(1).getInt()));
   } catch (std::exception& e) {
     LOG(INFO) << "exception: " << e.what() << "\n";
   }
@@ -49,13 +51,15 @@ bool Store::getFriend(std::list<FriendInfo>& friendlist, const int id) {
 
 bool Store::getMessage(std::list<MessageInfo>& messagelist, const int id) {
   try {
-    SQLite::Statement query(*this->db, "SELECT * FROM friendinfo WHERE id == ?");
-    query.bind(1, std::to_string(id));
-    while (query.executeStep()) {
-      int sender = query.getColumn(0);
-      int receiver = query.getColumn(1);
-      std::string msg = query.getColumn(2);
-      messagelist.push_back(MessageInfo(sender, receiver, msg));
+    SQLite::Statement querysid(*this->db, "SELECT * FROM messageinfo WHERE sid = ? OR rid = ?");
+    querysid.bind(1, id);
+    querysid.bind(2, id);
+    while (querysid.executeStep()) {
+      int sender = querysid.getColumn(0).getInt();
+      int receiver = querysid.getColumn(1).getInt();
+      std::string msg = querysid.getColumn(2).getString();
+      int time = querysid.getColumn(3).getInt();
+      messagelist.push_back(MessageInfo(sender, receiver, msg, time));
     }
   } catch (std::exception& e) {
     LOG(INFO) << "exception: " << e.what() << "\n";
@@ -87,7 +91,7 @@ bool Store::insertPersional(PersionalInfo& persionalinfo) {
 
 bool Store::insertFriend(FriendInfo& friendinfo) {
   try {
-    SQLite::Statement query(*this->db, "INSERT INTO friendlist VALUES (?)");
+    SQLite::Statement query(*this->db, "INSERT INTO friendlist VALUES ?");
     query.bind(1, friendinfo.friendid);
     query.exec();
     return true;
@@ -103,6 +107,7 @@ bool Store::insertMessage(MessageInfo& messageinfo) {
     query.bind(1, messageinfo.sender);
     query.bind(2, messageinfo.receiver);
     query.bind(3, messageinfo.msg);
+    query.bind(4, messageinfo.time);
     query.exec();
     return true;
   } catch (std::exception& e) {

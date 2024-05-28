@@ -28,6 +28,16 @@ void ConnectionManager::stop_all() {
   connections.clear();
 }
 
+Connection::Connection(tcp::socket socket_, ConnectionManager* connection_manager_)
+  : socket(std::move(socket_)), connection_manager(connection_manager_) {
+  chead = new char[9];
+  body = new char[50000];
+}
+Connection::~Connection() {
+  free(chead);
+  free(body);
+}
+
 void Connection::start() { do_readhead(); }
 
 void Connection::update(int id) {
@@ -35,33 +45,40 @@ void Connection::update(int id) {
 }
 
 void Connection::stop() { socket.close(); }
-Connection::Connection(tcp::socket socket, ConnectionManager* connection_manager_)
-  : socket(std::move(socket)), connection_manager(connection_manager_) {}
+
 
 void Connection::do_readhead() {
   LOG(INFO) << "start read head" << '\n';
-  std::shared_ptr<std::string> head = std::make_shared<std::string>(packer::getheadsize(), '\0');
-  async_read(socket, boost::asio::buffer(*head, packer::getheadsize()),
+  async_read(socket, boost::asio::buffer(chead, 9),
     [&](boost::system::error_code ec, std::size_t bytes_transferred) {
       if (!ec) {
-        LOG(INFO) << "deal with head " << '\n';
-        Head head_ = packer::depackhead(head);
-        do_readbody(head_);
+        LOG(INFO) << "deal with chead " << '\n';
+        LOG(INFO) << "read size: " << bytes_transferred << '\n';
+        //for(int i = 0; i < 9; i ++)
+        //  LOG(INFO) << head[i];
+        hhead = packer::depackhead(chead);
+        LOG(INFO) << hhead.size << ' ' << hhead.type << ' ' << hhead.method;
+        do_readbody();
+      } else {
+        LOG(INFO) << connection_manager->connections[shared_from_this()] << "log out";
+        this->stop();
+        connection_manager->connections.erase(shared_from_this());
       }
     }
   );
 }
 
-void Connection::do_readbody(Head head) {
-  LOG(INFO) << "start read body" << '\n';
-  std::shared_ptr<std::string> body = std::make_shared<std::string>(packer::getheadsize(), '\0');
-  async_read(socket, boost::asio::buffer(*body, head.size),
+void Connection::do_readbody() {
+  LOG(INFO) << "start read body";
+  async_read(socket, boost::asio::buffer(body, hhead.size),
     [&](boost::system::error_code ec, std::size_t bytes_transferred) {
       if(!ec) {
-        LOG(INFO) << "deal with body" << '\n';
-        WorkManager::push_work(head, packer::depackbody(body), 
+        LOG(INFO) << "deal with body";
+        LOG(INFO) << "read size: " << bytes_transferred << '\n';
+        WorkManager::push_work(hhead, packer::depackbody(body, hhead.size), 
           std::bind(&Connection::do_write, this, std::placeholders::_1, std::placeholders::_2)
         );
+        LOG(INFO) << "push_work finish";
       }
       boost::asio::defer(connection_manager->io, [&]{ do_readhead(); });
     }
@@ -69,6 +86,7 @@ void Connection::do_readbody(Head head) {
 }
 
 void Connection::do_chat(int status, Json::Value target) {
+  auto self(shared_from_this());
   int receiver = target["receiver"].asInt();
   for(auto& [item, id] : connection_manager->connections)
     if(id == receiver) {
@@ -76,13 +94,11 @@ void Connection::do_chat(int status, Json::Value target) {
       async_write(item->socket, boost::asio::buffer(message, message.size()),
         [&](boost::system::error_code ec, std::size_t bytes_transferred) {
           if (!ec) {
-            LOG(INFO) << "send message successful" << '\n';
-            if(status == login_success) {
-              update(target["id"].asInt());
-            } else {
-              this->stop();
-              connection_manager->connections.erase(shared_from_this());
-            }
+            LOG(INFO) << "send successful" << '\n';
+          } else {
+            LOG(INFO) << connection_manager->connections[shared_from_this()] << "log out";
+            this->stop();
+            connection_manager->connections.erase(shared_from_this());
           }
         }
       );
@@ -92,17 +108,23 @@ void Connection::do_chat(int status, Json::Value target) {
 void Connection::do_write(int status, Json::Value target) {
   if(status == chat_success) { do_chat(status, target); }
   else {
+    LOG(INFO) << "do write";
     std::string message = packer::enpack(status, target);
-    async_write(socket, boost::asio::buffer(message, message.size()),
+    LOG(INFO) << "message :" << message << '\n';
+    if(status == login_success) {
+      LOG(INFO) << target["id"] << "log in";
+      update(target["id"].asInt());
+    }
+    char *msg = new char[50009];
+    std::copy(message.begin(), message.end(), msg);
+    async_write(socket, boost::asio::buffer(msg, message.size()),
       [&](boost::system::error_code ec, std::size_t bytes_transferred) {
         if (!ec) {
-          LOG(INFO) << "send successful" << '\n';
-          if(status == login_success) {
-            update(target["id"].asInt());
-          } else {
-            this->stop();
-            connection_manager->connections.erase(shared_from_this());
-          }
+          LOG(INFO) << "write successful" << '\n';
+        } else {
+          LOG(INFO) << connection_manager->connections[shared_from_this()] << "log out";
+          this->stop();
+          connection_manager->connections.erase(shared_from_this());
         }
     });
   }

@@ -1,0 +1,15 @@
+Log file created at: 2024/05/27 10:41:45
+Running on machine: Hunter
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20240527 10:41:45.213917 134491568758400 connection.cpp:10] start connect
+I20240527 10:41:45.214467 134491568758400 main.cpp:19] tui start...
+I20240527 10:41:45.214488 134491563624128 main.cpp:16] IO running...
+I20240527 10:41:45.214569 134491563624128 connection.cpp:24] connect successful
+I20240527 10:41:45.214585 134491563624128 connection.cpp:34] start read head
+I20240527 10:41:45.214716 134491563624128 package.cpp:11] get head size: 38
+I20240527 10:41:45.214764 134491563624128 package.cpp:11] get head size: 38
+I20240527 10:41:47.209681 134491568758400 function.cpp:17] do_login
+I20240527 10:41:47.209851 134491568758400 connection.cpp:101] do_write message
+I20240527 10:41:47.210009 134491563624128 connection.cpp:104] write success
+E20240527 10:41:47.264642 134491563624128 connection.cpp:44] read head error: Connection reset by peer [system:104 at /home/hunter/project/vchat/lib/boost/include/boost/asio/detail/reactive_socket_recv_op.hpp:133 in function 'do_complete']

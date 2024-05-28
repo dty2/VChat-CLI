@@ -9,6 +9,7 @@ list(APPEND SOURCES
   "${SRC_DIR}/tool.cpp"
   "${SRC_DIR}/info.cpp"
   "${SRC_DIR}/start.cpp"
+  "${SRC_DIR}/chat.cpp"
 )
 
 # .out

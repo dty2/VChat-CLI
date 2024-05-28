@@ -14,8 +14,10 @@ Service* Service::getInstance() {
 }
 
 void Service::do_login(Json::Value value, std::function<void(int, Json::Value)> callback) {
+  LOG(INFO) << "someone login";
   int id = value["id"].asInt();
   int password = value["password"].asInt();
+  LOG(INFO) << "id: " << id << "password: " << password;
   PersionalInfo persionalinfo;
   Store::store->getPersional(persionalinfo, id);
   if(persionalinfo.password == password) {
@@ -35,14 +37,15 @@ void Service::do_login(Json::Value value, std::function<void(int, Json::Value)> 
       messageinfo["sender"] = x.sender;
       messageinfo["receiver"] = x.receiver;
       messageinfo["message"] = x.msg;
+      messageinfo["time"] = x.time;
       messagelist.append(messageinfo);
     }
-    root.append(persionalinfo);
-    root.append(friendlist);
-    root.append(messagelist);
+    root["persionalinfo"] = persionalinfo;
+    root["friendlist"] = friendlist;
+    root["messagelist"] = messagelist;
+    online.insert(id);
     callback(login_success, root);
   }
-  online.insert(id);
 }
 
 void Service::do_signin(Json::Value value, std::function<void(int, Json::Value)> callback) {
@@ -51,8 +54,7 @@ void Service::do_signin(Json::Value value, std::function<void(int, Json::Value)>
   persionalinfo.password = value["password"].asInt();
   persionalinfo.username = value["username"].asString();
   bool op = Store::store->insertPersional(persionalinfo);
-  Json::Value root;
-  if(op) { callback(signin_success, root); }
+  if(op) { callback(signin_success, value); }
 }
 
 void Service::do_chat(Json::Value value, std::function<void(int, Json::Value)> callback) {
@@ -60,6 +62,7 @@ void Service::do_chat(Json::Value value, std::function<void(int, Json::Value)> c
   messageinfo.sender = value["sender"].asInt();
   messageinfo.receiver = value["receiver"].asInt();
   messageinfo.msg = value["message"].asString();
+  messageinfo.time = value["time"].asInt();
   bool op = Store::store->insertMessage(messageinfo);
   if(op) { callback(chat_success, value); }
 }

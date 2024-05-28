@@ -46,7 +46,10 @@ Start::Start() : screen(ScreenInteractive::FitComponent()) {
       return true;
     } else if(event == Event::CtrlY) {
       if(!log_id.empty() && !log_password.empty()) {
-        Function::function->do_login(std::stoi(log_id), std::stoi(log_password));
+        if(Function::function->do_login(std::stoi(log_id), std::stoi(log_password))) {
+          screen.Exit();
+          Chat::getinstance();
+        }
       }
       return true;
     } else return false;
@@ -82,7 +85,7 @@ Start::Start() : screen(ScreenInteractive::FitComponent()) {
         case 2: c_signpassword->TakeFocus();  break;
       }
       return true;
-    } else if(event == Event::Return) {
+    } else if(event == Event::CtrlY) {
       if(!log_id.empty() && !log_password.empty()) {
         Function::function->do_signin(std::stoi(sign_id), std::stoi(sign_password), sign_username);
       }
@@ -148,12 +151,11 @@ Start::Start() : screen(ScreenInteractive::FitComponent()) {
     } else return false;
   });
   auto cer_main = Renderer(ce_main, [&]{
-    return window(text(" VChat ") | center, ce_main->Render())
-    | color(Color::Blue);
+    return window(text(" VChat ") | center, ce_main->Render()) | color(Color::Blue);
   });
 
   // -------------------
-  //    initlization
+  //    start loop
   // -------------------
   c_right->TakeFocus();
   screen.Loop(cer_main);

@@ -1,0 +1,59 @@
+Log file created at: 2024/05/28 14:19:49
+Running on machine: Hunter
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20240528 14:19:49.441469 139964389789312 main.cpp:10] start server
+I20240528 14:19:49.442217 139964389789312 acceptor.cpp:21] start accept...
+I20240528 14:19:50.223996 139964387952320 acceptor.cpp:32] A Client Connect
+I20240528 14:19:50.224024 139964387952320 connection.cpp:52] start read head
+I20240528 14:19:58.512502 139964387952320 connection.cpp:56] deal with chead 
+I20240528 14:19:58.512544 139964387952320 connection.cpp:57] read size: 9
+I20240528 14:19:58.512571 139964387952320 package.cpp:51] depackstd::string successful
+I20240528 14:19:58.512583 139964387952320 connection.cpp:61] 35 0 100
+I20240528 14:19:58.512601 139964387952320 connection.cpp:74] start read body
+I20240528 14:19:58.512631 139964387952320 connection.cpp:78] deal with body
+I20240528 14:19:58.512642 139964387952320 connection.cpp:79] read size: 35
+I20240528 14:19:58.512723 139964387952320 work.cpp:13] 35 0 100
+I20240528 14:19:58.512737 139964387952320 work.cpp:14] push a work
+I20240528 14:19:58.512753 139964387952320 service.cpp:17] someone login
+I20240528 14:19:58.512769 139964387952320 service.cpp:20] id: 1password: 123456
+I20240528 14:19:58.513554 139964387952320 connection.cpp:117] do write
+I20240528 14:19:58.513648 139964387952320 package.cpp:14] size: 32700
+I20240528 14:19:58.513684 139964387952320 connection.cpp:119] message :010132700{
+	"friendlist" : 
+	[
+		{
+			"id" : 2
+		},
+		{
+			"id" : 3
+		}
+	],
+	"messagelist" : 
+	[
+		{
+			"message" : "hello, world",
+			"receiver" : 2,
+			"sender" : 1
+		},
+		{
+			"message" : "hello, world",
+			"receiver" : 3,
+			"sender" : 1
+		}
+	],
+	"persionalinfo" : 
+	{
+		"id" : 1,
+		"password" : 123456,
+		"username" : "hunter"
+	}
+}
+I20240528 14:19:58.513820 139964387952320 connection.cpp:83] push_work finish
+I20240528 14:19:58.513883 139964387952320 connection.cpp:125] send successful
+I20240528 14:19:58.513903 139964387952320 connection.cpp:130] log out
+I20240528 14:19:58.513962 139964387952320 connection.cpp:52] start read head
+I20240528 14:19:58.513985 139964387952320 connection.cpp:64] log out
+I20240528 14:22:00.511180 139964387952320 acceptor.cpp:48] acceptor start close...
+I20240528 14:22:00.511238 139964387952320 acceptor.cpp:50] connection_manager start stop...
+I20240528 14:22:00.511245 139964387952320 acceptor.cpp:52] server quit...

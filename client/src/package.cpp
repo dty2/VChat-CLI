@@ -3,47 +3,70 @@
 namespace vchat {
 namespace packer {
 
-int getheadsize() {
-  Head head;
-  std::ostringstream os;
-  boost::archive::text_oarchive oa(os);
-  oa << head;
-  LOG(INFO) << "get head size: " << os.str().size() << '\n';
-  return os.str().size();
+std::string getsize(int size_) {
+  //TO FIX BUG: when size_ == 30, 30000 will get error
+  std::string size;
+  size = std::to_string(size_);
+  if(size.size() < 5) {
+    for(int i = 0; i < size.size() - 5; i ++)
+      size += '0';
+  }
+  LOG(INFO) << "size: " << size << '\n';
+  return size;
 }
 
 std::string enpack(int method, Json::Value body) {
-  // enpack head
+  // enpack std::string
   Json::StreamWriterBuilder builder;
   std::string output = Json::writeString(builder, body);
-  Head head;
-  head.type = method >= 100;
-  head.size = body.size();
-  head.method = method;
-  std::ostringstream os;
-  boost::archive::text_oarchive oa(os);
-  oa << head;
-  output = os.str() + output;
+  LOG(INFO) << "output: " << output << '\n';
+  LOG(INFO) << "output size: " << output.size() << '\n';
+  std::string head;
+  int type;
+  switch (method) {
+    case login: type = 0; break;
+    case signin: type = 1; break;
+    case chat: type = 0; break;
+    case addfriend: type = 1; break;
+    case login_success: type = 0; break;
+    case signin_success: type = 1; break;
+    case chat_success: type = 0; break;
+    case addfriend_success: type = 1; break;
+  }
+  head += std::to_string(type);
+  head += std::to_string(method);
+  head += getsize(output.size());
+  LOG(INFO) << "head" << head << '\n';
+  output = head + output;
   return output;
 }
 
-Head depackhead(std::shared_ptr<std::string> target) {
+Head depackhead(char* target) {
   Head head;
-  std::istringstream is(*target);
-  boost::archive::text_iarchive ia(is);
-  ia >> head;
+  head.type = *target - '0';
+  std::string method(target + 1, target + 4);
+  //LOG(INFO) << method;
+  head.method = std::stoi(method);
+  std::string size(target + 4, target + 9);
+  for(int i = 1 ; i < 5; i ++) if(*(target + 9 - i) == '0') size.pop_back(); 
+  //LOG(INFO) << size;
+  head.size = std::stoi(size);
+  LOG(INFO) << "depack head successful";
   return head;
 }
 
-Json::Value depackbody(std::shared_ptr<std::string> target) {
+Json::Value depackbody(char* target, int size) {
+  LOG(INFO) << "start depack body";
   Json::Value root;
   std::string errors;
   Json::CharReaderBuilder builder;
-  std::stringstream ss(*target);
+  std::string temp(target, size);
+  std::stringstream ss(temp);
   if(Json::parseFromStream(builder, ss, &root, &errors)) {
+    LOG(INFO) << "depack body success";
     return root;
   } else {
-    LOG(ERROR) << "parse json error" << '\n';
+    LOG(ERROR) << "parse json error";
     return 0;
   }
 }

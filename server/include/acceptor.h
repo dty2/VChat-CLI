@@ -2,6 +2,7 @@
 #define ACCEPTOR_H
 
 #include "connection.h"
+#include <thread>
 
 namespace vchat {
 using boost::asio::ip::tcp;
@@ -13,6 +14,7 @@ public:
   Acceptor(const Acceptor&) = delete;
   Acceptor& operator=(const Acceptor&) = delete;
   static Acceptor* getInstance();
+  //std::thread t;
   void run();
 
 private:
