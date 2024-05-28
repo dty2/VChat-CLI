@@ -1,5 +1,0 @@
-Log file created at: 2024/05/27 14:38:18
-Running on machine: Hunter
-Running duration (h:mm:ss): 0:00:09
-Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
-I20240527 14:38:18.356401 140737352646272 main.cpp:10] start server
