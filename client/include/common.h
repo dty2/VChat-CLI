@@ -1,18 +1,29 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+// time
+#include <ctime>
 #include <chrono>
+
+// type
 #include <string>
 #include <functional>
 #include <memory>
-#include <set>
-#include <unordered_set>
-#include <list>
-#include <deque>
-#include <vector>
+
+// thread
 #include <mutex>
 #include <condition_variable>
-#include <ctime>
+
+// container
+#include <list>
+#include <set>
+#include <unordered_set>
+#include <vector>
+#include <deque>
+
+// algorithm
+#include <algorithm>
+
 #include <boost/asio.hpp>
 #include <boost/serialization/access.hpp>
 #include <boost/archive/text_oarchive.hpp>

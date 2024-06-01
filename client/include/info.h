@@ -10,7 +10,6 @@ class Info {
 public:
   static Info* info;
   UserInfo userinfo;
-  std::vector<int> messageupdate;
   std::mutex mtx;
   std::condition_variable cv;
   bool dataReady = false;

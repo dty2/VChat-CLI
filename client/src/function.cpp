@@ -41,11 +41,12 @@ bool Function::do_signin(int id, int password, std::string username) {
   else return true;
 }
 
-void Function::do_chat(int sender, int receiver, std::string message) {
+void Function::do_chat(int sender, int receiver, std::string message, int time) {
   Json::Value chatinfo;
   chatinfo["sender"] = sender;
   chatinfo["receiver"] = receiver;
   chatinfo["message"] = message;
+  chatinfo["time"] = time;
   packer::enpack(chat, chatinfo);
   Connection::connection->do_write(chat, chatinfo);
 }

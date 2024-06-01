@@ -29,7 +29,8 @@ void Service::do_login(Json::Value value, std::function<void(int, Json::Value)> 
     persionalinfo["username"] = userinfo.persionalinfo.username;
     for(auto x : userinfo.friendlist) {
       Json::Value friendinfo;
-      friendinfo["id"] = x.friendid;
+      friendinfo["friendid"] = x.friendid;
+      friendinfo["friendname"] = x.friendname;
       friendlist.append(friendinfo);
     }
     for(auto x : userinfo.messagelist) {
@@ -62,7 +63,7 @@ void Service::do_chat(Json::Value value, std::function<void(int, Json::Value)> c
   messageinfo.sender = value["sender"].asInt();
   messageinfo.receiver = value["receiver"].asInt();
   messageinfo.msg = value["message"].asString();
-  messageinfo.time = value["time"].asInt();
+  messageinfo.time = value["time"].asInt64();
   bool op = Store::store->insertMessage(messageinfo);
   if(op) { callback(chat_success, value); }
 }

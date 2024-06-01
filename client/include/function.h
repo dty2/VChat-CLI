@@ -17,7 +17,7 @@ public:
   // request service
   bool do_login(int, int);
   bool do_signin(int, int, std::string);
-  void do_chat(int, int, std::string);
+  void do_chat(int, int, std::string, int);
   std::string checkmessage(int);
   void do_addfriend(int);
   void do_deletefriend(int);

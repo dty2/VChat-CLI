@@ -68,19 +68,21 @@ void Connection::do_readbody() {
               Info::info->userinfo.persionalinfo.password = body_["persionalinfo"]["password"].asInt();
               Info::info->userinfo.persionalinfo.username = body_["persionalinfo"]["username"].asString();
               for(auto x : body_["friendlist"])
-                Info::info->userinfo.friendlist.push_back(FriendInfo(x["id"].asInt()));
+                Info::info->userinfo.friendlist.push_back(
+                  FriendInfo(x["friendid"].asInt(), x["friendname"].asString()));
               for(auto x : body_["messagelist"])
                 Info::info->userinfo.messagelist.push_back(
                   MessageInfo(x["sender"].asInt(),
                     x["receiver"].asInt(),
-                    x["message"].asString()
+                    x["message"].asString(),
+                    x["time"].asInt64()
                   )
                 );
               LOG(INFO) << Info::info->userinfo.persionalinfo.id
                         << Info::info->userinfo.persionalinfo.password
                         << Info::info->userinfo.persionalinfo.username;
               for(auto x : Info::info->userinfo.friendlist)
-                LOG(INFO) << x.friendid;
+                LOG(INFO) << x.friendid << x.friendname;
               for(auto x : Info::info->userinfo.messagelist)
                 LOG(INFO) << x.sender << x.receiver << x.msg;
             });

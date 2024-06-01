@@ -4,7 +4,6 @@
 #include "common.h"
 #include "function.h"
 
-#include <ctime>
 #include <ftxui/screen/screen.hpp>
 #include <ftxui/screen/color.hpp>
 #include <ftxui/dom/elements.hpp>
@@ -19,16 +18,16 @@ namespace vchat {
 using namespace ftxui;
 
 enum {
-  user_page = 0,
+  chat_page = 0,
   friend_page,
-  chat_page,
-  tool_page,
+  user_page,
 };
 
 class Chat {
 private:
-  bool mode; // 1: NORMAL, 2: INSERT
-  int selected = chat_page;
+  int input_toggle; // 0: NORMAL, 1: INSERT
+  int search_toggle; // 0: close tools dialog 1: open tools dialog
+  int selected_page; // context select
   ScreenInteractive screen;
   Chat();
 

@@ -7,7 +7,7 @@ typedef struct MessageInfo {
   int sender;
   int receiver;
   std::string msg;
-  std::time_t time;
+  int64_t time;
   MessageInfo(){};
   MessageInfo(int sender_, int receiver_, std::string msg_, std::time_t time_) :
     sender(sender_),
@@ -18,8 +18,9 @@ typedef struct MessageInfo {
 
 typedef struct FriendInfo {
   int friendid;
+  std::string friendname;
   FriendInfo(){};
-  FriendInfo(int id_) : friendid(id_) {}
+  FriendInfo(int id_, std::string friendname_) : friendid(id_), friendname(friendname_) {}
 }FriendInfo;
 
 typedef struct PersionalInfo {

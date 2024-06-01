@@ -38,17 +38,16 @@ Start::Start() : screen(ScreenInteractive::FitComponent()) {
     }),
   }, &selected_log);
   auto ce_loginput = CatchEvent(c_loginput, [&](Event event){
-    if(event == Event::CtrlK) {
+    if(event == Event::CtrlP) {
       c_logid->TakeFocus();
       return true;
-    } else if(event == Event::CtrlJ) {
+    } else if(event == Event::CtrlN) {
       c_logpassword->TakeFocus();
       return true;
     } else if(event == Event::CtrlY) {
       if(!log_id.empty() && !log_password.empty()) {
         if(Function::function->do_login(std::stoi(log_id), std::stoi(log_password))) {
           screen.Exit();
-          Chat::getinstance();
         }
       }
       return true;
@@ -71,14 +70,14 @@ Start::Start() : screen(ScreenInteractive::FitComponent()) {
     }),
   }, &selected_sign);
   auto ce_signinput = CatchEvent(c_signinput, [&](Event event){
-    if(event == Event::CtrlK) {
+    if(event == Event::CtrlN) {
       switch (selected_sign) {
         case 0: c_signid->TakeFocus();       break;
         case 1: c_signid->TakeFocus();       break;
         case 2: c_signusername->TakeFocus(); break;
       }
       return true;
-    } else if(event == Event::CtrlJ) {
+    } else if(event == Event::CtrlP) {
       switch (selected_sign) {
         case 0: c_signusername->TakeFocus();  break;
         case 1: c_signpassword ->TakeFocus(); break;
@@ -142,10 +141,10 @@ Start::Start() : screen(ScreenInteractive::FitComponent()) {
     cr_left, Renderer([]{ return vbox(paragraph_imp(SPLIT)); }), c_right
   });
   auto ce_main = CatchEvent(c_main, [&](Event event){
-    if(event == Event::CtrlH) { // this function not work... I don't know why...
+    if(event == Event::CtrlB) { // this function not work... I don't know why...
       cr_left->TakeFocus();
       return true;
-    } else if(event == Event::CtrlL) {
+    } else if(event == Event::CtrlF) {
       c_right->TakeFocus();
       return true;
     } else return false;

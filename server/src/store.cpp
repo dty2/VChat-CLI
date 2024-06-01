@@ -42,7 +42,7 @@ bool Store::getFriend(std::list<FriendInfo>& friendlist, const int id) {
     SQLite::Statement query(*this->db, "SELECT * FROM friendinfo WHERE id = ?");
     query.bind(1, id);
     while (query.executeStep())
-      friendlist.push_back(FriendInfo(query.getColumn(1).getInt()));
+      friendlist.push_back(FriendInfo(query.getColumn(1).getInt(), query.getColumn(2).getString()));
   } catch (std::exception& e) {
     LOG(INFO) << "exception: " << e.what() << "\n";
   }
@@ -51,14 +51,14 @@ bool Store::getFriend(std::list<FriendInfo>& friendlist, const int id) {
 
 bool Store::getMessage(std::list<MessageInfo>& messagelist, const int id) {
   try {
-    SQLite::Statement querysid(*this->db, "SELECT * FROM messageinfo WHERE sid = ? OR rid = ?");
+    SQLite::Statement querysid(*this->db, "SELECT * FROM messageinfo WHERE sender = ? OR receiver = ?");
     querysid.bind(1, id);
     querysid.bind(2, id);
     while (querysid.executeStep()) {
       int sender = querysid.getColumn(0).getInt();
       int receiver = querysid.getColumn(1).getInt();
       std::string msg = querysid.getColumn(2).getString();
-      int time = querysid.getColumn(3).getInt();
+      int64_t time = querysid.getColumn(3).getInt64();
       messagelist.push_back(MessageInfo(sender, receiver, msg, time));
     }
   } catch (std::exception& e) {
@@ -103,7 +103,7 @@ bool Store::insertFriend(FriendInfo& friendinfo) {
 
 bool Store::insertMessage(MessageInfo& messageinfo) {
   try {
-    SQLite::Statement query(*this->db, "INSERT INTO friendlist VALUES (?, ?, ?)");
+    SQLite::Statement query(*this->db, "INSERT INTO friendlist VALUES (?, ?, ?, ?)");
     query.bind(1, messageinfo.sender);
     query.bind(2, messageinfo.receiver);
     query.bind(3, messageinfo.msg);

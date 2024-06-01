@@ -18,6 +18,7 @@ int main(int argc, char **argv) {
     });
     LOG(INFO) << "tui start..." << '\n';
     vchat::Start start;
+    vchat::Chat::getinstance();
     t.join();
   } catch (const std::exception& e) {
     LOG(ERROR) << "exception: " << e.what() << '\n';
