@@ -2,10 +2,11 @@
 #include "service.h"
 
 int main() {
-  google::InitGoogleLogging("VChat-server");
-  google::SetLogDestination(google::GLOG_INFO, "/home/hunter/project/vchat/log/");
-  FLAGS_colorlogtostderr = 1;
-  FLAGS_alsologtostderr = 1;
+  FLAGS_alsologtostderr = true;
+  FLAGS_log_dir = "/home/hunter/project/vchat/log/";
+  FLAGS_max_log_size = 10 * 1024; // 10MB
+  FLAGS_minloglevel = google::INFO;
+  google::InitGoogleLogging("VChat-Server");
   try {
     LOG(INFO) << "start server" << '\n';
     vchat::Service::service = vchat::Service::getInstance();

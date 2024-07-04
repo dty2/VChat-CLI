@@ -28,26 +28,26 @@ void ConnectionManager::stop_all() {
   connections.clear();
 }
 
-Connection::Connection(tcp::socket socket_, ConnectionManager* connection_manager_)
+Net::Net(tcp::socket socket_, ConnectionManager* connection_manager_)
   : socket(std::move(socket_)), connection_manager(connection_manager_) {
   chead = new char[9];
   body = new char[50000];
 }
-Connection::~Connection() {
+Net::~Net() {
   free(chead);
   free(body);
 }
 
-void Connection::start() { do_readhead(); }
+void Net::start() { do_readhead(); }
 
-void Connection::update(int id) {
+void Net::update(int id) {
   connection_manager->connections[shared_from_this()] = id;
 }
 
-void Connection::stop() { socket.close(); }
+void Net::stop() { socket.close(); }
 
 
-void Connection::do_readhead() {
+void Net::do_readhead() {
   LOG(INFO) << "start read head" << '\n';
   async_read(socket, boost::asio::buffer(chead, 9),
     [&](boost::system::error_code ec, std::size_t bytes_transferred) {
@@ -68,7 +68,7 @@ void Connection::do_readhead() {
   );
 }
 
-void Connection::do_readbody() {
+void Net::do_readbody() {
   LOG(INFO) << "start read body";
   async_read(socket, boost::asio::buffer(body, hhead.size),
     [&](boost::system::error_code ec, std::size_t bytes_transferred) {
@@ -76,7 +76,7 @@ void Connection::do_readbody() {
         LOG(INFO) << "deal with body";
         LOG(INFO) << "read size: " << bytes_transferred << '\n';
         WorkManager::push_work(hhead, packer::depackbody(body, hhead.size), 
-          std::bind(&Connection::do_write, this, std::placeholders::_1, std::placeholders::_2)
+          std::bind(&Net::do_write, this, std::placeholders::_1, std::placeholders::_2)
         );
         LOG(INFO) << "push_work finish";
       }
@@ -85,12 +85,43 @@ void Connection::do_readbody() {
   );
 }
 
-void Connection::do_chat(int status, Json::Value target) {
+void Net::do_addfriend(int status, Json::Value target) {
   auto self(shared_from_this());
-  int receiver = target["receiver"].asInt();
+  int receiver = target["friendid"].asInt();
+  std::string message = packer::enpack(status, target);
   for(auto& [item, id] : connection_manager->connections)
     if(id == receiver) {
-      std::string message = packer::enpack(status, target);
+      async_write(item->socket, boost::asio::buffer(message, message.size()),
+        [&](boost::system::error_code ec, std::size_t bytes_transferred) {
+          if (!ec) {
+            LOG(INFO) << "add friend successful";
+          } else {
+            LOG(INFO) << connection_manager->connections[shared_from_this()] << "log out";
+            this->stop();
+            connection_manager->connections.erase(shared_from_this());
+          }
+        }
+      );
+    }
+  async_write(socket, boost::asio::buffer(message, message.size()),
+    [&](boost::system::error_code ec, std::size_t bytes_transferred) {
+      if (!ec) {
+        LOG(INFO) << "add friend successful";
+      } else {
+        LOG(INFO) << connection_manager->connections[shared_from_this()] << "log out";
+        this->stop();
+        connection_manager->connections.erase(shared_from_this());
+      }
+    }
+  );
+}
+
+void Net::do_chat(int status, Json::Value target) {
+  auto self(shared_from_this());
+  int receiver = target["receiver"].asInt();
+  std::string message = packer::enpack(status, target);
+  for(auto& [item, id] : connection_manager->connections)
+    if(id == receiver) {
       async_write(item->socket, boost::asio::buffer(message, message.size()),
         [&](boost::system::error_code ec, std::size_t bytes_transferred) {
           if (!ec) {
@@ -103,10 +134,22 @@ void Connection::do_chat(int status, Json::Value target) {
         }
       );
     }
+  async_write(socket, boost::asio::buffer(message, message.size()),
+    [&](boost::system::error_code ec, std::size_t bytes_transferred) {
+      if (!ec) {
+        LOG(INFO) << "send successful" << '\n';
+      } else {
+        LOG(INFO) << connection_manager->connections[shared_from_this()] << "log out";
+        this->stop();
+        connection_manager->connections.erase(shared_from_this());
+      }
+    }
+  );
 }
 
-void Connection::do_write(int status, Json::Value target) {
+void Net::do_write(int status, Json::Value target) {
   if(status == chat_success) { do_chat(status, target); }
+  else if(status == addfriend_success) { do_addfriend(status, target); }
   else {
     LOG(INFO) << "do write";
     std::string message = packer::enpack(status, target);

@@ -1,27 +1,25 @@
+#include "tui.h"
 #include "function.h"
-#include "connection.h"
 #include "info.h"
-#include "start.h"
+
+void start_glog() {
+  FLAGS_alsologtostderr = true;
+  FLAGS_log_dir = "/home/hunter/project/vchat/log/";
+  FLAGS_max_log_size = 10 * 1024; // 10MB
+  FLAGS_minloglevel = google::INFO;
+  google::InitGoogleLogging("VChat-Client");
+}
+
+void stop_glog() { google::ShutdownGoogleLogging(); }
+
+using namespace vchat;
 
 int main(int argc, char **argv) {
-  google::InitGoogleLogging("VChat-client");
-  google::SetLogDestination(google::GLOG_INFO, "/home/hunter/project/vchat/log/");
-  FLAGS_colorlogtostderr = 1;
-  FLAGS_alsologtostderr = 1;
   try {
-    vchat::Info::getinstance();
-    vchat::Connection::getinstance();
-    vchat::Function::getinstance();
-    std::thread t([&]{
-      LOG(INFO) << "IO running..." << '\n';
-      vchat::Connection::connection->io.run();
-    });
-    LOG(INFO) << "tui start..." << '\n';
-    vchat::Start start;
-    vchat::Chat::getinstance();
-    t.join();
-  } catch (const std::exception& e) {
-    LOG(ERROR) << "exception: " << e.what() << '\n';
+    Info::getinstance();
+    Tui ui;
+  } catch (const std::exception &e) {
+    LOG(ERROR) << "Exception: " << e.what() << '\n';
   }
   return 0;
 }

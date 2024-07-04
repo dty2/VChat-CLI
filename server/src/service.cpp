@@ -55,7 +55,6 @@ void Service::do_signin(Json::Value value, std::function<void(int, Json::Value)>
   persionalinfo.password = value["password"].asInt();
   persionalinfo.username = value["username"].asString();
   bool op = Store::store->insertPersional(persionalinfo);
-  if(op) { callback(signin_success, value); }
 }
 
 void Service::do_chat(Json::Value value, std::function<void(int, Json::Value)> callback) {
@@ -69,9 +68,11 @@ void Service::do_chat(Json::Value value, std::function<void(int, Json::Value)> c
 }
 
 void Service::do_addfriend(Json::Value value, std::function<void(int, Json::Value)> callback) {
-}
-
-void Service::do_deletefriend(Json::Value value, std::function<void(int, Json::Value)> callback) {
+  FriendInfo friendinfo;
+  auto userid = value["userid"].asInt();
+  friendinfo.friendid = value["friendid"].asInt();
+  bool op = Store::store->insertFriend(friendinfo, userid);
+  if(op) { callback(addfriend_success, value); }
 }
 
 } // namespace vchat

@@ -28,4 +28,6 @@ DROP TABLE [tablename];
 INSERT INTO [tablename] VALUES ([value], [value], [value]);
 -- 查询数据
 SELECT [column_name] FROM [tablename];
+-- 删除数据
+DELETE FROM [tablename] WHERE [condition];
 ```

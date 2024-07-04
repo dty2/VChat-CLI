@@ -21,7 +21,7 @@ public:
   bool getMessage(std::list<MessageInfo>&, const int);
   bool getUser(UserInfo&, const int);
   bool insertPersional(PersionalInfo&);
-  bool insertFriend(FriendInfo&);
+  bool insertFriend(FriendInfo&, int);
   bool insertMessage(MessageInfo&);
 };
 

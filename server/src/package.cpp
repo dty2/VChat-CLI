@@ -4,15 +4,11 @@ namespace vchat {
 namespace packer {
 
 std::string getsize(int size_) {
-  //TO FIX BUG: when size_ == 30, 30000 will get error
   std::string size;
   size = std::to_string(size_);
-  if(size.size() < 5) {
-    for(int i = 0; i < size.size() - 5; i ++)
-      size += '0';
-  }
-  LOG(INFO) << "size: " << size << '\n';
-  return size;
+  std::ostringstream oss;
+  oss << std::setfill('0') << std::setw(5) << size;
+  return oss.str();
 }
 
 std::string enpack(int method, Json::Value body) {
@@ -27,7 +23,6 @@ std::string enpack(int method, Json::Value body) {
     case chat: type = 0; break;
     case addfriend: type = 1; break;
     case login_success: type = 0; break;
-    case signin_success: type = 1; break;
     case chat_success: type = 0; break;
     case addfriend_success: type = 1; break;
   }
@@ -42,11 +37,14 @@ Head depackhead(char* target) {
   Head head;
   head.type = *target - '0';
   std::string method(target + 1, target + 4);
-  //LOG(INFO) << method;
   head.method = std::stoi(method);
-  std::string size(target + 4, target + 9);
-  for(int i = 1 ; i < 5; i ++) if(*(target + 9 - i) == '0') size.pop_back(); 
-  //LOG(INFO) << size;
+  std::string size_0(target + 4, target + 9);
+  std::string size;
+  int i = 0;
+  for(; i < size_0.size(); i ++)
+    if(size[i] != '0') break;
+  for(; i < size_0.size(); i ++)
+    size += size_0[i];
   head.size = std::stoi(size);
   LOG(INFO) << "depackstd::string successful" << '\n';
   return head;

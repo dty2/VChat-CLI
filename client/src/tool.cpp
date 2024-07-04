@@ -1,10 +1,11 @@
-#include <ftxui/dom/elements.hpp>
-#include <sstream>
+#include "ui.h"
 
 namespace vchat {
 
+namespace ui {
 using namespace ftxui;
-// offered by ftxui author see more for https://github.com/ArthurSonzogni/FTXUI/issues/336
+// offered by ftxui author see more for
+// https://github.com/ArthurSonzogni/FTXUI/issues/336
 Elements split(std::string the_text) {
   Elements output;
   std::stringstream ss(the_text);
@@ -16,9 +17,10 @@ Elements split(std::string the_text) {
 
 Element paragraph_imp(std::string the_text) {
   Elements lines;
-  for(Element &line : split(std::move(the_text)))
+  for (Element &line : split(std::move(the_text)))
     lines.push_back(line);
   return vbox(std::move(lines));
 }
+} // namespace ui
 
 } // namespace vchat

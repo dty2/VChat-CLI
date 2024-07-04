@@ -14,7 +14,6 @@ enum request {
 
 enum response {
   login_success = 101,
-  signin_success = 201,
   chat_success = 301,
   addfriend_success = 401,
 };

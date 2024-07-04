@@ -1,5 +1,5 @@
-#ifndef CONNECTION_H
-#define CONNECTION_H
+#ifndef NET_H
+#define NET_H
 
 #include "work.h"
 
@@ -27,6 +27,7 @@ private:
   void do_readbody();
   void do_write(int, Json::Value);
   void do_chat(int, Json::Value);
+  void do_addfriend(int, Json::Value);
   void update(int);
 };
 typedef std::shared_ptr<Connection> connection_ptr;
@@ -54,5 +55,5 @@ extern ConnectionManager* connection_manager;
 
 } // namespace vchat
 
-#endif // CONNECTION_H
+#endif // NET_H
 

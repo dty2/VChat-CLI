@@ -89,10 +89,14 @@ bool Store::insertPersional(PersionalInfo& persionalinfo) {
   } 
 }
 
-bool Store::insertFriend(FriendInfo& friendinfo) {
+bool Store::insertFriend(FriendInfo& friendinfo, int userid) {
   try {
-    SQLite::Statement query(*this->db, "INSERT INTO friendlist VALUES ?");
-    query.bind(1, friendinfo.friendid);
+    PersionalInfo temp;
+    Store::getPersional(temp, friendinfo.friendid);
+    SQLite::Statement query(*this->db, "INSERT INTO friendinfo VALUES (?, ?, ?)");
+    query.bind(1, userid);
+    query.bind(2, friendinfo.friendid);
+    query.bind(3, temp.username);
     query.exec();
     return true;
   } catch (std::exception& e) {
@@ -103,7 +107,7 @@ bool Store::insertFriend(FriendInfo& friendinfo) {
 
 bool Store::insertMessage(MessageInfo& messageinfo) {
   try {
-    SQLite::Statement query(*this->db, "INSERT INTO friendlist VALUES (?, ?, ?, ?)");
+    SQLite::Statement query(*this->db, "INSERT INTO messageinfo VALUES (?, ?, ?, ?)");
     query.bind(1, messageinfo.sender);
     query.bind(2, messageinfo.receiver);
     query.bind(3, messageinfo.msg);
@@ -111,7 +115,7 @@ bool Store::insertMessage(MessageInfo& messageinfo) {
     query.exec();
     return true;
   } catch (std::exception& e) {
-    LOG(INFO) << "exception: " << e.what() << "\n";
+    LOG(ERROR) << "exception: " << e.what() << "\n";
     return false;
   }
 }

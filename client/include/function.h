@@ -2,33 +2,35 @@
 #define FUNCTION_H
 
 #include "common.h"
+#include "info.h"
+#include "net.h"
 #include "package.h"
-#include "connection.h"
 
 namespace vchat {
 
 class Function {
 public:
-  static Function* function;
-  static void getinstance();
-  Function(const Function&) = delete;
-  Function& operator=(const Function&) = delete;
-
-  // request service
-  bool do_login(int, int);
-  bool do_signin(int, int, std::string);
-  void do_chat(int, int, std::string, int);
-  std::string checkmessage(int);
-  void do_addfriend(int);
-  void do_deletefriend(int);
+  void start();
+  bool login(int, int);
+  bool logout(int);
+  bool signin(int, int, std::string);
+  bool signout(int, int);
+  bool sendmsg(int, int, std::string, int64_t);
+  bool find(int);
+  bool addfriend(int);
+  bool deletefriend(int);
+  std::function<void(std::string)> postevent;
+  //TempInfo tempinfo;
 
 private:
-  Function();
-  ~Function();
-
+  void handle();
+  void handle_login(Json::Value&);
+  void handle_find(Json::Value&);
+  void handle_saddfd(Json::Value&);
+  void handle_ssendmsg(Json::Value&);
+  Net net;
 };
 
 } // namespace vchat
 
 #endif // FUNCTION_H
-
