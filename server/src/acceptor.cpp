@@ -28,7 +28,7 @@ void Acceptor::do_accept() {
     [&](boost::system::error_code ec, tcp::socket socket) {
       if (!ec) {
         LOG(INFO) << "A Client Connect" << "\n";
-        connection_manager->start(std::make_shared<Net>(std::move(socket), connection_manager));
+        connection_manager->start(std::make_shared<Connection>(std::move(socket), connection_manager));
       }
       boost::asio::defer(io, [&]{ do_accept(); });
     }

@@ -2,7 +2,6 @@
 #define ACCEPTOR_H
 
 #include "connection.h"
-#include <thread>
 
 namespace vchat {
 using boost::asio::ip::tcp;

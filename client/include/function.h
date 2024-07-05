@@ -11,6 +11,7 @@ namespace vchat {
 class Function {
 public:
   void start();
+  void end();
   bool login(int, int);
   bool logout(int);
   bool signin(int, int, std::string);
@@ -23,6 +24,7 @@ public:
   //TempInfo tempinfo;
 
 private:
+  bool mode = 0;
   void handle();
   void handle_login(Json::Value&);
   void handle_find(Json::Value&);

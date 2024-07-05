@@ -9,15 +9,15 @@ using namespace ftxui;
 
 class About {
 private:
+  int &now;
+  Function& function;
+  ScreenInteractive& screen;
   int main_selected = 0;
-  std::shared_ptr<std::function<void(int)>> pfun;
 public:
   Component content;
-  About(std::function<void(int)>);
+  About(int&, Function&, ScreenInteractive&);
 };
 
 } // namespace vchat
 
 #endif // ABOUT_H
-
-

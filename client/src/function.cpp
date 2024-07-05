@@ -4,55 +4,61 @@
 namespace vchat {
 
 void Function::start() {
-  this->handle();
+  if (!net.connect()) {
+    this->mode = true;
+    this->handle();
+  }
 }
 
+void Function::end() { this->mode = false; }
+
 void Function::handle() {
-  DLOG(INFO) << "start handle";
-  int op, signal;
-  Json::Value value;
-  if (!(signal = net.read(op, value))) {
-    switch (op) {
-    case method::signin_suc:
-      postevent("signin_suc");
-      break;
-    case method::signin_err:
-      postevent(value["error"].asString());
-      break;
-    case method::login_suc:
-      this->handle_login(value);
-      postevent("login_suc");
-      break;
-    case method::login_err:
-      postevent(value["error"].asString());
-      break;
-    case method::findfd_suc:
-      postevent("resource_findfd_suc");
-      break;
-    case method::findfd_err:
-      postevent(value["error"].asString());
-      break;
-    case method::saddfd:
-      postevent("resource_saddfd");
-      break;
-    case method::saddfd_suc:
-      this->handle_saddfd(value);
-      postevent("saddfd_suc");
-      break;
-    case method::saddfd_err:
-      postevent(value["error"].asString());
-      break;
-    case method::sdeletefd:
-      postevent("resource_sdeletedfd");
-      break;
-    case method::ssendmsg:
-      this->handle_ssendmsg(value);
-      postevent("ssendmsg");
-      break;
-    }
-  } else
-    LOG(ERROR) << signal;
-  handle();
+  while (mode) {
+    DLOG(INFO) << "start handle";
+    int op, signal;
+    Json::Value value;
+    if (!(signal = net.read(op, value))) {
+      switch (op) {
+      case method::signin_suc:
+        postevent("signin_suc");
+        break;
+      case method::signin_err:
+        postevent(value["error"].asString());
+        break;
+      case method::login_suc:
+        this->handle_login(value);
+        postevent("login_suc");
+        break;
+      case method::login_err:
+        postevent(value["error"].asString());
+        break;
+      case method::findfd_suc:
+        postevent("resource_findfd_suc");
+        break;
+      case method::findfd_err:
+        postevent(value["error"].asString());
+        break;
+      case method::saddfd:
+        postevent("resource_saddfd");
+        break;
+      case method::saddfd_suc:
+        this->handle_saddfd(value);
+        postevent("saddfd_suc");
+        break;
+      case method::saddfd_err:
+        postevent(value["error"].asString());
+        break;
+      case method::sdeletefd:
+        postevent("resource_sdeletedfd");
+        break;
+      case method::ssendmsg:
+        this->handle_ssendmsg(value);
+        postevent("ssendmsg");
+        break;
+      }
+    } else
+      LOG(ERROR) << signal;
+  }
 }
 
 void Function::handle_login(Json::Value &value) {
@@ -74,6 +80,7 @@ void Function::handle_login(Json::Value &value) {
 }
 
 void Function::handle_find(Json::Value &value) {}
+void Function::handle_ssendmsg(Json::Value &value) {}
 
 void Function::handle_saddfd(Json::Value &value) {
   Info::info->change([&] {

@@ -2,27 +2,24 @@
 #define UI_H
 
 #include "common.h"
-#include <ftxui/screen/screen.hpp>
-#include <ftxui/screen/color.hpp>
-#include <ftxui/dom/elements.hpp>
-#include <ftxui/dom/flexbox_config.hpp>
+#include "function.h"
+#include <ftxui/component/captured_mouse.hpp>
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/component_base.hpp>
 #include <ftxui/component/component_options.hpp>
 #include <ftxui/component/screen_interactive.hpp>
-#include <ftxui/component/captured_mouse.hpp>
+#include <ftxui/dom/elements.hpp>
+#include <ftxui/dom/flexbox_config.hpp>
+#include <ftxui/screen/color.hpp>
+#include <ftxui/screen/screen.hpp>
 
 namespace vchat {
 
 using namespace ftxui;
 
-namespace ui {
+enum page { DASHBOARD = 0, CHAT, HELP, ABOUT };
 
-Elements split(std::string);
-Element paragraph_imp(std::string);
-
-static std::string SPLIT = "│ \n│ \n│ \n│ \n│ \n│ \n│ \n│";
-
+namespace graph {
 static std::string SMALL_COW = "\
                       ,__,        \n\
                       (oo)____    \n\
@@ -40,12 +37,10 @@ static std::string LOGO = "\
                                            \n\
                                            \n\
                                            ";
+} // namespace graph
+extern Elements split(std::string);
+extern Element paragraph_imp(std::string);
 
-static std::string START = " [ Welcome to VChat... ] ";
-static std::string QUIT  = " [ Quit VChat ...] ";
-
-}
 } // namespace vchat
 
-# endif // UI_H
-
+#endif // UI_H

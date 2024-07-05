@@ -9,11 +9,13 @@ using namespace ftxui;
 
 class Help {
 private:
+  int &now;
+  Function& function;
+  ScreenInteractive& screen;
   int main_selected = 0;
-  std::function<void(int)> pfun;
 public:
   Component content;
-  Help(std::function<void(int)>);
+  Help(int&, Function&, ScreenInteractive&);
 };
 
 } // namespace vchat

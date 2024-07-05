@@ -28,26 +28,26 @@ void ConnectionManager::stop_all() {
   connections.clear();
 }
 
-Net::Net(tcp::socket socket_, ConnectionManager* connection_manager_)
+Connection::Connection(tcp::socket socket_, ConnectionManager* connection_manager_)
   : socket(std::move(socket_)), connection_manager(connection_manager_) {
   chead = new char[9];
   body = new char[50000];
 }
-Net::~Net() {
+Connection::~Connection() {
   free(chead);
   free(body);
 }
 
-void Net::start() { do_readhead(); }
+void Connection::start() { do_readhead(); }
 
-void Net::update(int id) {
+void Connection::update(int id) {
   connection_manager->connections[shared_from_this()] = id;
 }
 
-void Net::stop() { socket.close(); }
+void Connection::stop() { socket.close(); }
 
 
-void Net::do_readhead() {
+void Connection::do_readhead() {
   LOG(INFO) << "start read head" << '\n';
   async_read(socket, boost::asio::buffer(chead, 9),
     [&](boost::system::error_code ec, std::size_t bytes_transferred) {
@@ -68,7 +68,7 @@ void Net::do_readhead() {
   );
 }
 
-void Net::do_readbody() {
+void Connection::do_readbody() {
   LOG(INFO) << "start read body";
   async_read(socket, boost::asio::buffer(body, hhead.size),
     [&](boost::system::error_code ec, std::size_t bytes_transferred) {
@@ -76,7 +76,7 @@ void Net::do_readbody() {
         LOG(INFO) << "deal with body";
         LOG(INFO) << "read size: " << bytes_transferred << '\n';
         WorkManager::push_work(hhead, packer::depackbody(body, hhead.size), 
-          std::bind(&Net::do_write, this, std::placeholders::_1, std::placeholders::_2)
+          std::bind(&Connection::do_write, this, std::placeholders::_1, std::placeholders::_2)
         );
         LOG(INFO) << "push_work finish";
       }
@@ -85,7 +85,7 @@ void Net::do_readbody() {
   );
 }
 
-void Net::do_addfriend(int status, Json::Value target) {
+void Connection::do_addfriend(int status, Json::Value target) {
   auto self(shared_from_this());
   int receiver = target["friendid"].asInt();
   std::string message = packer::enpack(status, target);
@@ -116,7 +116,7 @@ void Net::do_addfriend(int status, Json::Value target) {
   );
 }
 
-void Net::do_chat(int status, Json::Value target) {
+void Connection::do_chat(int status, Json::Value target) {
   auto self(shared_from_this());
   int receiver = target["receiver"].asInt();
   std::string message = packer::enpack(status, target);
@@ -147,7 +147,7 @@ void Net::do_chat(int status, Json::Value target) {
   );
 }
 
-void Net::do_write(int status, Json::Value target) {
+void Connection::do_write(int status, Json::Value target) {
   if(status == chat_success) { do_chat(status, target); }
   else if(status == addfriend_success) { do_addfriend(status, target); }
   else {
