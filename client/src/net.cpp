@@ -4,8 +4,8 @@ namespace vchat {
 
 Net::Net() : resolver(io), socket(io) {
   endpoint = resolver.resolve(address, port);
-  head = new char[9];
-  body = new char[50000];
+  head = new char[HEAD_SIZE];
+  body = new char[BODY_SIZE];
 }
 
 Net::~Net() { free(head); free(body); }
@@ -23,7 +23,7 @@ bool Net::connect() {
 bool Net::readhead(std::pair<int, int>& info) {
   DLOG(INFO) << "start read head";
   boost::system::error_code ec;
-  boost::asio::read(socket, boost::asio::buffer(head, 9));
+  boost::asio::read(socket, boost::asio::buffer(head, HEAD_SIZE));
   if(!ec) {
     DLOG(INFO) << "read head successful";
     info = packer::depackhead(head);
@@ -58,7 +58,7 @@ bool Net::read(int& status, Json::Value& target) {
 
 bool Net::write(int status) {
   std::string message = packer::enpack(status);
-  char *msg = new char[50009];
+  char *msg = new char[ALL_SIZE];
   std::copy(message.begin(), message.end(), msg);
   DLOG(INFO) << "write message";
   boost::system::error_code ec;
@@ -72,12 +72,13 @@ bool Net::write(int status) {
 
 bool Net::write(int status, Json::Value& target) {
   std::string message = packer::enpack(status, target);
-  if (message.size() > 50009) { return 2; } // 传输信息太大
-  char *msg = new char[50009];
+  if (message.size() > ALL_SIZE) { return 2; } // 传输信息太大
+  char *msg = new char[ALL_SIZE];
   std::copy(message.begin(), message.end(), msg);
   DLOG(INFO) << "write message" << '\n';
   boost::system::error_code ec;
   boost::asio::write(socket, boost::asio::buffer(msg, message.size()), ec);
+  delete[] msg;
   if(ec) {
     DLOG(ERROR) << "write error: "<< ec.what();
     return 1; // 发送数据失败

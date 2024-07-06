@@ -42,3 +42,4 @@ typedef struct UserInfo {
 }UserInfo;
 
 #endif // USERINFO_HPP
+

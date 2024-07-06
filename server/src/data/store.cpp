@@ -1,7 +1,5 @@
 #include "store.h"
 
-namespace vchat {
-
 Store* Store::store = nullptr;
 
 Store* Store::getInstance() {
@@ -119,5 +117,3 @@ bool Store::insertMessage(MessageInfo& messageinfo) {
     return false;
   }
 }
-
-} // namespace vchat

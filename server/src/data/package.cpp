@@ -1,6 +1,5 @@
 #include "package.h"
 
-namespace vchat {
 namespace packer {
 
 std::string enpack(int method) {
@@ -31,12 +30,11 @@ std::pair<int, int> depackhead(char *target) {
   headmethod = std::stoi(method);
   std::string size(target + 3, target + 8);
   bodysize = std::stoi(size);
-  DLOG(INFO) << "body size:" << bodysize << "head method:" << headmethod;
+  DLOG(INFO) << "body size:" << bodysize << "method:" << headmethod;
   return std::pair<int, int>(headmethod, bodysize);
 }
 
 Json::Value depackbody(char *target, int size) {
-  DLOG(INFO) << "start depack body";
   Json::Value root;
   std::string errors;
   Json::CharReaderBuilder builder;
@@ -52,4 +50,3 @@ Json::Value depackbody(char *target, int size) {
 }
 
 } // namespace packer
-} // namespace vchat

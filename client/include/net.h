@@ -4,6 +4,10 @@
 #include "common.h"
 #include "package.h"
 
+#define HEAD_SIZE 8
+#define BODY_SIZE 50000
+#define ALL_SIZE 50008
+
 namespace vchat {
 
 using boost::asio::ip::tcp;

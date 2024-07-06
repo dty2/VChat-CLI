@@ -4,8 +4,6 @@
 #include "data.hpp"
 #include "common.h"
 
-namespace vchat {
-
 class Store {
 private:
   const std::string db_address = "/home/hunter/project/vchat/resource/sql/vchat.db";
@@ -16,6 +14,7 @@ public:
   static Store* getInstance();
   Store(const Store&) = delete;
   Store& operator=(const Store&) = delete;
+
   bool getPersional(PersionalInfo&, const int);
   bool getFriend(std::list<FriendInfo>&, const int);
   bool getMessage(std::list<MessageInfo>&, const int);
@@ -24,7 +23,5 @@ public:
   bool insertFriend(FriendInfo&, int);
   bool insertMessage(MessageInfo&);
 };
-
-} // namespace vchat
 
 #endif // STORE_H
