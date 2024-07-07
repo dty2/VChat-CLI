@@ -13,21 +13,22 @@ enum { CHAT_PAGE = 0, FRIENDS_PAGE, MYSELF_PAGE };
 
 class Chat {
 private:
-  Function &function;
   int id;
+  Function &function;
+  ScreenInteractive& screen;
   int selected_msg = 0;
   int inputfocus = 0; // 默认为0,焦点在消息框中
   std::string input;
   Component inputarea;
   Components messagelist;
   Component list;
+  void updatemessagelist();
   void getinputarea();
-  void updatemessage();
   void getmessagelist();
   std::vector<MessageInfo> getmessage(int);
 
 public:
-  Chat(int, Function &);
+  Chat(int, Function&, ScreenInteractive&);
   Component content;
 };
 
@@ -36,7 +37,7 @@ private:
   int id;
   Function &function;
 public:
-  Friend(int, Function &);
+  Friend(int, Function&);
   Component content;
 };
 
@@ -54,7 +55,7 @@ private:
   int option_selected = 0;
   int &now;
   Function &function;
-  ScreenInteractive &screen;
+  ScreenInteractive& screen;
 
   // page
   int page_selected = 0;
@@ -73,7 +74,7 @@ private:
 
 public:
   Component content;
-  Vchat(int &, Function &, ScreenInteractive &);
+  Vchat(int&, Function&, ScreenInteractive&);
 };
 
 } // namespace vchat

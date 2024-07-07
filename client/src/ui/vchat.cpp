@@ -3,7 +3,8 @@
 
 namespace vchat {
 
-Chat::Chat(int id_, Function& function_) : id(id_), function(function_) {
+Chat::Chat(int id_, Function& function_, ScreenInteractive& screen_)
+  : id(id_), function(function_), screen(screen_) {
   getmessagelist();
   getinputarea();
   auto cchatpage = Container::Vertical({list, inputarea}, &inputfocus);
@@ -37,11 +38,11 @@ std::vector<MessageInfo> Chat::getmessage(int id) {
   return temp;
 }
 
-void Chat::updatemessage() {
-  std::vector<MessageInfo> messages = getmessage(this->id);
+void Chat::updatemessagelist() {
   messagelist.clear();
-  for(auto value : messages) {
-    this->messagelist.emplace_back(
+  std::vector<MessageInfo> messages = getmessage(this->id);
+  for(auto& value : messages) {
+    messagelist.emplace_back(
       Renderer([=](bool focused){
         Element element;
         if(value.sender == id) {
@@ -57,17 +58,46 @@ void Chat::updatemessage() {
 }
 
 void Chat::getmessagelist() {
-  updatemessage();
-  auto clist = Container::Vertical(messagelist, &selected_msg) | vscroll_indicator | frame;
-  auto elist = CatchEvent(clist, [&](Event event){
-    if(event == Event::Special("ssendmsg")) {
-      LOG(INFO) << "tui receive ssendmsg";
-      updatemessage();
+  //updatemessagelist();
+  auto rlist = Renderer([=]{
+    messagelist.clear();
+    std::vector<MessageInfo> messages = getmessage(this->id);
+    for(auto& value : messages) {
+      messagelist.emplace_back(
+        Renderer([=](bool focused){
+          Element element;
+          if(value.sender == id) {
+            element = hbox(text(value.msg) | border, filler());
+          } else if(value.receiver == id){
+            element = hbox(filler(), text(value.msg) | border);
+          }
+          if(focused) element |= focus;
+          return element;
+        })
+      );
+    }
+    auto show = Container::Vertical(messagelist, &selected_msg) | vscroll_indicator | frame;
+    Elements container;
+    for(auto& value : messagelist) {
+      container.emplace_back(value->Render());
+    }
+    return show->Render();
+  });
+  auto elist = CatchEvent(rlist, [&](Event event){
+    if(event == Event::CtrlN) {
+      if(selected_msg != list->ChildCount() - 1) selected_msg ++;
+      return true;
+    }
+    else if(event == Event::CtrlP) {
+      if(selected_msg) selected_msg --;
+      return true;
+    }
+    else if(event == Event::Special("ssendmsg")) {
+      LOG(INFO) << "get ssendmsg";
       return true;
     }
     return false;
   });
-  selected_msg = messagelist.size();
   this->list = elist | border | flex;
 }
 
@@ -87,15 +117,14 @@ void Chat::getinputarea() {
       if(!input.empty())
         if(!function.sendmsg(id, Info::info->userinfo.persionalinfo.id, input,
           static_cast<int64_t>(std::stoll(oss.str())))) {
-          Info::info->userinfo.messagelist.emplace_back(
-            MessageInfo(Info::info->userinfo.persionalinfo.id,
-              id, input, static_cast<int64_t>(std::stoll(oss.str()))));
           input.clear();
-          updatemessage();
+          //updatemessagelist();
+          screen.PostEvent(Event::Special("ssendmsg"));
+          list->TakeFocus();
         }
       return true;
     } else return false;
-  }) | size(HEIGHT, EQUAL, 3);
+  }) | size(HEIGHT, EQUAL, 2);
   this->inputarea = einput | border;
 }
 
@@ -116,7 +145,7 @@ Vchat::Vchat(int& now_, Function& function_, ScreenInteractive& screen_)
   : now(now_), function(function_), screen(screen_) {
   LOG(INFO) << "friendlist size: " << Info::info->userinfo.friendlist.size();
   for(auto& v : Info::info->userinfo.friendlist)
-    this->chats[v.friendid] = new Chat(v.friendid, function);
+    this->chats[v.friendid] = new Chat(v.friendid, function, screen);
   LOG(INFO) << "chats size: " << chats.size();
   for(auto& v : Info::info->userinfo.friendlist)
     this->friends[v.friendid] = new Friend(v.friendid, function);

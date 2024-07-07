@@ -92,7 +92,17 @@ void Function::handle_login(Json::Value &value) {
 }
 
 void Function::handle_find(Json::Value &value) {}
-void Function::handle_ssendmsg(Json::Value &value) {}
+
+void Function::handle_ssendmsg(Json::Value &value) {
+  Info::info->change([&]{
+    MessageInfo temp;
+    temp.sender = value["sender"].asInt();
+    temp.receiver = value["receiver"].asInt();
+    temp.msg = value["message"].asString();
+    temp.time = value["time"].asInt64();
+    Info::info->userinfo.messagelist.push_back(temp);
+  });
+}
 
 void Function::handle_saddfd(Json::Value &value) {
   Info::info->change([&] {
