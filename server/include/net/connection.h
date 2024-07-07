@@ -32,8 +32,9 @@ private:
   ConnectionManager* manager;
   tcp::socket socket;
   char *head, *body;
+  std::pair<int, int> headinfo;
   void readhead();
-  void readbody(std::pair<int, int>);
+  void readbody();
 };
 
 #endif //CONNECTION_H

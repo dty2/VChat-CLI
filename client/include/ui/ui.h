@@ -17,7 +17,7 @@ namespace vchat {
 
 using namespace ftxui;
 
-enum page { DASHBOARD = 0, CHAT, HELP, ABOUT };
+enum page { DASHBOARD = 0, HELP, ABOUT, CHAT };
 
 namespace graph {
 static std::string SMALL_COW = "\

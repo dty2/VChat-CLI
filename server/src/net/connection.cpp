@@ -42,8 +42,8 @@ void Connection::readhead() {
   async_read(socket, boost::asio::buffer(head, HEAD_SIZE),
     [&](boost::system::error_code ec, std::size_t bytes_transferred) {
       if (!ec) {
-        std::pair<int, int> headinfo = packer::depackhead(head);
-        readbody(headinfo);
+        headinfo = packer::depackhead(head);
+        readbody();
       } else {
         this->stop();
         manager->connections.erase(shared_from_this());
@@ -52,11 +52,12 @@ void Connection::readhead() {
   );
 }
 
-void Connection::readbody(std::pair<int, int> headinfo) {
+void Connection::readbody() {
   async_read(socket, boost::asio::buffer(body, headinfo.second),
     [&](boost::system::error_code ec, std::size_t bytes_transferred) {
       if(!ec) {
         Json::Value value = packer::depackbody(body, headinfo.second);
+        LOG(INFO) << "start serve";
         Service::serve(headinfo.first, std::move(value), this);
       }
       readhead();

@@ -1,11 +1,11 @@
 #include "store.h"
+#include "server.h"
 
 Store* Store::store = nullptr;
 
-Store* Store::getInstance() {
-  Store* instance = new Store();
-  return instance;
-}
+void Store::getinstance() { store = new Store(); }
+
+void Store::free() { delete store; }
 
 Store::Store() {
   try {
@@ -15,7 +15,9 @@ Store::Store() {
     );
   }
   catch (const std::exception& e) {
-    LOG(INFO) << "Exception: " << e.what() << "\n";
+    LOG(ERROR) << "Exception: " << e.what();
+    LOG(INFO) << "Exit VChat-Server ...";
+    exit(0);
   }
 }
 

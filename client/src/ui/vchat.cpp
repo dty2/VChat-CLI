@@ -1,39 +1,72 @@
 #include "vchat.h"
+#include "info.h"
+#include <ftxui/component/component.hpp>
+#include <ftxui/component/event.hpp>
 
 namespace vchat {
 
-Chat::Chat(int id_, Function& function_)
-  : id(id_), function(function_) {
-  auto chatpage = Container::Vertical({list, inputarea}, &inputfocus);
-  this->content = chatpage;
+Chat::Chat(int id_, Function& function_) : id(id_), function(function_) {
+  getmessagelist();
+  getinputarea();
+  auto cchatpage = Container::Vertical({list, inputarea}, &inputfocus);
+  auto echatpage = CatchEvent(cchatpage, [&](Event event){
+    if(event == Event::CtrlN) {
+      list->TakeFocus();
+      if(selected_msg != messagelist.size() - 1)
+        selected_msg ++;
+      return true;
+    }
+    else if(event == Event::CtrlP) {
+      list->TakeFocus();
+      if(selected_msg)
+        selected_msg --;
+      return true;
+    }
+    else {
+      inputarea->TakeFocus();
+    }
+    return false;
+  });
+  this->content = echatpage | flex;
 }
 
 std::vector<MessageInfo> Chat::getmessage(int id) {
   std::vector<MessageInfo> temp;
-  for (auto v : Info::info->userinfo.messagelist) {
-    if (v.receiver == Info::info->userinfo.persionalinfo.id && v.sender == id)
+  for (auto& v : Info::info->userinfo.messagelist) {
+    if (v.receiver == id || v.sender == id)
       temp.emplace_back(v);
   }
   return temp;
 }
 
-void Chat::getmessagelist() {
+void Chat::updatemessage() {
   std::vector<MessageInfo> messages = getmessage(this->id);
+  messagelist.clear();
   for(auto value : messages) {
-    this->messagelist.emplace_back(Renderer([&](bool focused){
-      Element element;
-      if(value.sender == id) {
-        element = hbox(text(value.msg), filler());
-      } else if(value.receiver == id){
-        element = hbox(filler(), text(value.msg));
-      }
-      if(focused) element |= focus;
-      return element;
-    }));
+    this->messagelist.emplace_back(
+      Renderer([=](bool focused){
+        Element element;
+        if(value.sender == id) {
+          element = hbox(text(value.msg) | border, filler());
+        } else if(value.receiver == id){
+          element = hbox(filler(), text(value.msg) | border);
+        }
+        if(focused) element |= focus;
+        return element;
+      })
+    );
   }
-  auto list = Container::Vertical(messagelist, &selected_msg) | vscroll_indicator | frame | flex;
+}
+
+void Chat::getmessagelist() {
+  updatemessage();
+  auto clist = Container::Vertical(messagelist, &selected_msg) | vscroll_indicator | frame;
+  auto elist = CatchEvent(clist, [&](Event event){
+    if(event == Event::Special("ssendmsg")) { updatemessage(); }
+    return false;
+  });
   selected_msg = messagelist.size();
-  this->list = list;
+  this->list = elist | border | flex;
 }
 
 void Chat::getinputarea() {
@@ -55,25 +88,30 @@ void Chat::getinputarea() {
           input.clear();
       return true;
     } else return false;
-  }) | size(HEIGHT, EQUAL, 6);
-  this->inputarea = einput;
+  }) | size(HEIGHT, EQUAL, 3);
+  this->inputarea = einput | border;
 }
 
 Friend::Friend(int id_, Function& function_)
   : id(id_), function(function_) {
-
+  content = Container::Horizontal({
+    Button(" 󰍡  发消息 ", [&]{ }, ButtonOption::Ascii()),
+    Button(" 󰆴 删除好友 ", [&]{ }, ButtonOption::Ascii()),
+  });
 }
 
 Myself::Myself(Function& function_)
   : function(function_) {
-
+  content = Button( "myself", [&] { }, ButtonOption::Ascii());
 }
 
 Vchat::Vchat(int& now_, Function& function_, ScreenInteractive& screen_)
   : now(now_), function(function_), screen(screen_) {
-  for(auto v : Info::info->userinfo.friendlist)
+  LOG(INFO) << "friendlist size: " << Info::info->userinfo.friendlist.size();
+  for(auto& v : Info::info->userinfo.friendlist)
     this->chats[v.friendid] = new Chat(v.friendid, function);
-  for(auto v : Info::info->userinfo.friendlist)
+  LOG(INFO) << "chats size: " << chats.size();
+  for(auto& v : Info::info->userinfo.friendlist)
     this->friends[v.friendid] = new Friend(v.friendid, function);
   this->myself = new Myself(function);
   this->getpage();
@@ -99,8 +137,13 @@ Vchat::Vchat(int& now_, Function& function_, ScreenInteractive& screen_)
 }
 
 void Vchat::getpage() {
-  auto page = Container::Tab({}, &option_selected);
-  this->pages = page | border;
+
+  auto page = Container::Tab({
+    chats.begin()->second->content,
+    friends.begin()->second->content,
+    myself->content
+  }, &option_selected);
+  this->pages = page;
 }
 
 void Vchat::getcatalogue() {

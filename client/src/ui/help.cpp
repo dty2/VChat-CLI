@@ -4,8 +4,8 @@ namespace vchat {
 Help::Help(int& now_, Function& function_, ScreenInteractive& screen_)
   : now(now_), function(function_), screen(screen_) {
   auto cmain = Container::Horizontal({
-    Button(" 󰌑  Back ", [&]{ this->now = DASHBOARD; }, ButtonOption::Ascii()),
-    Button(" 󰩈  Exit ", [&]{ this->screen.Exit(); }, ButtonOption::Ascii()),
+    Button(" 󰌑  返回 ", [&]{ this->now = DASHBOARD; }, ButtonOption::Ascii()),
+    Button(" 󰩈  退出 ", [&]{ this->screen.Exit(); }, ButtonOption::Ascii()),
   }, &main_selected);
   auto rmain = Renderer(cmain, [=]{
     return vbox(

@@ -23,6 +23,7 @@ private:
   std::unique_ptr<About> window_about = nullptr;
   void changewindow(int);
   Component main;
+  void getvchat();
   void postevent(std::string); // 接收消息，好友申请
 
 public:

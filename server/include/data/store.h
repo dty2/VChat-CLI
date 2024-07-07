@@ -6,12 +6,13 @@
 
 class Store {
 private:
-  const std::string db_address = "/home/hunter/project/vchat/resource/sql/vchat.db";
+  const std::string db_address = "/home/hunter/source/project/vchat/resource/sql/vchat.db";
   std::unique_ptr<SQLite::Database> db;
   Store();
 public:
   static Store* store;
-  static Store* getInstance();
+  static void getinstance();
+  static void free();
   Store(const Store&) = delete;
   Store& operator=(const Store&) = delete;
 

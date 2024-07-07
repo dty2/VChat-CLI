@@ -14,7 +14,6 @@ void Function::end() { this->mode = false; }
 
 void Function::handle() {
   while (mode) {
-    DLOG(INFO) << "start handle";
     int op, signal;
     Json::Value value;
     if (!(signal = net.read(op, value))) {
@@ -52,6 +51,7 @@ void Function::handle() {
         postevent("resource_sdeletedfd");
         break;
       case method::ssendmsg:
+        LOG(INFO) << "get ssendmsg";
         this->handle_ssendmsg(value);
         postevent("ssendmsg");
         break;
@@ -69,14 +69,26 @@ void Function::handle_login(Json::Value &value) {
         value["persionalinfo"]["password"].asInt();
     Info::info->userinfo.persionalinfo.username =
         value["persionalinfo"]["username"].asString();
-    for (auto v : value["friendlist"])
-      Info::info->userinfo.friendlist.push_back(
-          FriendInfo(v["friendid"].asInt(), v["friendname"].asString()));
-    for (auto v : value["messagelist"])
+    for (auto& v : value["friendlist"]) {
+      Info::info->userinfo.friendlist.push_back(FriendInfo(v["friendid"].asInt(), v["friendname"].asString()));
+    }
+    for (auto& v : value["messagelist"])
       Info::info->userinfo.messagelist.push_back(
-          MessageInfo(v["sender"].asInt(), v["receiver"].asInt(),
-                      v["message"].asString(), v["time"].asInt64()));
+        MessageInfo(
+          v["sender"].asInt(), v["receiver"].asInt(),
+          v["message"].asString(), v["time"].asInt64()
+        )
+      );
   });
+  LOG(INFO) << Info::info->userinfo.persionalinfo.id;
+  LOG(INFO) << Info::info->userinfo.persionalinfo.password;
+  LOG(INFO) << Info::info->userinfo.persionalinfo.username;
+  LOG(INFO) << Info::info->userinfo.friendlist.size();
+  LOG(INFO) << Info::info->userinfo.messagelist.size();
+  for(auto& v : Info::info->userinfo.friendlist) // 注意这里要使用&引用
+    LOG(INFO) << v.friendid << v.friendname;
+  for(auto& v : Info::info->userinfo.messagelist)
+    LOG(INFO) << v.sender << v.receiver << v.msg << v.time;
 }
 
 void Function::handle_find(Json::Value &value) {}
@@ -91,7 +103,7 @@ void Function::handle_saddfd(Json::Value &value) {
 }
 
 bool Function::login(int id, int password) {
-  DLOG(INFO) << "start login";
+  LOG(INFO) << "start login";
   Json::Value loginfo;
   loginfo["id"] = id;
   loginfo["password"] = password;
@@ -144,9 +156,9 @@ bool Function::signout(int id, int password) {
   return 0;
 }
 
-bool Function::sendmsg(int sender, int receiver, std::string message,
+bool Function::sendmsg(int receiver, int sender, std::string message,
                        int64_t time) {
-  DLOG(INFO) << "sendmsg";
+  LOG(INFO) << "sendmsg";
   Json::Value chatinfo;
   chatinfo["sender"] = sender;
   chatinfo["receiver"] = receiver;

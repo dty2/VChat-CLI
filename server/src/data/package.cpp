@@ -6,7 +6,7 @@ std::string enpack(int method) {
   std::string head;
   head += std::to_string(method);
   head += "00000";
-  DLOG(INFO) << "output: " << head << "output size: " << head.size();
+  LOG(INFO) << "output: " << head << "output size: " << head.size();
   return head;
 }
 
@@ -20,7 +20,7 @@ std::string enpack(int method, Json::Value body) {
   head += std::to_string(method);
   head += oss.str();
   output = head + output;
-  DLOG(INFO) << "output: " << output << "output size: " << output.size();
+  LOG(INFO) << "output: " << output << "output size: " << output.size();
   return output;
 }
 
@@ -30,7 +30,7 @@ std::pair<int, int> depackhead(char *target) {
   headmethod = std::stoi(method);
   std::string size(target + 3, target + 8);
   bodysize = std::stoi(size);
-  DLOG(INFO) << "body size:" << bodysize << "method:" << headmethod;
+  LOG(INFO) << "body size:" << bodysize << "method:" << headmethod;
   return std::pair<int, int>(headmethod, bodysize);
 }
 

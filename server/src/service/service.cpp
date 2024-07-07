@@ -10,6 +10,7 @@ Service::Service() {}
 void Service::getinstance() { service = new Service(); }
 
 void Service::serve(int method, Json::Value value, Connection *connection) {
+  LOG(INFO) << method;
   switch (method) {
     case method::signin: service->signin(value, connection); break;
     //case method::signout: service->signout(value, connection); break;
@@ -25,6 +26,7 @@ void Service::serve(int method, Json::Value value, Connection *connection) {
 }
 
 void Service::login(Json::Value value, Connection* connection) {
+  LOG(INFO) << "client start login";
   int id = value["id"].asInt();
   int password = value["password"].asInt();
   PersionalInfo persionalinfo;
@@ -75,6 +77,7 @@ void Service::sendmsg(Json::Value value) {
   messageinfo.time = value["time"].asInt64();
   bool op = Store::store->insertMessage(messageinfo);
   if(Service::cache.online[messageinfo.receiver]) {
+    LOG(INFO) << "sendmsg" << messageinfo.receiver;
     Service::cache.online[messageinfo.receiver]->write(method::ssendmsg, value);
   }
 }

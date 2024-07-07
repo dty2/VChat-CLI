@@ -11,20 +11,17 @@ using boost::asio::ip::tcp;
 
 class Server {
 public:
-  Server(const Server&) = delete;
-  Server& operator=(const Server&) = delete;
-  explicit Server();
+  Server();
   void run();
 
 private:
   const std::string address = "127.0.0.1";
-  const int port = 3864;
-  tcp::endpoint endpoint;
-  tcp::acceptor acceptor;
+  const std::string port = "3784";
   void do_accept();
   void do_await_stop();
   boost::asio::io_context io_context;
   boost::asio::signal_set signals;
+  tcp::acceptor acceptor;
   ConnectionManager connection_manager;
 
 };

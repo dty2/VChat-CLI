@@ -22,6 +22,7 @@ private:
   Components messagelist;
   Component list;
   void getinputarea();
+  void updatemessage();
   void getmessagelist();
   std::vector<MessageInfo> getmessage(int);
 
@@ -51,10 +52,13 @@ class Vchat {
 private:
   int catalogue_toggle = 1;
   int option_selected = 0;
+  int &now;
+  Function &function;
+  ScreenInteractive &screen;
 
   // page
   int page_selected = 0;
-  std::unordered_map<int, Chat *> chats;
+  std::unordered_map<int, Chat*> chats;
   std::unordered_map<int, Friend*> friends;
   Myself *myself;
   // catalogue
@@ -66,9 +70,6 @@ private:
   Component pages;
   void getcatalogue();
   void getpage();
-  int &now;
-  Function &function;
-  ScreenInteractive &screen;
 
 public:
   Component content;

@@ -1,3 +1,4 @@
+#include "boost/asio/io_context.hpp"
 #include "service.h"
 #include "server.h"
 
@@ -14,10 +15,11 @@ int main() {
   start_glog();
   try {
     LOG(INFO) << "Start VChat-Server";
-    Store::store = Store::getInstance();
+    Store::getinstance();
     Service::getinstance();
     Server server;
     server.run();
+    Store::free();
   } catch (const std::exception& e) {
     LOG(ERROR) << "exception: " << e.what();
   }

@@ -1,8 +1,8 @@
 #include "dashboard.h"
 
 namespace vchat {
-Dashboard::Dashboard(int& now_, Function& function_, ScreenInteractive& screen_)
-  : now(now_), function(function_), screen(screen_) {
+Dashboard::Dashboard(int& now_, Function& function_, ScreenInteractive& screen_, std::function<void()> createchat_)
+  : now(now_), function(function_), screen(screen_), createchat(createchat_) {
   option.password = true;
   // choice
   auto cchoice = Container::Vertical({
@@ -19,7 +19,7 @@ Dashboard::Dashboard(int& now_, Function& function_, ScreenInteractive& screen_)
     else return true;
   });
   auto rchoice = Renderer(echoice, [=] {
-    return vbox({ paragraph_imp(graph::LOGO), echoice->Render() | center });
+    return vbox({ paragraph_imp(graph::LOGO), echoice->Render() | center }) | center;
   });
   // main
   auto cmain = Container::Tab({ rchoice, dialog_log(), dialog_sign() }, &dialog);
@@ -57,9 +57,10 @@ Component Dashboard::dialog_log() {
     Renderer(cpassword, [=]{ return hbox(text("[ 密码 ]: "), cpassword->Render()); }),
     Container::Horizontal({
       Button( " 确定 ", [&] {
-        if(!id.empty() && !password.empty())
+        if(!id.empty() && !password.empty()) {
           function.login(std::stoi(id), std::stoi(password));
-        id = ""; username = ""; dialog = none;
+          id = ""; password = "";
+        }
       }, ButtonOption::Ascii()), // 1: chat window
       Button( " 取消 ", [&] { id = ""; password = ""; dialog = none; }, ButtonOption::Ascii())
     }, &log_but) | center
@@ -69,7 +70,7 @@ Component Dashboard::dialog_log() {
     else if(event == Event::CtrlN) { if(log_selected != 2) log_selected ++; return true; }
     else if(event == Event::CtrlB) { if(log_selected == 2) log_but = 0; return true; }
     else if(event == Event::CtrlF) { if(log_selected == 2) log_but = 1; return true; }
-    else if(event == Event::Special("login_suc")) { this->now = CHAT; return true; }
+    else if(event == Event::Special("login_suc")) { createchat(); this->now = CHAT; return true; }
     else if(event == Event::Special("password_wrong")) { return true; }
     else if(event == Event::Special("id_notexist")) { return true; }
     return false;

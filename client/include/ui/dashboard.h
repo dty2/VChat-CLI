@@ -15,6 +15,7 @@ private:
   int &now;
   Function& function;
   ScreenInteractive& screen;
+  std::function<void()> createchat;
 
   int dialog = none;
   int choice = 0;
@@ -31,7 +32,7 @@ private:
 
 public:
   Component content;
-  Dashboard(int&, Function&, ScreenInteractive&);
+  Dashboard(int&, Function&, ScreenInteractive&, std::function<void()>);
 };
 
 } // namespace vchat
