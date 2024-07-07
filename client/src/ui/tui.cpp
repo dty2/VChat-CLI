@@ -1,7 +1,7 @@
 #include "tui.h"
 
 namespace vchat {
-Tui::Tui() : screen(ScreenInteractive::FitComponent()) {
+Tui::Tui() : screen(ScreenInteractive::Fullscreen()) {
   window_dashboard = std::make_unique<Dashboard>(now, function, screen, std::bind(&Tui::getvchat, this));
   window_help = std::make_unique<Help>(now, function, screen);
   window_about = std::make_unique<About>(now, function, screen);

@@ -1,7 +1,5 @@
 #include "vchat.h"
 #include "info.h"
-#include <ftxui/component/component.hpp>
-#include <ftxui/component/event.hpp>
 
 namespace vchat {
 
@@ -62,7 +60,11 @@ void Chat::getmessagelist() {
   updatemessage();
   auto clist = Container::Vertical(messagelist, &selected_msg) | vscroll_indicator | frame;
   auto elist = CatchEvent(clist, [&](Event event){
-    if(event == Event::Special("ssendmsg")) { updatemessage(); }
+    if(event == Event::Special("ssendmsg")) {
+      LOG(INFO) << "tui receive ssendmsg";
+      updatemessage();
+      return true;
+    }
     return false;
   });
   selected_msg = messagelist.size();
@@ -84,8 +86,13 @@ void Chat::getinputarea() {
           << std::setfill('0') << std::setw(2) << std::to_string(now_tm->tm_sec); // second
       if(!input.empty())
         if(!function.sendmsg(id, Info::info->userinfo.persionalinfo.id, input,
-          static_cast<int64_t>(std::stoll(oss.str()))))
+          static_cast<int64_t>(std::stoll(oss.str())))) {
+          Info::info->userinfo.messagelist.emplace_back(
+            MessageInfo(Info::info->userinfo.persionalinfo.id,
+              id, input, static_cast<int64_t>(std::stoll(oss.str()))));
           input.clear();
+          updatemessage();
+        }
       return true;
     } else return false;
   }) | size(HEIGHT, EQUAL, 3);
