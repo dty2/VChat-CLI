@@ -28,7 +28,7 @@ void Tui::postevent(std::string ss) {
 }
 
 void Tui::getvchat() {
-  window_chat = std::make_unique<Vchat>(now, function, screen);
+  window_chat = std::make_unique<Vchat>(now, function, &screen);
   main->Add(window_chat->content);
 }
 

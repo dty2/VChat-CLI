@@ -11,42 +11,45 @@ using namespace ftxui;
 // page
 enum { CHAT_PAGE = 0, FRIENDS_PAGE, MYSELF_PAGE };
 
-class Chat {
-private:
+class Page {
+public:
   int id;
   Function &function;
-  ScreenInteractive& screen;
+  ScreenInteractive *screen;
+  Page(int, Function&, ScreenInteractive*);
+  Page(int, Function&);
+  Page(Function&);
+  Component content;
+};
+
+class Chat : public Page {
+private:
   int selected_msg = 0;
   int inputfocus = 0; // 默认为0,焦点在消息框中
   std::string input;
   Component inputarea;
   Components messagelist;
   Component list;
-  void updatemessagelist();
   void getinputarea();
   void getmessagelist();
   std::vector<MessageInfo> getmessage(int);
 
 public:
-  Chat(int, Function&, ScreenInteractive&);
-  Component content;
+  Chat(int, Function&, ScreenInteractive*);
+  std::string lastmsg;
 };
 
-class Friend {
+class Friend : public Page{
 private:
-  int id;
-  Function &function;
 public:
   Friend(int, Function&);
   Component content;
 };
 
-class Myself {
+class Myself : public Page {
 private:
-  Function &function;
 public:
   Myself(Function &);
-  Component content;
 };
 
 class Vchat {
@@ -55,26 +58,31 @@ private:
   int option_selected = 0;
   int &now;
   Function &function;
-  ScreenInteractive& screen;
-
+  ScreenInteractive *screen;
   // page
   int page_selected = 0;
   std::unordered_map<int, Chat*> chats;
   std::unordered_map<int, Friend*> friends;
   Myself *myself;
+  Component pages;
+  void getpage();
   // catalogue
-  int friends_selected = 0;
-  int messages_selected = 0;
-  int myself_selected = 0;
   int list_selected = 0;
   Component catalogue;
-  Component pages;
+  int messages_selected = 0;
+  Component messageslist;
+  int friends_selected = 0;
+  Component friendslist;
+  int myself_selected = 0;
+  Component myselflist;
+  void getmessagelist();
+  void getfriendlist();
+  void getmyselflist();
   void getcatalogue();
-  void getpage();
 
 public:
   Component content;
-  Vchat(int&, Function&, ScreenInteractive&);
+  Vchat(int&, Function&, ScreenInteractive*);
 };
 
 } // namespace vchat

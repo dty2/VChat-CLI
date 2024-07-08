@@ -51,13 +51,13 @@ void Function::handle() {
         postevent("resource_sdeletedfd");
         break;
       case method::ssendmsg:
-        LOG(INFO) << "get ssendmsg";
+        DLOG(INFO) << "get ssendmsg";
         this->handle_ssendmsg(value);
         postevent("ssendmsg");
         break;
       }
     } else
-      LOG(ERROR) << signal;
+      DLOG(ERROR) << signal;
   }
 }
 
@@ -80,15 +80,15 @@ void Function::handle_login(Json::Value &value) {
         )
       );
   });
-  LOG(INFO) << Info::info->userinfo.persionalinfo.id;
-  LOG(INFO) << Info::info->userinfo.persionalinfo.password;
-  LOG(INFO) << Info::info->userinfo.persionalinfo.username;
-  LOG(INFO) << Info::info->userinfo.friendlist.size();
-  LOG(INFO) << Info::info->userinfo.messagelist.size();
-  for(auto& v : Info::info->userinfo.friendlist) // 注意这里要使用&引用
-    LOG(INFO) << v.friendid << v.friendname;
-  for(auto& v : Info::info->userinfo.messagelist)
-    LOG(INFO) << v.sender << v.receiver << v.msg << v.time;
+  //DLOG(INFO) << Info::info->userinfo.persionalinfo.id;
+  //DLOG(INFO) << Info::info->userinfo.persionalinfo.password;
+  //DLOG(INFO) << Info::info->userinfo.persionalinfo.username;
+  //DLOG(INFO) << Info::info->userinfo.friendlist.size();
+  //DLOG(INFO) << Info::info->userinfo.messagelist.size();
+  //for(auto& v : Info::info->userinfo.friendlist) // 注意这里要使用&引用
+  //  DLOG(INFO) << v.friendid << v.friendname;
+  //for(auto& v : Info::info->userinfo.messagelist)
+  //  DLOG(INFO) << v.sender << v.receiver << v.msg << v.time;
 }
 
 void Function::handle_find(Json::Value &value) {}
@@ -113,7 +113,7 @@ void Function::handle_saddfd(Json::Value &value) {
 }
 
 bool Function::login(int id, int password) {
-  LOG(INFO) << "start login";
+  DLOG(INFO) << "start login";
   Json::Value loginfo;
   loginfo["id"] = id;
   loginfo["password"] = password;
@@ -168,7 +168,7 @@ bool Function::signout(int id, int password) {
 
 bool Function::sendmsg(int receiver, int sender, std::string message,
                        int64_t time) {
-  LOG(INFO) << "sendmsg";
+  DLOG(INFO) << "sendmsg";
   Json::Value chatinfo;
   chatinfo["sender"] = sender;
   chatinfo["receiver"] = receiver;
