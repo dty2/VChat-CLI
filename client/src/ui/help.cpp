@@ -9,8 +9,9 @@ Help::Help(int& now_, Function& function_, ScreenInteractive& screen_)
   }, &main_selected);
   auto rmain = Renderer(cmain, [=]{
     return vbox(
-      cmain->Render()
-    );
+      paragraph_imp(graph::HELPINFO),
+      cmain->Render() | center
+    ) | center;
   });
   auto emain = CatchEvent(rmain, [&](Event event){
     if(event == Event::CtrlB) {

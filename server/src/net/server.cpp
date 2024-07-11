@@ -21,7 +21,7 @@ void Server::do_accept() {
   acceptor.async_accept(
     [&](boost::system::error_code ec, tcp::socket socket) {
       if (!ec) {
-        LOG(INFO) << "new client connection";
+        DLOG(INFO) << "new client connection";
         connection_manager.add(std::make_shared<Connection>(std::move(socket), &connection_manager));
       }
       do_accept();

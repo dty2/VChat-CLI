@@ -2,58 +2,60 @@
 
 namespace vchat {
 
-Net::Net() : resolver(io), socket(io) {
+Net::Net(std::function<void(int, Json::Value)> handle_)
+  : resolver(io), socket(io), handle(handle_) {
   endpoint = resolver.resolve(address, port);
   head = new char[HEAD_SIZE];
   body = new char[BODY_SIZE];
+  boost::asio::async_connect(socket, endpoint, [&](boost::system::error_code ec, tcp::endpoint) {
+    if (!ec) {
+      LOG(INFO) << "connection successful";
+      readhead();
+    }
+    else {
+      LOG(INFO) << "connection error";
+    }
+  });
+}
+
+void Net::start() {
+  this->io.run();
 }
 
 Net::~Net() { free(head); free(body); }
 
-bool Net::connect() {
-  boost::system::error_code ec;
-  boost::asio::connect(socket, endpoint, ec);
-  if(ec) {
-    DLOG(ERROR) << "connect error: "<< ec.what();
-    return 1; // 连接服务器失败
-  }
-  return 0;
+void Net::close() {
+  this->socket.close();
+  this->io.stop();
 }
 
-bool Net::readhead(std::pair<int, int>& info) {
-  DLOG(INFO) << "start read head";
-  boost::system::error_code ec;
-  boost::asio::read(socket, boost::asio::buffer(head, HEAD_SIZE));
-  if(!ec) {
-    DLOG(INFO) << "read head successful";
-    info = packer::depackhead(head);
-  } else {
-    DLOG(ERROR) << "read head error: "<< ec.what();
-    return 1; // 读包头失败
-  }
-  return 0;
+void Net::readhead() {
+  LOG(INFO) << "start read head";
+  async_read(socket, boost::asio::buffer(head, HEAD_SIZE),
+    [&](boost::system::error_code ec, std::size_t bytes_transferred) {
+    LOG(INFO) << "read head successful";
+    if (!ec) {
+      LOG(INFO) << "read head successful";
+      readbody(packer::depackhead(head));
+    } else {
+      this->close();
+    }
+  });
+  LOG(INFO) << " read head end";
 }
 
-bool Net::readbody(int bodysize, Json::Value& target) {
-  DLOG(INFO) << "start read body";
-  boost::system::error_code ec;
-  boost::asio::read(socket, boost::asio::buffer(body, bodysize));
-  if(!ec) {
-    DLOG(INFO) << "read body successful";
-    target = packer::depackbody(body, bodysize);
-  } else {
-    DLOG(ERROR) << "read head error: "<< ec.what();
-    return 1; // 读包头失败
-  }
-  return 0;
-}
-
-bool Net::read(int& status, Json::Value& target) {
-  std::pair<int, int> info;
-  if (readhead(info)) { return 1; } // 读包头失败
-  status = info.first;
-  if (readbody(info.second, target)) { return 2; } // 读包身失败
-  return 0;
+void Net::readbody(std::pair<int, int> headinfo) {
+  LOG(INFO) << "start read body";
+  async_read(socket, boost::asio::buffer(body, headinfo.second),
+  [=](boost::system::error_code ec, std::size_t bytes_transferred) {
+    if(!ec) {
+      LOG(INFO) << "this is headinfo" << headinfo.first << ' ' << headinfo.second;
+      handle(headinfo.first, packer::depackbody(body, headinfo.second));
+      readhead();
+    } else {
+      DLOG(ERROR) << "read head error: "<< ec.what();
+    }
+  });
 }
 
 bool Net::write(int status) {

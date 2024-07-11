@@ -14,15 +14,15 @@ using boost::asio::ip::tcp;
 
 class Net {
 public:
-  Net();
+  Net(std::function<void(int, Json::Value)>);
   ~Net();
-  bool connect();
-  void stop();
+  void start();
+  void close();
   bool write(int);
   bool write(int, Json::Value&);
-  bool read(int&, Json::Value&);
 
 private:
+  std::function<void(int, Json::Value)> handle;
   const std::string port = "3784";
   const std::string address = "127.0.0.1";
   boost::asio::io_context io;
@@ -30,8 +30,8 @@ private:
   tcp::resolver resolver;
   tcp::resolver::results_type endpoint;
   char *head, *body;
-  bool readhead(std::pair<int, int>&);
-  bool readbody(int, Json::Value&);
+  void readhead();
+  void readbody(std::pair<int, int>);
 
 };
 

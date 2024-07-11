@@ -45,7 +45,7 @@ namespace packer {
 std::string enpack(int, Json::Value);
 std::string enpack(int);
 // depack
-std::pair<int, int> depackhead(char *);
+std::pair<int, int> depackhead(char *); // return headmethod, bodysize
 Json::Value depackbody(char *, int);
 } // namespace packer
 

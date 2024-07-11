@@ -10,7 +10,7 @@ Dashboard::Dashboard(int& now_, Function& function_, ScreenInteractive& screen_,
     Button( "   注册 ", [&] { dialog = sign; }, ButtonOption::Ascii()),
     Button( " 󰞋  帮助 ", [&] { this->now = HELP; }, ButtonOption::Ascii()), // 2: help window
     Button( "   关于 ", [&] { this->now = ABOUT; }, ButtonOption::Ascii()), // 3: about window
-    Button( " 󰩈  Exit ", [&] { this->screen.Exit(); }, ButtonOption::Ascii()),
+    Button( " 󰩈  退出 ", [&] { this->screen.Exit(); }, ButtonOption::Ascii()),
   }, &choice);
   auto echoice = CatchEvent(cchoice, [&](Event event) {
     if(event == Event::CtrlP) { if(choice) choice --; return true; }

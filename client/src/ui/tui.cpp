@@ -22,11 +22,13 @@ Tui::Tui() : screen(ScreenInteractive::Fullscreen()) {
   t.join();
 }
 
+// 通讯底层受到消息后通过该函数向上反馈事件
 void Tui::postevent(std::string ss) {
   LOG(INFO) << "postevent";
   screen.PostEvent(Event::Special(ss));
 }
 
+// 初始化主聊天界面，作为函数对象传递给daskboard
 void Tui::getvchat() {
   window_chat = std::make_unique<Vchat>(now, function, &screen);
   main->Add(window_chat->content);

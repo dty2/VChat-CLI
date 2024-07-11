@@ -11,6 +11,7 @@ using namespace ftxui;
 // page
 enum { CHAT_PAGE = 0, FRIENDS_PAGE, MYSELF_PAGE };
 
+// 页面父类，三种初始化方式分别对应不同的页面子类
 class Page {
 public:
   int id;
@@ -22,6 +23,7 @@ public:
   Component content;
 };
 
+// 聊天页面
 class Chat : public Page {
 private:
   int selected_msg = 0;
@@ -32,26 +34,32 @@ private:
   Component list;
   void getinputarea();
   void getmessagelist();
-  std::vector<MessageInfo> getmessage(int);
 
 public:
+  static std::unordered_map<int, Chat*> chats_map;
+  static int chats_selected;
   Chat(int, Function&, ScreenInteractive*);
   std::string lastmsg;
 };
 
+// 朋友页面
 class Friend : public Page{
 private:
 public:
+  static std::unordered_map<int, Friend*> friends_map;
+  static int friends_selected;
   Friend(int, Function&);
   Component content;
 };
 
+// 个人页面
 class Myself : public Page {
 private:
 public:
   Myself(Function &);
 };
 
+// 聊天主页面
 class Vchat {
 private:
   int catalogue_toggle = 1;
@@ -59,20 +67,19 @@ private:
   int &now;
   Function &function;
   ScreenInteractive *screen;
-  // page
+  // 页面信息
   int page_selected = 0;
-  std::unordered_map<int, Chat*> chats;
-  std::unordered_map<int, Friend*> friends;
   Myself *myself;
   Component pages;
   void getpage();
-  // catalogue
+  // 侧边栏目录信息
   int list_selected = 0;
   Component catalogue;
   int messages_selected = 0;
   Component messageslist;
   int friends_selected = 0;
   Component friendslist;
+  Components all_friends;
   int myself_selected = 0;
   Component myselflist;
   void getmessagelist();

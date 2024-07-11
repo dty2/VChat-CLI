@@ -10,6 +10,7 @@ namespace vchat {
 
 class Function {
 public:
+  Function();
   void start();
   void end();
   bool login(int, int);
@@ -25,7 +26,7 @@ public:
 
 private:
   bool mode = 0;
-  void handle();
+  void handle(int, Json::Value);
   void handle_login(Json::Value&);
   void handle_find(Json::Value&);
   void handle_saddfd(Json::Value&);
