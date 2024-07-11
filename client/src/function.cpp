@@ -39,7 +39,8 @@ void Function::handle(int op, Json::Value value) {
     postevent(value["error"].asString());
     break;
   case method::saddfd:
-    postevent("resource_saddfd");
+
+    postevent("saddfd");
     break;
   case method::saddfd_suc:
     this->handle_saddfd(value);
@@ -49,7 +50,7 @@ void Function::handle(int op, Json::Value value) {
     postevent(value["error"].asString());
     break;
   case method::sdeletefd:
-    postevent("resource_sdeletedfd");
+    postevent("sdeletedfd");
     break;
   case method::ssendmsg:
     DLOG(INFO) << "get ssendmsg";
@@ -210,6 +211,23 @@ bool Function::addfriend(int id) {
     return 0;
   } else
     return signal;
+  return 0;
+}
+
+bool Function::responseadd(int id, bool isagree) {
+  Json::Value friendinfo;
+  friendinfo["userid"] = Info::info->userinfo.persionalinfo.id;
+  friendinfo["friendid"] = id;
+  int signal = 0;
+  if (isagree) {
+    if (!(signal = net.write(method::caddfd_suc, friendinfo))) {
+      return 0;
+    } else return signal;
+  } else {
+    if (!(signal = net.write(method::caddfd_err, friendinfo))) {
+      return 0;
+    } else return signal;
+  }
   return 0;
 }
 

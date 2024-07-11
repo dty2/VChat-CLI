@@ -1,6 +1,7 @@
 #ifndef CHAT_H
 #define CHAT_H
 
+#include "function.h"
 #include "ui.h"
 #include "data.hpp"
 
@@ -45,10 +46,12 @@ public:
 // 朋友页面
 class Friend : public Page{
 private:
+  int* page_selected;
+  int friend_op_selected = 0;
 public:
   static std::unordered_map<int, Friend*> friends_map;
   static int friends_selected;
-  Friend(int, Function&);
+  Friend(int, Function&, int*);
   Component content;
 };
 
@@ -80,8 +83,9 @@ private:
   int friends_selected = 0;
   Component friendslist;
   Components all_friends;
-  int myself_selected = 0;
+  std::string friend_input;
   Component myselflist;
+  int myself_selected = 0;
   void getmessagelist();
   void getfriendlist();
   void getmyselflist();

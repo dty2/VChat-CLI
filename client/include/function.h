@@ -5,6 +5,7 @@
 #include "info.h"
 #include "net.h"
 #include "package.h"
+#include <vector>
 
 namespace vchat {
 
@@ -20,9 +21,12 @@ public:
   bool sendmsg(int, int, std::string, int64_t);
   bool find(int);
   bool addfriend(int);
+  bool responseadd(int, bool);
   bool deletefriend(int);
   std::function<void(std::string)> postevent;
-  //TempInfo tempinfo;
+  struct Tempinfo {
+    std::vector<int> requestaddlist;
+  }tempinfo;
 
 private:
   bool mode = 0;
