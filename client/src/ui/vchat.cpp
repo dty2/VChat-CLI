@@ -44,9 +44,9 @@ void Chat::getmessagelist() {
             element |= focus;
           } else {
             if(value.sender == id) {
-              element = hbox(text(" >"), text(value.msg), filler());
+              element = hbox(text(" > "), text(value.msg), filler());
             } else if(value.receiver == id){
-              element = hbox(filler(), text(value.msg), text("< "));
+              element = hbox(filler(), text(value.msg), text(" < "));
             }
           }
           return element;
@@ -54,8 +54,12 @@ void Chat::getmessagelist() {
       );
     }
     return clist->Render();
+  }) | vscroll_indicator | frame;
+  auto elist = CatchEvent(rlist, [&](Event event){
+    if(event == Event::Special("sendmsg")) {}
+    return false;
   });
-  this->list = rlist | vscroll_indicator | frame | border | flex;
+  this->list = elist | border | flex;
 }
 
 // 生成输入区域
@@ -106,7 +110,9 @@ Chat::Chat(int id_, Function& function_, ScreenInteractive* screen_)
       return true;
     }
     else if(event == Event::Special("sendmsg")) {
+      list->TakeFocus();
       lastmsg = Info::info->messageinfo[id].back().msg;
+      return false;
     }
     else inputarea->TakeFocus();
     return false;
@@ -214,16 +220,16 @@ void Vchat::getmessagelist() {
 
 // 生成侧边栏朋友列表
 void Vchat::getfriendlist() {
-  auto rlist = Renderer([=]{
-    Components container;
+  auto clist = Container::Vertical({}, &friends_selected);
+  auto rlist = Renderer(clist, [=]{
+    clist->DetachAllChildren();
     for(auto& n : Info::info->friendinfo) {
       auto but = Button(n.second.friendname, [&]{
         Friend::friends_selected = n.first;
         page_selected = FRIENDS_PAGE;
       }, ButtonOption::Ascii());
-      container.emplace_back(but);
+      clist->Add(but);
     }
-    auto clist = Container::Vertical(container, &friends_selected);
     return clist->Render();
   });
   auto elist = CatchEvent(rlist, [=](Event event) {

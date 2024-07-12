@@ -101,7 +101,7 @@ void Function::handle_msg(Json::Value &value) {
     temp.receiver = value["receiver"].asInt();
     temp.msg = value["message"].asString();
     temp.time = value["time"].asInt64();
-    int id = temp.sender == Info::info->myself.id ? temp.sender : temp.receiver;
+    int id = temp.sender != Info::info->myself.id ? temp.sender : temp.receiver;
     Info::info->messageinfo[id].emplace_back(temp);
   });
 }
