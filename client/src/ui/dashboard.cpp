@@ -71,8 +71,6 @@ Component Dashboard::dialog_log() {
     else if(event == Event::CtrlB) { if(log_selected == 2) log_but = 0; return true; }
     else if(event == Event::CtrlF) { if(log_selected == 2) log_but = 1; return true; }
     else if(event == Event::Special("login_suc")) { createchat(); this->now = CHAT; return true; }
-    else if(event == Event::Special("password_wrong")) { return true; }
-    else if(event == Event::Special("id_notexist")) { return true; }
     return false;
   });
   return einput;
@@ -103,7 +101,6 @@ Component Dashboard::dialog_sign() {
     else if(event == Event::CtrlB) { if(sign_selected == 3) sign_but = 0; return true; }
     else if(event == Event::CtrlF) { if(sign_selected == 3) sign_but = 1; return true; }
     else if(event == Event::Special("signin_suc")) { dialog = none; return true; }
-    else if(event == Event::Special("id_exist")) { return true; }
     return false;
   });
   return einput;

@@ -14,7 +14,9 @@ private:
   std::mutex mtx;
 
 public:
-  UserInfo userinfo;
+  PersionalInfo myself;
+  std::map<int, FriendInfo> friendinfo;
+  std::map<int, std::vector<MessageInfo>> messageinfo;
   static Info *info;
   static void getinstance();
   void change(std::function<void()>);

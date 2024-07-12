@@ -22,18 +22,13 @@ enum method {
   findfd_suc,
   findfd_err,
   // 添加
-  caddfd,
-  saddfd,
-  caddfd_suc,
-  caddfd_err,
-  saddfd_suc,
-  saddfd_err,
+  addfd,
+  accept_addfd,
+  refuse_addfd,
   // 删除
-  cdeletefd,
-  sdeletefd,
+  deletefd,
   // 发消息
-  csendmsg,
-  ssendmsg,
+  sendmsg,
 };
 
 } // namespace method
@@ -48,4 +43,3 @@ Json::Value depackbody(char *, int);
 } // namespace packer
 
 #endif // PACKAGE_H
-

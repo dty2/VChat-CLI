@@ -17,11 +17,11 @@ void Service::serve(int method, Json::Value value, Connection *connection) {
     case method::login: service->login(value, connection); break;
     //case method::logout: service->logout(value, connection); break;
     //case method::findfd: service->find(value, connection); break;
-    case method::caddfd: service->addfriend(method, value, connection); break;
-    case method::caddfd_suc: service->addfriend(method, value, connection); break;
-    case method::caddfd_err: service->addfriend(method, value, connection); break;
+    case method::addfd: service->addfriend(value, connection); break;
+    case method::accept_addfd: service->addfriend(method, value, connection); break;
+    case method::refuse_addfd: service->addfriend(method, value, connection); break;
     //case method::cdeletefd: service->deletefriend(value, connection); break;
-    case method::csendmsg: service->sendmsg(value); break;
+    case method::sendmsg: service->sendmsg(value); break;
   }
 }
 
@@ -78,7 +78,7 @@ void Service::sendmsg(Json::Value value) {
   bool op = Store::store->insertMessage(messageinfo);
   if(Service::cache.online[messageinfo.receiver]) {
     LOG(INFO) << "sendmsg" << messageinfo.receiver;
-    Service::cache.online[messageinfo.receiver]->write(method::ssendmsg, value);
+    Service::cache.online[messageinfo.receiver]->write(method::sendmsg, value);
   }
 }
 
@@ -86,7 +86,7 @@ void Service::addfriend(Json::Value value, Connection* connection) {
   FriendInfo friendinfo;
   friendinfo.friendid = value["friendid"].asInt();
   if(Service::cache.online[friendinfo.friendid]) {
-    Service::cache.online[friendinfo.friendid]->write(method::saddfd, value);
+    Service::cache.online[friendinfo.friendid]->write(method::addfd, value);
   }
 }
 
@@ -94,12 +94,12 @@ void Service::addfriend(int method, Json::Value value, Connection* connection) {
   FriendInfo friendinfo;
   auto userid = value["userid"].asInt();
   friendinfo.friendid = value["friendid"].asInt();
-  if (method == method::caddfd_suc) {
+  if (method == method::accept_addfd) {
     bool op = Store::store->insertFriend(friendinfo, userid);
     if(Service::cache.online[userid])
-      Service::cache.online[userid]->write(method::saddfd_suc, value);
+      Service::cache.online[userid]->write(method::accept_addfd, value);
   } else {
     if(Service::cache.online[userid])
-      Service::cache.online[userid]->write(method::saddfd_err, value);
+      Service::cache.online[userid]->write(method::refuse_addfd, value);
   }
 }

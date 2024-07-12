@@ -22,92 +22,95 @@ void Function::handle(int op, Json::Value value) {
     postevent("signin_suc");
     break;
   case method::signin_err:
-    postevent(value["error"].asString());
+    postevent("signin_err");
     break;
   case method::login_suc:
     this->handle_login(value);
-    LOG(INFO) << "receive log info";
     postevent("login_suc");
     break;
   case method::login_err:
-    postevent(value["error"].asString());
+    postevent("login_err");
     break;
   case method::findfd_suc:
-    postevent("resource_findfd_suc");
+    postevent("findfd_suc");
     break;
   case method::findfd_err:
-    postevent(value["error"].asString());
+    postevent("findfd_err");
     break;
-  case method::saddfd:
-
-    postevent("saddfd");
+  case method::addfd:
+    postevent("addfd");
     break;
-  case method::saddfd_suc:
-    this->handle_saddfd(value);
-    postevent("saddfd_suc");
+  case method::accept_addfd:
+    this->handle_addfd(value);
+    postevent("accept_addfd");
     break;
-  case method::saddfd_err:
-    postevent(value["error"].asString());
+  case method::refuse_addfd:
+    postevent("refuse_addfd");
     break;
-  case method::sdeletefd:
-    postevent("sdeletedfd");
+  case method::deletefd:
+    postevent("deletefd");
     break;
-  case method::ssendmsg:
-    DLOG(INFO) << "get ssendmsg";
-    this->handle_ssendmsg(value);
-    postevent("ssendmsg");
+  case method::sendmsg:
+    this->handle_msg(value);
+    postevent("sendmsg");
     break;
   }
 }
 
 void Function::handle_login(Json::Value &value) {
   Info::info->change([&] {
-    Info::info->userinfo.persionalinfo.id =
-        value["persionalinfo"]["id"].asInt();
-    Info::info->userinfo.persionalinfo.password =
-        value["persionalinfo"]["password"].asInt();
-    Info::info->userinfo.persionalinfo.username =
-        value["persionalinfo"]["username"].asString();
+    Info::info->myself.id = value["persionalinfo"]["id"].asInt();
+    Info::info->myself.password = value["persionalinfo"]["password"].asInt();
+    Info::info->myself.username = value["persionalinfo"]["username"].asString();
     for (auto& v : value["friendlist"]) {
-      Info::info->userinfo.friendlist.push_back(FriendInfo(v["friendid"].asInt(), v["friendname"].asString()));
+      int id = v["friendid"].asInt();
+      std::string name = v["friendname"].asString();
+      Info::info->friendinfo[id] = FriendInfo(id, name);
     }
-    for (auto& v : value["messagelist"])
-      Info::info->userinfo.messagelist.push_back(
-        MessageInfo(
-          v["sender"].asInt(), v["receiver"].asInt(),
-          v["message"].asString(), v["time"].asInt64()
-        )
+    for (auto& v : value["messagelist"]) {
+      int sender = v["sender"].asInt();
+      int receiver = v["receiver"].asInt();
+      std::string message = v["message"].asString();
+      int64_t time = v["time"].asInt64();
+      int id = sender != Info::info->myself.id ? sender : receiver;
+      Info::info->messageinfo[id].emplace_back(
+        MessageInfo(sender, receiver, message, time)
       );
+    }
   });
-  //DLOG(INFO) << Info::info->userinfo.persionalinfo.id;
-  //DLOG(INFO) << Info::info->userinfo.persionalinfo.password;
-  //DLOG(INFO) << Info::info->userinfo.persionalinfo.username;
-  //DLOG(INFO) << Info::info->userinfo.friendlist.size();
-  //DLOG(INFO) << Info::info->userinfo.messagelist.size();
-  //for(auto& v : Info::info->userinfo.friendlist) // 注意这里要使用&引用
-  //  DLOG(INFO) << v.friendid << v.friendname;
-  //for(auto& v : Info::info->userinfo.messagelist)
-  //  DLOG(INFO) << v.sender << v.receiver << v.msg << v.time;
+  DLOG(INFO) << Info::info->myself.id;
+  DLOG(INFO) << Info::info->myself.password;
+  DLOG(INFO) << Info::info->myself.username;
+  DLOG(INFO) << Info::info->friendinfo.size();
+  DLOG(INFO) << Info::info->messageinfo.size();
+  for(auto& v : Info::info->friendinfo)
+    DLOG(INFO) << v.first << v.second.friendname;
+  for(auto& v : Info::info->messageinfo) {
+    DLOG(INFO) << v.first;
+    for(auto& x : v.second)
+      DLOG(INFO) << x.sender << x.receiver << x.msg << x.time;
+  }
 }
 
 void Function::handle_find(Json::Value &value) {}
 
-void Function::handle_ssendmsg(Json::Value &value) {
+void Function::handle_msg(Json::Value &value) {
   Info::info->change([&]{
     MessageInfo temp;
     temp.sender = value["sender"].asInt();
     temp.receiver = value["receiver"].asInt();
     temp.msg = value["message"].asString();
     temp.time = value["time"].asInt64();
-    Info::info->userinfo.messagelist.push_back(temp);
+    int id = temp.sender == Info::info->myself.id ? temp.sender : temp.receiver;
+    Info::info->messageinfo[id].emplace_back(temp);
   });
 }
 
-void Function::handle_saddfd(Json::Value &value) {
+void Function::handle_addfd(Json::Value &value) {
   Info::info->change([&] {
     FriendInfo temp;
     temp.friendid = value["friendid"].asInt();
-    Info::info->userinfo.friendlist.push_back(temp);
+    Info::info->friendinfo[temp.friendid] = temp;
   });
 }
 
@@ -167,14 +170,13 @@ bool Function::signout(int id, int password) {
 
 bool Function::sendmsg(int receiver, int sender, std::string message,
                        int64_t time) {
-  DLOG(INFO) << "sendmsg";
   Json::Value chatinfo;
   chatinfo["sender"] = sender;
   chatinfo["receiver"] = receiver;
   chatinfo["message"] = message;
   chatinfo["time"] = time;
   int signal = 0;
-  if (!(signal = net.write(method::csendmsg, chatinfo))) {
+  if (!(signal = net.write(method::sendmsg, chatinfo))) {
     Info::info->change([&] {
       DLOG(INFO) << "chat info write to info";
       MessageInfo temp;
@@ -182,7 +184,7 @@ bool Function::sendmsg(int receiver, int sender, std::string message,
       temp.receiver = receiver;
       temp.msg = message;
       temp.time = time;
-      Info::info->userinfo.messagelist.push_back(temp);
+      Info::info->messageinfo[receiver].emplace_back(temp);
     });
     return 0;
   } else
@@ -192,7 +194,7 @@ bool Function::sendmsg(int receiver, int sender, std::string message,
 
 bool Function::find(int id) {
   Json::Value friendinfo;
-  friendinfo["userid"] = Info::info->userinfo.persionalinfo.id;
+  friendinfo["userid"] = Info::info->myself.id;
   friendinfo["friendid"] = id;
   int signal = 0;
   if (!(signal = net.write(method::findfd, friendinfo))) {
@@ -204,10 +206,10 @@ bool Function::find(int id) {
 
 bool Function::addfriend(int id) {
   Json::Value friendinfo;
-  friendinfo["userid"] = Info::info->userinfo.persionalinfo.id;
+  friendinfo["userid"] = Info::info->myself.id;
   friendinfo["friendid"] = id;
   int signal = 0;
-  if (!(signal = net.write(method::caddfd, friendinfo))) {
+  if (!(signal = net.write(method::addfd, friendinfo))) {
     return 0;
   } else
     return signal;
@@ -216,15 +218,15 @@ bool Function::addfriend(int id) {
 
 bool Function::responseadd(int id, bool isagree) {
   Json::Value friendinfo;
-  friendinfo["userid"] = Info::info->userinfo.persionalinfo.id;
+  friendinfo["userid"] = Info::info->myself.id;
   friendinfo["friendid"] = id;
   int signal = 0;
   if (isagree) {
-    if (!(signal = net.write(method::caddfd_suc, friendinfo))) {
+    if (!(signal = net.write(method::accept_addfd, friendinfo))) {
       return 0;
     } else return signal;
   } else {
-    if (!(signal = net.write(method::caddfd_err, friendinfo))) {
+    if (!(signal = net.write(method::refuse_addfd, friendinfo))) {
       return 0;
     } else return signal;
   }
@@ -233,10 +235,10 @@ bool Function::responseadd(int id, bool isagree) {
 
 bool Function::deletefriend(int id) {
   Json::Value friendinfo;
-  friendinfo["userid"] = Info::info->userinfo.persionalinfo.id;
+  friendinfo["userid"] = Info::info->myself.id;
   friendinfo["friendid"] = id;
   int signal = 0;
-  if (!(signal = net.write(method::cdeletefd, friendinfo))) {
+  if (!(signal = net.write(method::deletefd, friendinfo))) {
     return 0;
   } else
     return signal;

@@ -31,7 +31,6 @@ private:
   int inputfocus = 0; // 默认为0,焦点在消息框中
   std::string input;
   Component inputarea;
-  Components messagelist;
   Component list;
   void getinputarea();
   void getmessagelist();
@@ -39,6 +38,7 @@ private:
 public:
   static std::unordered_map<int, Chat*> chats_map;
   static int chats_selected;
+  bool show_list;
   Chat(int, Function&, ScreenInteractive*);
   std::string lastmsg;
 };
@@ -58,6 +58,7 @@ public:
 // 个人页面
 class Myself : public Page {
 private:
+  std::vector<int> addlist;
 public:
   Myself(Function &);
 };

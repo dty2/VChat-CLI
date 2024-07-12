@@ -27,13 +27,13 @@ typedef struct PersionalInfo {
   std::string username;
   PersionalInfo() {}
   PersionalInfo(int id_, int password_, std::string username_)
-      : id(id_), password(password_), username(username_) {}
+    : id(id_), password(password_), username(username_) {}
 } PersionalInfo;
 
 typedef struct UserInfo {
   PersionalInfo persionalinfo;
-  std::list<FriendInfo> friendlist;
-  std::list<MessageInfo> messagelist;
+  std::map<int, std::vector<FriendInfo>> friendinfo;
+  std::map<int, std::vector<MessageInfo>> messageinfo;
   UserInfo(){};
 } UserInfo;
 

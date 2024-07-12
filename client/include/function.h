@@ -5,7 +5,6 @@
 #include "info.h"
 #include "net.h"
 #include "package.h"
-#include <vector>
 
 namespace vchat {
 
@@ -33,8 +32,8 @@ private:
   void handle(int, Json::Value);
   void handle_login(Json::Value&);
   void handle_find(Json::Value&);
-  void handle_saddfd(Json::Value&);
-  void handle_ssendmsg(Json::Value&);
+  void handle_addfd(Json::Value&);
+  void handle_msg(Json::Value&);
   Net net;
 };
 

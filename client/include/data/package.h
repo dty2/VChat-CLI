@@ -18,24 +18,18 @@ enum method {
   login_suc,
   login_err,
   logout,
-  // 好友
   // 查询
   findfd,
   findfd_suc,
   findfd_err,
-  // 添加
-  caddfd,
-  saddfd,
-  caddfd_suc,
-  caddfd_err,
-  saddfd_suc,
-  saddfd_err,
-  // 删除
-  cdeletefd,
-  sdeletefd,
+  // 添加好友
+  addfd,
+  accept_addfd,
+  refuse_addfd,
+  // 删除好友
+  deletefd,
   // 发消息
-  csendmsg,
-  ssendmsg,
+  sendmsg,
 };
 
 } // namespace method
