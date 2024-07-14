@@ -37,5 +37,5 @@ target_link_libraries(client
   ftxui::dom
   ftxui::component
   jsoncpp
-  glog::glog
+  glog::glog # uncomment when you want dbug
 )

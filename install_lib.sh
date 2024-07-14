@@ -1,29 +1,42 @@
 #! /bin/bash
 
+# The below content is third-party library download address
 boost_version="boost_1_85_0"
 boost_1_85_0="https://archives.boost.io/release/1.85.0/source/boost_1_85_0.tar.gz"
 glog="git@github.com:google/glog.git"
 sqlite3="git@github.com:SRombauts/SQLiteCpp.git"
 json="git@github.com:nlohmann/json.git"
 ftxui="git@github.com:ArthurSonzogni/FTXUI.git"
-command=("wget" "git" "cmake" "make" "tar")
 
+
+# directory
+## you need add vchat environment variable to specify the download directory
 project_dir=$vchat
-install_dir=$vchat/lib
-target_dir=$vchat/libs
+install_dir=$project_dir/lib
+target_dir=$project_dir/libs
 
-check_command() {
-  echo "Check Command ..."
-  for item in ${command[@]}; do
+# check install environment
+# the commands which is needed to use
+commands=("wget" "git" "cmake" "make" "tar")
+check_env() {
+  echo "check command..."
+  for item in ${commands[@]}; do
     if ! command -v $item >/dev/null 2>&1; then
       echo "$item not exist"
-      echo "please get $item and try again"
+      echo "please get $item commnad and try again"
       exit 0
     fi
   done
-  echo "Check Pass"
+  echo "check pass"
+  echo "check environment..."
+  if [ -z $vchat ]; then
+    echo "vchat environment not exist"
+    echo "please add 'vchat' environment variable"
+  fi
+  echo "check pass"
 }
 
+# install all library
 install() {
   choice=
   echo "Install all libs"
@@ -31,11 +44,7 @@ install() {
   read choice
   if [ "$choice" = "y" ]; then
     mkdir "$install_dir"
-    if [ "$1" ]; then
-      cd "$install_dir" && wget --proxy=on "$boost_1_85_0" && tar -xzvf "$boost_version".tar.gz
-    else
-      cd "$install_dir" && wget --proxy=off "$boost_1_85_0" && tar -xzvf "$boost_version".tar.gz
-    fi
+    cd "$install_dir" && wget --proxy=on "$boost_1_85_0" && tar -xzvf "$boost_version".tar.gz
     cd "$install_dir" && \
     git clone "$glog" && git clone "$sqlite3" && \
     git clone "$json" && git clone "$ftxui"
@@ -45,17 +54,20 @@ install() {
   fi
 }
 
+# compile each library
 compile_item() {
   echo "Start compile $1"
   cd $target_dir && mkdir "$1"
   cd $install_dir/$1 && mkdir build && \
   cd build && cmake -DCMAKE_INSTALL_PREFIX=$target_dir/$1 .. && \
   make -j8 && make install
+  echo "Compile $1 finish"
 }
 
+# compile all library
 compile() {
   choice=
-  echo "compile all libs"
+  echo "Compile all third-party libraries"
   echo "Type y/n to continue"
   read choice
   if [ "$choice" = "y" ]; then
@@ -74,10 +86,16 @@ compile() {
 }
 
 main() {
-  check_command
-  install "$1"
+  check_env
+  install
   compile
-  rm -rf "$install_dir"
+  choice=
+  echo "Compile finish, do you want to remove all install directory"
+  echo "Type y/n to continue"
+  read choice
+  if [ "$choice" = "y" ]; then
+    rm -rf "$install_dir"
+  fi
 }
 
-main "$1"
+main
