@@ -16,7 +16,6 @@ void Function::end() {
 }
 
 void Function::handle(int op, Json::Value value) {
-  LOG(INFO) << "handle op and value";
   switch (op) {
   case method::signin_suc:
     postevent("signin_suc");
@@ -38,13 +37,15 @@ void Function::handle(int op, Json::Value value) {
     postevent("findfd_err");
     break;
   case method::addfd:
+    handle_addfd(value);
     postevent("addfd");
     break;
   case method::accept_addfd:
-    this->handle_addfd(value);
+    this->handle_addfd(op, value);
     postevent("accept_addfd");
     break;
   case method::refuse_addfd:
+    this->handle_addfd(op, value);
     postevent("refuse_addfd");
     break;
   case method::deletefd:
@@ -78,18 +79,6 @@ void Function::handle_login(Json::Value &value) {
       );
     }
   });
-  DLOG(INFO) << Info::info->myself.id;
-  DLOG(INFO) << Info::info->myself.password;
-  DLOG(INFO) << Info::info->myself.username;
-  DLOG(INFO) << Info::info->friendinfo.size();
-  DLOG(INFO) << Info::info->messageinfo.size();
-  for(auto& v : Info::info->friendinfo)
-    DLOG(INFO) << v.first << v.second.friendname;
-  for(auto& v : Info::info->messageinfo) {
-    DLOG(INFO) << v.first;
-    for(auto& x : v.second)
-      DLOG(INFO) << x.sender << x.receiver << x.msg << x.time;
-  }
 }
 
 void Function::handle_find(Json::Value &value) {}
@@ -106,14 +95,25 @@ void Function::handle_msg(Json::Value &value) {
   });
 }
 
+// 处理添加好友请求的返回结果
+void Function::handle_addfd(int op, Json::Value &value) {
+  if (op == method::accept_addfd) {
+    Info::info->change([&] {
+      int id = value["userid"].asInt();
+      std::string name = value["username"].asString();
+      Info::info->friendinfo[id] = FriendInfo(id, name);
+    });
+  }
+}
+
+// 处理添加好友请求
 void Function::handle_addfd(Json::Value &value) {
   Info::info->change([&] {
-    FriendInfo temp;
-    temp.friendid = value["friendid"].asInt();
-    Info::info->friendinfo[temp.friendid] = temp;
+    Info::info->requestaddlist[value["userid"].asInt()] = value;
   });
 }
 
+// 登陆
 bool Function::login(int id, int password) {
   DLOG(INFO) << "start login";
   Json::Value loginfo;
@@ -168,8 +168,7 @@ bool Function::signout(int id, int password) {
   return 0;
 }
 
-bool Function::sendmsg(int receiver, int sender, std::string message,
-                       int64_t time) {
+bool Function::sendmsg(int receiver, int sender, std::string message, int64_t time) {
   Json::Value chatinfo;
   chatinfo["sender"] = sender;
   chatinfo["receiver"] = receiver;
@@ -178,7 +177,6 @@ bool Function::sendmsg(int receiver, int sender, std::string message,
   int signal = 0;
   if (!(signal = net.write(method::sendmsg, chatinfo))) {
     Info::info->change([&] {
-      DLOG(INFO) << "chat info write to info";
       MessageInfo temp;
       temp.sender = sender;
       temp.receiver = receiver;
@@ -204,9 +202,11 @@ bool Function::find(int id) {
   return 0;
 }
 
+// 添加好友
 bool Function::addfriend(int id) {
   Json::Value friendinfo;
   friendinfo["userid"] = Info::info->myself.id;
+  friendinfo["username"] = Info::info->myself.username;
   friendinfo["friendid"] = id;
   int signal = 0;
   if (!(signal = net.write(method::addfd, friendinfo))) {
@@ -216,17 +216,25 @@ bool Function::addfriend(int id) {
   return 0;
 }
 
+// 回应添加好友请求
 bool Function::responseadd(int id, bool isagree) {
-  Json::Value friendinfo;
-  friendinfo["userid"] = Info::info->myself.id;
-  friendinfo["friendid"] = id;
+  Json::Value receiveinfo = Info::info->requestaddlist[id];
+  Json::Value sendinfo;
+  sendinfo["userid"] = Info::info->myself.id;
+  sendinfo["username"] = Info::info->myself.username;
+  sendinfo["friendid"] = id;
   int signal = 0;
   if (isagree) {
-    if (!(signal = net.write(method::accept_addfd, friendinfo))) {
+    if (!(signal = net.write(method::accept_addfd, sendinfo))) {
+      Info::info->change([&] {
+        Info::info->requestaddlist.erase(id);
+        for (auto& v : Info::info->requestaddlist)
+        Info::info->friendinfo[id] = FriendInfo(id, receiveinfo["username"].asString());
+      });
       return 0;
     } else return signal;
   } else {
-    if (!(signal = net.write(method::refuse_addfd, friendinfo))) {
+    if (!(signal = net.write(method::refuse_addfd, sendinfo))) {
       return 0;
     } else return signal;
   }

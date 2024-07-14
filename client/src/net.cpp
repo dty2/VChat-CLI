@@ -9,11 +9,9 @@ Net::Net(std::function<void(int, Json::Value)> handle_)
   body = new char[BODY_SIZE];
   boost::asio::async_connect(socket, endpoint, [&](boost::system::error_code ec, tcp::endpoint) {
     if (!ec) {
-      LOG(INFO) << "connection successful";
       readhead();
     }
     else {
-      LOG(INFO) << "connection error";
     }
   });
 }
@@ -30,26 +28,20 @@ void Net::close() {
 }
 
 void Net::readhead() {
-  LOG(INFO) << "start read head";
   async_read(socket, boost::asio::buffer(head, HEAD_SIZE),
     [&](boost::system::error_code ec, std::size_t bytes_transferred) {
-    LOG(INFO) << "read head successful";
     if (!ec) {
-      LOG(INFO) << "read head successful";
       readbody(packer::depackhead(head));
     } else {
       this->close();
     }
   });
-  LOG(INFO) << " read head end";
 }
 
 void Net::readbody(std::pair<int, int> headinfo) {
-  LOG(INFO) << "start read body";
   async_read(socket, boost::asio::buffer(body, headinfo.second),
   [=](boost::system::error_code ec, std::size_t bytes_transferred) {
     if(!ec) {
-      LOG(INFO) << "this is headinfo" << headinfo.first << ' ' << headinfo.second;
       handle(headinfo.first, packer::depackbody(body, headinfo.second));
       readhead();
     } else {

@@ -57,7 +57,6 @@ void Connection::readbody() {
     [&](boost::system::error_code ec, std::size_t bytes_transferred) {
       if(!ec) {
         Json::Value value = packer::depackbody(body, headinfo.second);
-        LOG(INFO) << "start serve";
         Service::serve(headinfo.first, std::move(value), this);
       }
       readhead();

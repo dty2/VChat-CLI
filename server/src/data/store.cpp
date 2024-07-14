@@ -15,8 +15,6 @@ Store::Store() {
     );
   }
   catch (const std::exception& e) {
-    LOG(ERROR) << "Exception: " << e.what();
-    LOG(INFO) << "Exit VChat-Server ...";
     exit(0);
   }
 }
@@ -31,8 +29,7 @@ bool Store::getPersional(PersionalInfo& persionalinfo, const int id) {
       persionalinfo.username = query.getColumn(2).getString();
     }
   } catch (std::exception& e) {
-    LOG(ERROR) << "exception: " << e.what() << "\n";
-  } 
+  }
   if(persionalinfo.id && persionalinfo.password && persionalinfo.username.empty()) return true;
   else return false;
 }
@@ -44,7 +41,6 @@ bool Store::getFriend(std::list<FriendInfo>& friendlist, const int id) {
     while (query.executeStep())
       friendlist.push_back(FriendInfo(query.getColumn(1).getInt(), query.getColumn(2).getString()));
   } catch (std::exception& e) {
-    LOG(INFO) << "exception: " << e.what() << "\n";
   }
   return friendlist.empty();
 }
@@ -62,7 +58,6 @@ bool Store::getMessage(std::list<MessageInfo>& messagelist, const int id) {
       messagelist.push_back(MessageInfo(sender, receiver, msg, time));
     }
   } catch (std::exception& e) {
-    LOG(INFO) << "exception: " << e.what() << "\n";
   }
   return messagelist.empty();
 }
@@ -84,23 +79,19 @@ bool Store::insertPersional(PersionalInfo& persionalinfo) {
     query.exec();
     return true;
   } catch (std::exception& e) {
-    LOG(INFO) << "exception: " << e.what() << "\n";
     return false;
   } 
 }
 
 bool Store::insertFriend(FriendInfo& friendinfo, int userid) {
   try {
-    PersionalInfo temp;
-    Store::getPersional(temp, friendinfo.friendid);
     SQLite::Statement query(*this->db, "INSERT INTO friendinfo VALUES (?, ?, ?)");
     query.bind(1, userid);
     query.bind(2, friendinfo.friendid);
-    query.bind(3, temp.username);
+    query.bind(3, friendinfo.friendname);
     query.exec();
     return true;
   } catch (std::exception& e) {
-    LOG(INFO) << "exception: " << e.what() << "\n";
     return false;
   }
 }
@@ -115,7 +106,6 @@ bool Store::insertMessage(MessageInfo& messageinfo) {
     query.exec();
     return true;
   } catch (std::exception& e) {
-    LOG(ERROR) << "exception: " << e.what() << "\n";
     return false;
   }
 }

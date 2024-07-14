@@ -24,7 +24,6 @@ Tui::Tui() : screen(ScreenInteractive::Fullscreen()) {
 
 // 通讯底层受到消息后通过该函数向上反馈事件
 void Tui::postevent(std::string ss) {
-  LOG(INFO) << "postevent";
   screen.PostEvent(Event::Special(ss));
 }
 

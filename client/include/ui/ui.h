@@ -21,9 +21,10 @@ enum page { DASHBOARD = 0, HELP, ABOUT, CHAT };
 
 namespace graph {
 static std::string SMALL_COW = "\
-                      ,__,         \n\
-                      (oo)____     \n\
-                      (__)    )\\  \n\
+    这里一片空白...                \n\
+                   .  ,__,         \n\
+                    . (oo)____     \n\
+                     .(__)    )\\  \n\
                          ||--||     ";
 
 static std::string LOGO = "\

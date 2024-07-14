@@ -23,9 +23,6 @@ public:
   bool responseadd(int, bool);
   bool deletefriend(int);
   std::function<void(std::string)> postevent;
-  struct Tempinfo {
-    std::vector<int> requestaddlist;
-  }tempinfo;
 
 private:
   bool mode = 0;
@@ -33,6 +30,7 @@ private:
   void handle_login(Json::Value&);
   void handle_find(Json::Value&);
   void handle_addfd(Json::Value&);
+  void handle_addfd(int, Json::Value&);
   void handle_msg(Json::Value&);
   Net net;
 };

@@ -10,7 +10,6 @@ Service::Service() {}
 void Service::getinstance() { service = new Service(); }
 
 void Service::serve(int method, Json::Value value, Connection *connection) {
-  LOG(INFO) << method;
   switch (method) {
     case method::signin: service->signin(value, connection); break;
     //case method::signout: service->signout(value, connection); break;
@@ -26,80 +25,108 @@ void Service::serve(int method, Json::Value value, Connection *connection) {
 }
 
 void Service::login(Json::Value value, Connection* connection) {
-  LOG(INFO) << "client start login";
-  int id = value["id"].asInt();
-  int password = value["password"].asInt();
-  PersionalInfo persionalinfo;
-  Store::store->getPersional(persionalinfo, id);
-  if (persionalinfo.password == password) {
-    UserInfo userinfo;
-    Store::store->getUser(userinfo, id);
-    Json::Value root, persionalinfo, friendlist, messagelist;
-    persionalinfo["id"] = userinfo.persionalinfo.id;
-    persionalinfo["password"] = userinfo.persionalinfo.password;
-    persionalinfo["username"] = userinfo.persionalinfo.username;
-    for (auto x : userinfo.friendlist) {
-      Json::Value friendinfo;
-      friendinfo["friendid"] = x.friendid;
-      friendinfo["friendname"] = x.friendname;
-      friendlist.append(friendinfo);
+  try {
+    int id = value["id"].asInt();
+    int password = value["password"].asInt();
+    PersionalInfo persionalinfo;
+    Store::store->getPersional(persionalinfo, id);
+    if (persionalinfo.password == password) {
+      UserInfo userinfo;
+      Store::store->getUser(userinfo, id);
+      Json::Value root, persionalinfo, friendlist, messagelist;
+      persionalinfo["id"] = userinfo.persionalinfo.id;
+      persionalinfo["password"] = userinfo.persionalinfo.password;
+      persionalinfo["username"] = userinfo.persionalinfo.username;
+      for (auto x : userinfo.friendlist) {
+        Json::Value friendinfo;
+        friendinfo["friendid"] = x.friendid;
+        friendinfo["friendname"] = x.friendname;
+        friendlist.append(friendinfo);
+      }
+      for (auto x : userinfo.messagelist) {
+        Json::Value messageinfo;
+        messageinfo["sender"] = x.sender;
+        messageinfo["receiver"] = x.receiver;
+        messageinfo["message"] = x.msg;
+        messageinfo["time"] = x.time;
+        messagelist.append(messageinfo);
+      }
+      root["persionalinfo"] = persionalinfo;
+      root["friendlist"] = friendlist;
+      root["messagelist"] = messagelist;
+      Service::cache.online[id] = connection;
+      connection->write(method::login_suc, root);
+      for (auto x : this->cache.addfriendapply[id])
+        connection->write(method::addfd, x);
     }
-    for (auto x : userinfo.messagelist) {
-      Json::Value messageinfo;
-      messageinfo["sender"] = x.sender;
-      messageinfo["receiver"] = x.receiver;
-      messageinfo["message"] = x.msg;
-      messageinfo["time"] = x.time;
-      messagelist.append(messageinfo);
-    }
-    root["persionalinfo"] = persionalinfo;
-    root["friendlist"] = friendlist;
-    root["messagelist"] = messagelist;
-    Service::cache.online[id] = connection;
-    connection->write(method::login_suc, root);
+  } catch (const std::exception& e) {
   }
 }
 
 void Service::signin(Json::Value value, Connection* connection) {
-  PersionalInfo persionalinfo;
-  persionalinfo.id = value["id"].asInt();
-  persionalinfo.password = value["password"].asInt();
-  persionalinfo.username = value["username"].asString();
-  bool op = Store::store->insertPersional(persionalinfo);
-  connection->write(method::signin_suc, 0);
+  try {
+    PersionalInfo persionalinfo;
+    persionalinfo.id = value["id"].asInt();
+    persionalinfo.password = value["password"].asInt();
+    persionalinfo.username = value["username"].asString();
+    bool op = Store::store->insertPersional(persionalinfo);
+    connection->write(method::signin_suc, 0);
+  } catch (const std::exception& e) {
+  }
 }
 
 void Service::sendmsg(Json::Value value) {
-  MessageInfo messageinfo;
-  messageinfo.sender = value["sender"].asInt();
-  messageinfo.receiver = value["receiver"].asInt();
-  messageinfo.msg = value["message"].asString();
-  messageinfo.time = value["time"].asInt64();
-  bool op = Store::store->insertMessage(messageinfo);
-  if(Service::cache.online[messageinfo.receiver]) {
-    LOG(INFO) << "sendmsg" << messageinfo.receiver;
-    Service::cache.online[messageinfo.receiver]->write(method::sendmsg, value);
+  try {
+    MessageInfo messageinfo;
+    messageinfo.sender = value["sender"].asInt();
+    messageinfo.receiver = value["receiver"].asInt();
+    messageinfo.msg = value["message"].asString();
+    messageinfo.time = value["time"].asInt64();
+    bool op = Store::store->insertMessage(messageinfo);
+    if(Service::cache.online[messageinfo.receiver]) {
+      Service::cache.online[messageinfo.receiver]->write(method::sendmsg, value);
+    }
+  } catch (const std::exception& e) {
   }
 }
 
 void Service::addfriend(Json::Value value, Connection* connection) {
-  FriendInfo friendinfo;
-  friendinfo.friendid = value["friendid"].asInt();
-  if(Service::cache.online[friendinfo.friendid]) {
-    Service::cache.online[friendinfo.friendid]->write(method::addfd, value);
+  try {
+    int friendid = value["friendid"].asInt();
+    if(Service::cache.online[friendid])
+      Service::cache.online[friendid]->write(method::addfd, value);
+    else
+      Service::cache.addfriendapply[friendid].emplace_back(value);
+  } catch (const std::exception& e) {
   }
 }
 
+// 这里添加好友比较复杂，在接受好友申请方同意后
+// 需要对数据库添加两个好友记录如 1 2 test1 和 2 1 test2
+// 置于为什么要添加两次，因为当初在设计的时候考虑到取数据的时候方便写因此就这么设计了
+// 但是由于这里的函数内部变量名字起得乱七八糟，因此这里压根看不出来谁是被加好友的，谁是主动加好友的
+// 这里在之后的版本百分之百会进行修改，因为这里的变量名字起得真的是太糟糕了，在写的时候就给自己绕懵了
+// 为什么不在写的时候就起一个好名字？好问题，因为想给日后的自己留个天坑
 void Service::addfriend(int method, Json::Value value, Connection* connection) {
-  FriendInfo friendinfo;
-  auto userid = value["userid"].asInt();
-  friendinfo.friendid = value["friendid"].asInt();
-  if (method == method::accept_addfd) {
-    bool op = Store::store->insertFriend(friendinfo, userid);
-    if(Service::cache.online[userid])
-      Service::cache.online[userid]->write(method::accept_addfd, value);
-  } else {
-    if(Service::cache.online[userid])
-      Service::cache.online[userid]->write(method::refuse_addfd, value);
+  try {
+    FriendInfo friendinfo;
+    int userid = value["friendid"].asInt(); // 添加好友的人
+    friendinfo.friendid = value["userid"].asInt(); // 被添加的人
+    friendinfo.friendname = value["username"].asString();
+    if (method == method::accept_addfd) {
+      bool op = Store::store->insertFriend(friendinfo, userid);
+      userid = friendinfo.friendid;
+      PersionalInfo temp;
+      Store::store->getPersional(temp, value["friendid"].asInt());
+      friendinfo.friendid = temp.id;
+      friendinfo.friendname = temp.username;
+      bool opp = Store::store->insertFriend(friendinfo, userid);
+      if(Service::cache.online[friendinfo.friendid])
+        Service::cache.online[friendinfo.friendid]->write(method::accept_addfd, value);
+    } else {
+      if(Service::cache.online[friendinfo.friendid])
+        Service::cache.online[friendinfo.friendid]->write(method::refuse_addfd, value);
+    }
+  } catch (const std::exception& e) {
   }
 }

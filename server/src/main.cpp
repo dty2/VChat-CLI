@@ -14,14 +14,12 @@ void stop_glog() { google::ShutdownGoogleLogging(); }
 int main() {
   start_glog();
   try {
-    LOG(INFO) << "Start VChat-Server";
     Store::getinstance();
     Service::getinstance();
     Server server;
     server.run();
     Store::free();
   } catch (const std::exception& e) {
-    LOG(ERROR) << "exception: " << e.what();
   }
   stop_glog();
   return 0;

@@ -7,7 +7,6 @@ std::string enpack(int method) {
   std::string head;
   head += std::to_string(method);
   head += "00000";
-  LOG(INFO) << "output: " << head << "output size: " << head.size();
   return head;
 }
 
@@ -21,7 +20,6 @@ std::string enpack(int method, Json::Value body) {
   head += std::to_string(method);
   head += oss.str();
   output = head + output;
-  LOG(INFO) << "output: " << output << "output size: " << output.size();
   return output;
 }
 
@@ -31,22 +29,18 @@ std::pair<int, int> depackhead(char *target) {
   headmethod = std::stoi(method);
   std::string size(target + 3, target + 8);
   bodysize = std::stoi(size);
-  LOG(INFO) << "body size:" << bodysize << "head method:" << headmethod;
   return std::pair<int, int>(headmethod, bodysize);
 }
 
 Json::Value depackbody(char *target, int size) {
-  LOG(INFO) << "start depack body";
   Json::Value root;
   std::string errors;
   Json::CharReaderBuilder builder;
   std::string temp(target, size);
   std::stringstream ss(temp);
   if (Json::parseFromStream(builder, ss, &root, &errors)) {
-    LOG(INFO) << "depack body success";
     return root;
   } else {
-    LOG(ERROR) << "parse json error";
     return root;
   }
 }

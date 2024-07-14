@@ -14,7 +14,7 @@ private:
   static Service* service;
   static struct Cache {
     std::map<int, Connection*> online;
-    std::vector<std::pair<int, int>> addfriendapply;
+    std::map<int, std::vector<Json::Value>> addfriendapply;
   } cache;
   // serve
   void login(Json::Value, Connection*);

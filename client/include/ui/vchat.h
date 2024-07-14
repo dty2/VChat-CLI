@@ -58,9 +58,9 @@ public:
 // 个人页面
 class Myself : public Page {
 private:
-  std::vector<int> addlist;
+  std::string friend_input;
 public:
-  Myself(Function &);
+  Myself(Function&);
 };
 
 // 聊天主页面
@@ -83,10 +83,9 @@ private:
   Component messageslist;
   int friends_selected = 0;
   Component friendslist;
-  Components all_friends;
-  std::string friend_input;
-  Component myselflist;
   int myself_selected = 0;
+  Component myselflist;
+  int lr = 0;
   void getmessagelist();
   void getfriendlist();
   void getmyselflist();

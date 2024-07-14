@@ -20,7 +20,6 @@ int main(int argc, char **argv) {
     Info::getinstance();
     Tui ui;
   } catch (const std::exception &e) {
-    LOG(ERROR) << "Exception: " << e.what() << '\n';
   }
   stop_glog();
   return 0;

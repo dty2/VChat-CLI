@@ -10,26 +10,26 @@ namespace method {
 enum method {
   // 注册
   signin = 100,
-  signin_suc,
-  signin_err,
-  signout,
+  signin_suc, // 101
+  signin_err, // 102
+  signout, // 103
   // 登陆
-  login,
-  login_suc,
-  login_err,
-  logout,
+  login, // 104
+  login_suc, // 105
+  login_err, // 106
+  logout, // 107
   // 查询
-  findfd,
-  findfd_suc,
-  findfd_err,
+  findfd, // 108
+  findfd_suc, // 109
+  findfd_err, // 110
   // 添加好友
-  addfd,
-  accept_addfd,
-  refuse_addfd,
+  addfd, // 111
+  accept_addfd, // 112
+  refuse_addfd, // 113
   // 删除好友
-  deletefd,
+  deletefd, // 114
   // 发消息
-  sendmsg,
+  sendmsg, // 115
 };
 
 } // namespace method
