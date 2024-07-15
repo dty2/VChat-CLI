@@ -1,5 +1,8 @@
 ## VChat
 VChat is a TUI Chat Program, which supports communication under the terminal.
+![Start](./resource/example/start.png)
+![Chat](./resource/example/chat.png)
+More VChat pictures are in ./resource/example...
 ## Start
 * Step One, you just need a Linux os with terminal simulator or only a tty!
 * Step Two, clone this repository.

@@ -18,7 +18,7 @@ Page::Page(int id_, Function& function_)
 Page::Page(Function& function_)
   : function(function_) {}
 
-// 生成消息列表
+// message list
 void Chat::getmessagelist() {
   auto clist = Container::Vertical({}, &selected_msg);
   auto rlist = Renderer(clist, [=]{
@@ -59,7 +59,6 @@ void Chat::getmessagelist() {
   }) | vscroll_indicator | frame;
   auto elist = CatchEvent(rlist, [&](Event event){
     if(event == Event::Special("sendmsg")) {}
-    else if(event == Event::Special("accept_addfd")) {}
     return false;
   });
   this->list = elist | border | flex;
@@ -256,14 +255,10 @@ void Vchat::getfriendlist() {
 void Vchat::getmyselflist() {
   auto clist = Container::Vertical({},&myself_selected);
   auto rlist = Renderer(clist, [=]{
-    DLOG(INFO) << "renderer persional rlist";
     clist->DetachAllChildren();
     for(auto& n : Info::info->requestaddlist) {
      auto buts = Container::Horizontal({
-        Button("Y添加", [&]{
-          function.responseadd(n.first, 1);
-          screen->PostEvent(Event::Special("accept_addfd"));
-        }, ButtonOption::Ascii()),
+        Button("Y添加", [&]{ function.responseadd(n.first, 1); }, ButtonOption::Ascii()),
         Button("N拒绝", [&]{ function.responseadd(n.first, 0); }, ButtonOption::Ascii())
       }, &lr);
       auto rbuts = Renderer(buts, [=]{
@@ -285,11 +280,7 @@ void Vchat::getmyselflist() {
       clist->Add(Renderer([=](bool focused){ return text("当前没有好友申请..."); }));
     return clist->Render();
   });
-  auto elist = CatchEvent(rlist, [&](Event event){
-    if(event == Event::Special("addfd")) {}
-    return false;
-  });
-  myselflist = elist;
+  myselflist = rlist;
 }
 
 // 综合所有侧边栏列表
@@ -370,8 +361,6 @@ Vchat::Vchat(int& now_, Function& function_, ScreenInteractive* screen_)
       for(auto& v : Info::info->friendinfo)
         Friend::friends_map[v.first] = new Friend(v.first, function, &page_selected);
       Chat::chats_selected = Friend::friends_selected = Info::info->friendinfo.begin()->first;
-      DLOG(INFO) << Info::info->friendinfo.size();
-      return true;
     }
     else if(event == Event::Special("refuse_addfd")) {}
     return false;

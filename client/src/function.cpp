@@ -228,9 +228,9 @@ bool Function::responseadd(int id, bool isagree) {
     if (!(signal = net.write(method::accept_addfd, sendinfo))) {
       Info::info->change([&] {
         Info::info->requestaddlist.erase(id);
-        for (auto& v : Info::info->requestaddlist)
         Info::info->friendinfo[id] = FriendInfo(id, receiveinfo["username"].asString());
       });
+      postevent("accept_addfd");
       return 0;
     } else return signal;
   } else {
