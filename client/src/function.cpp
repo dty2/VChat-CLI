@@ -1,13 +1,35 @@
+/*
+ * Copyright (c) 2024 Hunter 执着
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 #include "function.h"
 #include "net.h"
 #include "package.h"
 
-namespace vchat {
-
-Function::Function()
-  : net(std::bind(&Function::handle, this, std::placeholders::_1, std::placeholders::_2)) {}
+Function::Function(std::string address, std::string port)
+  : net(address, port,
+    std::bind(&Function::handle, this, std::placeholders::_1, std::placeholders::_2)) {}
 
 void Function::start() {
+  LOG(INFO) << "function start";
   net.start();
 }
 
@@ -16,45 +38,58 @@ void Function::end() {
 }
 
 void Function::handle(int op, Json::Value value) {
+  DLOG(INFO) << "Start handle, the method is:" << op;
   switch (op) {
   case method::signin_suc:
+    DLOG(INFO) << "signin_suc";
     postevent("signin_suc");
     break;
   case method::signin_err:
+    DLOG(INFO) << "signin_err";
     postevent("signin_err");
     break;
   case method::login_suc:
+    LOG(INFO) << "login_suc";
     this->handle_login(value);
     postevent("login_suc");
     break;
   case method::login_err:
+    DLOG(INFO) << "login_err";
     postevent("login_err");
     break;
   case method::findfd_suc:
+    DLOG(INFO) << "findfd_suc";
     postevent("findfd_suc");
     break;
   case method::findfd_err:
+    DLOG(INFO) << "findfd_err";
     postevent("findfd_err");
     break;
   case method::addfd:
+    DLOG(INFO) << "addfd";
     handle_addfd(value);
     postevent("addfd");
     break;
   case method::accept_addfd:
+    DLOG(INFO) << "accept_addfd";
     this->handle_addfd(op, value);
     postevent("accept_addfd");
     break;
   case method::refuse_addfd:
+    DLOG(INFO) << "refuse_addfd";
     this->handle_addfd(op, value);
     postevent("refuse_addfd");
     break;
   case method::deletefd:
+    DLOG(INFO) << "deletefd";
     postevent("deletefd");
     break;
   case method::sendmsg:
+    DLOG(INFO) << "sendmsg";
     this->handle_msg(value);
     postevent("sendmsg");
     break;
+  default : LOG(WARNING) << "Strange method";
   }
 }
 
@@ -95,7 +130,6 @@ void Function::handle_msg(Json::Value &value) {
   });
 }
 
-// 处理添加好友请求的返回结果
 void Function::handle_addfd(int op, Json::Value &value) {
   if (op == method::accept_addfd) {
     Info::info->change([&] {
@@ -106,14 +140,12 @@ void Function::handle_addfd(int op, Json::Value &value) {
   }
 }
 
-// 处理添加好友请求
 void Function::handle_addfd(Json::Value &value) {
   Info::info->change([&] {
     Info::info->requestaddlist[value["userid"].asInt()] = value;
   });
 }
 
-// 登陆
 bool Function::login(int id, int password) {
   DLOG(INFO) << "start login";
   Json::Value loginfo;
@@ -216,7 +248,6 @@ bool Function::addfriend(int id) {
   return 0;
 }
 
-// 回应添加好友请求
 bool Function::responseadd(int id, bool isagree) {
   Json::Value receiveinfo = Info::info->requestaddlist[id];
   Json::Value sendinfo;
@@ -252,5 +283,3 @@ bool Function::deletefriend(int id) {
     return signal;
   return 0;
 }
-
-} // namespace vchat

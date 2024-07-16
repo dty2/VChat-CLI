@@ -1,5 +1,5 @@
 ## VChat
-VChat is a TUI Chat Program, which supports communication under the terminal.
+VChat is a TUI Chat Program, which supports communication under the terminal.  
 ![Start](./resource/example/start.png)
 ![Chat](./resource/example/chat.png)
 More VChat pictures are in ./resource/example...
@@ -18,7 +18,7 @@ More VChat pictures are in ./resource/example...
   - `cd server && ./server`
   - `cd client && ./client`
 ## About
-Latest version is 0.8
+Latest version is 0.8  
 You can find all old version source codes in history directory.
 ### Feature
 * Full keyboard operation, no mouse needed
@@ -42,9 +42,9 @@ You can find all old version source codes in history directory.
 * downlaod cowsay by `sudo pacman -S cowsay`
 * [asciinema](https://docs.asciinema.org/)
 ## FAQ
-* Contribute
+* Contribute  
 This prorgram is developed by myself(a cpp beginner). And it is so terrible that I think nobody will contribute it...
-* VChat not work
+* VChat not work  
 You can write a issue, I will answer you in two days.
-* "install_lib.sh" is not work
+* "install_lib.sh" is not work  
 You can install all library by your self. Or you can modify it, I think the most problem is url error.

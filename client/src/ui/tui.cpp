@@ -1,36 +1,61 @@
-#include "tui.h"
+/*
+ * Copyright (c) 2024 Hunter 执着
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
-namespace vchat {
-Tui::Tui() : screen(ScreenInteractive::Fullscreen()) {
-  window_dashboard = std::make_unique<Dashboard>(now, function, screen, std::bind(&Tui::getvchat, this));
-  window_help = std::make_unique<Help>(now, function, screen);
-  window_about = std::make_unique<About>(now, function, screen);
+#include "tui.h"
+#include "ui.h"
+
+Tui::Tui(std::string language_, std::string address, std::string port)
+  : screen(ScreenInteractive::Fullscreen()), language(language_), function(address, port) {
+  this->now_page = DASHBOARD;
+  window_dashboard = std::make_unique<dashboard::Dashboard>(now_page, function, screen);
+  window_help = std::make_unique<Help>(now_page, function, screen);
+  window_about = std::make_unique<About>(now_page, function, screen);
   std::thread t([&] {
     function.postevent = std::bind(&Tui::postevent, this, std::placeholders::_1);
     function.start();
   });
-  main = Container::Tab({
+  auto cpages = Container::Tab({
     window_dashboard->content,
     window_help->content,
     window_about->content
-  }, &now);
-  auto rmain = Renderer(
-      main, [&] { return main->Render() | flex | color(Color::Blue); });
-  now = DASHBOARD;
-  screen.Loop(rmain);
+  }, &now_page);
+  auto rpages = Renderer(cpages, [=]{ return cpages->Render() | flex | color(Color::Blue); });
+  auto epages = CatchEvent(rpages, [&](Event event){
+    if(event == Event::Special("login_suc")) {
+      LOG(INFO) << "Catch a event login_suc";
+      window_chat = std::make_unique<Vchat>(now_page, function, &screen);
+      cpages->Add(window_chat->content);
+    }
+    return false;
+  });
+  this->content = epages;
+  now_page = DASHBOARD;
+  screen.Loop(content);
   function.end();
   t.join();
 }
 
-// 通讯底层受到消息后通过该函数向上反馈事件
+// function post event to tui to make it update
 void Tui::postevent(std::string ss) {
+  LOG(INFO) << "post a event: " << ss;
   screen.PostEvent(Event::Special(ss));
 }
-
-// 初始化主聊天界面，作为函数对象传递给daskboard
-void Tui::getvchat() {
-  window_chat = std::make_unique<Vchat>(now, function, &screen);
-  main->Add(window_chat->content);
-}
-
-} // namespace vchat

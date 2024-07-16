@@ -1,3 +1,25 @@
+/*
+ * Copyright (c) 2024 Hunter 执着
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 #ifndef PACKAGE_H
 #define PACKAGE_H
 
@@ -8,27 +30,27 @@ namespace method {
 enum method {
   // 注册
   signin = 100,
-  signin_suc,
-  signin_err,
-  signout,
+  signin_suc, // 101
+  signin_err, // 102
+  signout, // 103
   // 登陆
-  login,
-  login_suc,
-  login_err,
-  logout,
+  login, // 104
+  login_suc, // 105
+  login_err, // 106
+  logout, // 107
   // 好友
   // 查询
-  findfd,
-  findfd_suc,
-  findfd_err,
+  findfd, // 108
+  findfd_suc, // 109
+  findfd_err, // 110
   // 添加
-  addfd,
-  accept_addfd,
-  refuse_addfd,
+  addfd, // 111
+  accept_addfd, // 112
+  refuse_addfd, // 113
   // 删除
-  deletefd,
+  deletefd, // 114
   // 发消息
-  sendmsg,
+  sendmsg, // 115
 };
 
 } // namespace method

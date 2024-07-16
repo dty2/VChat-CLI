@@ -1,6 +1,27 @@
+/*
+ * Copyright (c) 2024 Hunter 执着
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 #include "package.h"
 
-namespace vchat {
 namespace packer {
 
 std::string enpack(int method) {
@@ -20,6 +41,7 @@ std::string enpack(int method, Json::Value body) {
   head += std::to_string(method);
   head += oss.str();
   output = head + output;
+  DLOG(INFO) << "enpack: " << output;
   return output;
 }
 
@@ -29,6 +51,7 @@ std::pair<int, int> depackhead(char *target) {
   headmethod = std::stoi(method);
   std::string size(target + 3, target + 8);
   bodysize = std::stoi(size);
+  DLOG(INFO) << "depack: bodysize:" << bodysize << " headmethod: " << headmethod;
   return std::pair<int, int>(headmethod, bodysize);
 }
 
@@ -39,6 +62,7 @@ Json::Value depackbody(char *target, int size) {
   std::string temp(target, size);
   std::stringstream ss(temp);
   if (Json::parseFromStream(builder, ss, &root, &errors)) {
+    DLOG(INFO) << "depack: body:" << root;
     return root;
   } else {
     return root;
@@ -46,4 +70,3 @@ Json::Value depackbody(char *target, int size) {
 }
 
 } // namespace packer
-} // namespace vchat

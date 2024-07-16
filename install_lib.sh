@@ -7,7 +7,7 @@ glog="git@github.com:google/glog.git"
 sqlite3="git@github.com:SRombauts/SQLiteCpp.git"
 json="git@github.com:nlohmann/json.git"
 ftxui="git@github.com:ArthurSonzogni/FTXUI.git"
-
+absl="git@github.com:abseil/abseil-cpp.git"
 
 # directory
 ## you need add vchat environment variable to specify the download directory
@@ -73,6 +73,7 @@ compile() {
   if [ "$choice" = "y" ]; then
     mkdir $target_dir
     compile_item glog
+    compile_item absl
     compile_item SQLiteCpp
     compile_item json
     compile_item FTXUI
