@@ -24,28 +24,26 @@
 
 namespace dashboard {
 
-Dashboard::Dashboard(int& now_, Function& function_, ScreenInteractive& screen_)
-  : now(now_), function(function_), screen(screen_) {
+Dashboard::Dashboard(int& now_) : now(now_) {
   option.password = true;
   auto cchoice = Container::Vertical({
-    Button( "   登陆 ", [&] { dialog = dashboard::log; }, ButtonOption::Ascii()),
-    Button( "   注册 ", [&] { dialog = dashboard::sign; }, ButtonOption::Ascii()),
-    Button( " 󰞋  帮助 ", [&] { this->now = HELP; }, ButtonOption::Ascii()), // 2: help window
-    Button( "   关于 ", [&] { this->now = ABOUT; }, ButtonOption::Ascii()), // 3: about window
-    Button( " 󰩈  退出 ", [&] { this->screen.Exit(); }, ButtonOption::Ascii()),
+    Button( " 󰌆  登陆 ", [&] { dialog = dashboard::log; }, ButtonOption::Ascii()),
+    Button( " 󰗛  注册 ", [&] { dialog = dashboard::sign; }, ButtonOption::Ascii()),
+    Button( " 󰞋  帮助 ", [&] { now = HELP; }, ButtonOption::Ascii()),
+    Button( "   关于 ", [&] { now = ABOUT; }, ButtonOption::Ascii()),
+    Button( " 󰩈  退出 ", [&] { screen->Exit(); }, ButtonOption::Ascii()),
   }, &choice);
   auto echoice = CatchEvent(cchoice, [&](Event event) {
-    if(event == Event::CtrlP) { if(choice) choice --; return true; }
-    else if(event == Event::CtrlN) { if(choice != 4) choice ++; return true; }
-    else if (event == Event::Return) { return false; }
+    if(event == Event::CtrlN) { if(choice != 4) choice ++; return true; }
+    else if(event == Event::CtrlP) { if(choice) choice --; return true; }
+    else if (event == Event::Return) return false;
     else return true;
   });
-  auto rchoice = Renderer(echoice, [=] {
+  auto rchoice = Renderer(echoice, [=]{
     return vbox({ paragraph_imp(graph::LOGO), echoice->Render() | center }) | center;
   });
-  // main
   auto cmain = Container::Tab({ rchoice, dialog_log(), dialog_sign() }, &dialog);
-  auto rmain = Renderer(cmain, [=] {
+  auto rmain = Renderer(cmain, [=]{
     Element document = rchoice->Render();
     switch (dialog) {
     case dashboard::none: break;
@@ -80,7 +78,7 @@ Component Dashboard::dialog_log() {
     Container::Horizontal({
       Button( " 确定 ", [&] {
         if(!id.empty() && !password.empty()) {
-          function.login(std::stoi(id), std::stoi(password));
+          function->login(std::stoi(id), std::stoi(password));
           id = ""; password = "";
         }
       }, ButtonOption::Ascii()),
@@ -109,7 +107,7 @@ Component Dashboard::dialog_sign() {
     Container::Horizontal({
       Button( " 确定 ", [&] {
         if(!id.empty() && !password.empty() && !username.empty())
-          function.signin(std::stoi(id), std::stoi(password), username);
+          function->signin(std::stoi(id), std::stoi(password), username);
         id = ""; username = ""; password = ""; dialog = dashboard::none;
         }, ButtonOption::Ascii()),
       Button( " 取消 ", [&] {

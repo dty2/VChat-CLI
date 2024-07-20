@@ -24,18 +24,20 @@
 #define ABOUT_H
 
 #include "ui.h"
+#include "function.h"
 
 using namespace ftxui;
+
+extern ScreenInteractive* screen;
+extern std::unique_ptr<Function> function;
 
 class About {
 private:
   int &now;
-  Function& function;
-  ScreenInteractive& screen;
   int main_selected = 0;
 public:
   Component content;
-  About(int&, Function&, ScreenInteractive&);
+  About(int&);
 };
 
 #endif // ABOUT_H

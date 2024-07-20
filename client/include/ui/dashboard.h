@@ -28,6 +28,9 @@
 
 using namespace ftxui;
 
+extern ScreenInteractive* screen;
+extern std::unique_ptr<Function> function;
+
 namespace dashboard {
 
 enum { none = 0, log, sign };
@@ -35,8 +38,6 @@ enum { none = 0, log, sign };
 class Dashboard {
 private:
   int &now;
-  Function& function;
-  ScreenInteractive& screen;
 
   int dialog = none;
   int choice = 0;
@@ -53,7 +54,7 @@ private:
 
 public:
   Component content;
-  Dashboard(int&, Function&, ScreenInteractive&);
+  Dashboard(int&);
 };
 
 } // namespace dashboard

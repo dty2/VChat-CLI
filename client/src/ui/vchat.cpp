@@ -24,22 +24,88 @@
 #include "info.h"
 #include "ui.h"
 
-std::unordered_map<int, Chat*> Chat::chats_map;
-int Chat::chats_selected = 0;
-std::unordered_map<int, Friend*> Friend::friends_map;
-int Friend::friends_selected = 0;
+namespace vchat {
 
-Page::Page(int id_, Function& function_, ScreenInteractive* screen_)
-  : id(id_), function(function_), screen(screen_) {}
+int Vchat::pages_selected;
+int ChatPage::chats_selected;
+int FriendPage::friends_selected;
+int ChatPage::choose_list;
+int FriendPage::choose_list;
+int MyselfPage::choose_list;
 
-Page::Page(int id_, Function& function_)
-  : id(id_), function(function_) {}
+// persional list
+MyselfPage::List::List(MyselfPage* myself_) : myself(myself_){
+  auto clist = Container::Vertical({}, &selected);
+  auto rlist = Renderer(clist, [=]{
+    clist->DetachAllChildren();
+    for(auto& n : Info::info->requestaddlist) {
+     auto buts = Container::Horizontal({
+        Button("Y添加", [&]{ function->responseadd(n.first, 1); }, ButtonOption::Ascii()),
+        Button("N拒绝", [&]{ function->responseadd(n.first, 0); }, ButtonOption::Ascii())
+      }, &myself->choose_add);
+      auto rbuts = Renderer(buts, [=]{
+        Element show;
+        show = vbox(
+          text("账号" + n.second["username"].asString() + "请求添加为好友"),
+          buts->Render()
+        );
+        return show;
+      });
+      auto ebuts = CatchEvent(rbuts, [&](Event event){
+        if(event == Event::Y) { myself->choose_add = 0; }
+        else if(event == Event::N) { myself->choose_add = 1; }
+        return false;
+      });
+      clist->Add(ebuts);
+    }
+    if(!clist->ChildCount())
+      clist->Add(Renderer([=](bool focused){ return text("当前没有好友申请"); }));
+    return clist->Render();
+  });
+  auto elist = CatchEvent(rlist, [&](Event event){
+    if (event == Event::CtrlN) {
+      if(selected != Info::info->requestaddlist.size() - 1) selected ++;
+    } else if (event == Event::CtrlP) {
+      if(selected) selected --;
+    }
+    return false;
+  });
+  content = elist | border | size(WIDTH, EQUAL, 30);
+}
 
-Page::Page(Function& function_)
-  : function(function_) {}
+// myself page
+MyselfPage::MyselfPage() : list(this) {
+  auto info = Container::Vertical({
+    Renderer([&](bool focused){
+    std::string id = std::to_string(Info::info->myself.id);
+    std::string username = Info::info->myself.username;
+      return vbox(
+        text("  账号  :" + id),
+        text(" 用户名 :" + username)
+      );
+    }),
+    Button(" 编辑信息", [&]{}, ButtonOption::Ascii())
+  }) | flex | border;
+  auto cmyself = Container::Horizontal({}, &choose_list);
+  auto rmyself = Renderer(cmyself, [=]{
+    cmyself->DetachAllChildren();
+    cmyself->Add(list.content);
+    cmyself->Add(info);
+    return cmyself->Render();
+  });
+  auto emyself = CatchEvent(rmyself, [&](Event event){
+    if (event == Event::CtrlB) {
+      if(!choose_list) choose_list ++;
+    } else if (event == Event::CtrlF) {
+      if(choose_list) choose_list --;
+    }
+    return false;
+  });
+  content = emyself;
+}
 
-// message list
-void Chat::getmessagelist() {
+// message
+void ChatPage::Chat::getmessage() {
   auto clist = Container::Vertical({}, &selected_msg);
   auto rlist = Renderer(clist, [=]{
     clist->DetachAllChildren();
@@ -81,11 +147,11 @@ void Chat::getmessagelist() {
     if(event == Event::Special("sendmsg")) {}
     return false;
   });
-  this->list = elist | border | flex;
+  this->messagelist = elist | flex | border;
 }
 
-// 生成输入区域
-void Chat::getinputarea() {
+// inputarea
+void ChatPage::Chat::getinput() {
   auto cinput = Input(&input, "这里输入消息... 按 Ctrl + Y 发送");
   auto einput = CatchEvent(cinput, [&](Event event){
     if(event == Event::CtrlY) {
@@ -99,10 +165,10 @@ void Chat::getinputarea() {
           << std::setfill('0') << std::setw(2) << std::to_string(now_tm->tm_min) // minute
           << std::setfill('0') << std::setw(2) << std::to_string(now_tm->tm_sec); // second
       if(!input.empty())
-        if(!function.sendmsg(id, Info::info->myself.id, input,
+        if(!function->sendmsg(id, Info::info->myself.id, input,
           static_cast<int64_t>(std::stoll(oss.str())))) {
           input.clear();
-          list->TakeFocus();
+          messagelist->TakeFocus();
         }
       return true;
     } else return false;
@@ -110,28 +176,27 @@ void Chat::getinputarea() {
   this->inputarea = einput | border;
 }
 
-// 聊天页面
-Chat::Chat(int id_, Function& function_, ScreenInteractive* screen_)
-  : Page(id_, function_, screen_) {
-  getmessagelist();
-  getinputarea();
-  this->show_list = true;
+// chat
+ChatPage::Chat::Chat(int id_) : id(id_) {
+  getmessage();
+  getinput();
+  this->showlist = true;
   if(Info::info->messageinfo[id].size()) lastmsg = Info::info->messageinfo[id].back().msg;
-  auto cchatpage = Container::Vertical({list, inputarea}, &inputfocus);
-  auto echatpage = CatchEvent(cchatpage, [&](Event event){
+  auto cchat = Container::Vertical({messagelist, inputarea}, &inputfocus);
+  auto echat = CatchEvent(cchat, [&](Event event){
     if(event == Event::CtrlN) {
-      list->TakeFocus();
+      messagelist->TakeFocus();
       if(selected_msg != Info::info->messageinfo[id].size())
         selected_msg ++;
       return true;
     }
     else if(event == Event::CtrlP) {
-      list->TakeFocus();
+      messagelist->TakeFocus();
       if(selected_msg > 1) selected_msg --;
       return true;
     }
     else if(event == Event::Special("sendmsg")) {
-      list->TakeFocus();
+      messagelist->TakeFocus();
       lastmsg = Info::info->messageinfo[id].back().msg;
       return false;
     }
@@ -139,103 +204,19 @@ Chat::Chat(int id_, Function& function_, ScreenInteractive* screen_)
     return false;
   });
   selected_msg = Info::info->messageinfo[id].size();
-  this->content = echatpage | flex;
+  this->content = echat | flex;
 }
 
-// 朋友页面
-Friend::Friend(int id_, Function& function_, int* page_selected_)
-  : Page(id_, function_), page_selected(page_selected_) {
-  auto container = Container::Horizontal({
-    Button(" 󰍡  发送消息 ", [&]{
-      Chat::chats_selected = id;
-      *page_selected = CHAT_PAGE;
-    }, ButtonOption::Ascii()),
-    Button(" 󰆴  删除好友 ", [&]{
-      function.deletefriend(id);
-    }, ButtonOption::Ascii()),
-  }, &friend_op_selected);
-  auto rcontainer = Renderer(container, [=]{
-    std::string username = Info::info->friendinfo[id].friendname;
-    return vbox({
-      text("   账号  :" + std::to_string(id)) | center,
-      text("  用户名 :" + username) | center,
-      container->Render() | center
-    });
-  });
-  auto econtainer = CatchEvent(rcontainer, [&](Event event){
-    if(event == Event::CtrlB) {
-      friend_op_selected = 0;
-      return true;
-    } else if(event == Event::CtrlF) {
-      friend_op_selected = 1;
-      return true;
-    }
-    return false;
-  });
-  content = econtainer;
-}
-
-// 个人页面
-Myself::Myself(Function& function_) : Page(function_) {
-  auto cinput = Input(&friend_input, "这里输入用户ID...");
-  auto rinput = Renderer(cinput, [=]{
-    std::string id = std::to_string(Info::info->myself.id);
-    std::string username = Info::info->myself.username;
-    return vbox(
-      text("   账号  :" + id),
-      text("  用户名 :" + username),
-      cinput->Render() | size(HEIGHT, EQUAL, 1) | border
-    ) | center;
-  });
-  auto einput = CatchEvent(rinput, [&](Event event){
-    if(event == Event::CtrlY) {
-      if(!friend_input.empty())
-        if(!function.addfriend(std::stoi(friend_input))) {
-          friend_input.clear();
-        }
-      return true;
-    } else return false;
-    return false;
-  });
-  content = einput;
-}
-
-// 综合所有页面
-void Vchat::getpage() {
-  // 初始化开始页面位置
-  Chat::chats_selected = Friend::friends_selected = Info::info->friendinfo.begin()->first;
-  // 整合所有页面组件
-  auto cpage = Container::Tab({}, &page_selected);
-  auto rpage = Renderer(cpage, [=]{
-    cpage->DetachAllChildren();
-    Component first, second, third = myself->content;
-    if (Chat::chats_map.size())
-      first = Chat::chats_map[Chat::chats_selected]->content;
-    else
-      first = Renderer([=](bool focused){ return paragraph_imp(graph::SMALL_COW) | center; });
-    if (Friend::friends_map.size())
-      second = Friend::friends_map[Friend::friends_selected]->content;
-    else
-      second = Renderer([=](bool focused){ return paragraph_imp(graph::SMALL_COW) | center; });
-    cpage->Add(first);
-    cpage->Add(second);
-    cpage->Add(third);
-    return cpage->Render();
-  });
-  this->pages = rpage;
-}
-
-// 生成侧边栏消息列表
-void Vchat::getmessagelist() {
-  auto clist = Container::Vertical({}, &messages_selected);
+// chat list
+ChatPage::List::List(ChatPage* chat_) : chat(chat_){
+  auto clist = Container::Vertical({}, &selected);
   auto rlist = Renderer(clist, [=]{
     clist->DetachAllChildren();
-    for (auto& v : Chat::chats_map) {
-      if (!v.second->show_list) continue;
+    for (auto& v : chat->chats) {
+      if (!v.second->showlist) continue;
       std::string name = Info::info->friendinfo[v.first].friendname;
-      auto but = Button("   " + name, [&]{
-        Chat::chats_selected = v.first;
-        page_selected = CHAT_PAGE;
+      auto but = Button("  " + name + " ", [&]{
+        chats_selected = v.first;
       }, ButtonOption::Ascii());
       auto per = Renderer(but, [=]{
         return vbox(
@@ -246,144 +227,224 @@ void Vchat::getmessagelist() {
       clist->Add(per);
     }
     if(!clist->ChildCount())
-      clist->Add(Renderer([=](bool focused){ return text("   一条消息都没有哎..."); }));
+      clist->Add(Renderer([=](bool focused){ return text("   一条消息都没有哎 "); }));
     return clist->Render();
   });
-  messageslist = rlist;
+  auto elist = CatchEvent(rlist, [&](Event event){
+    if (event == Event::CtrlN) {
+      if(selected != chat_->chats.size() - 1) selected ++;
+    } else if (event == Event::CtrlP) {
+      if(selected) selected --;
+    }
+    return false;
+  });
+  this->content = elist | border | size(WIDTH, EQUAL, 24);
 }
 
-// 生成侧边栏朋友列表
-void Vchat::getfriendlist() {
-  auto clist = Container::Vertical({}, &friends_selected);
+// chat page
+ChatPage::ChatPage() : list(this) {
+  for(auto& v : Info::info->friendinfo)
+    chats[v.first] = new Chat(v.first);
+  choose_list = 0;
+  auto cchatpage = Container::Horizontal({}, &choose_list);
+  auto rchatpage = Renderer(cchatpage, [=]{
+    cchatpage->DetachAllChildren();
+    cchatpage->Add(list.content);
+    if (chats.size())
+      cchatpage->Add(chats[chats_selected]->content);
+    else
+      cchatpage->Add(Renderer([&](bool focused){
+        return paragraph_imp(graph::SMALL_COW) | center;
+      }));
+    return cchatpage->Render();
+  });
+  auto echatpage = CatchEvent(rchatpage, [&](Event event){
+    if (event == Event::Special("accept_addfd")) {
+      chats.clear();
+      for(auto& v : Info::info->friendinfo)
+        chats[v.first] = new Chat(v.first);
+    } else if (event == Event::CtrlF) {
+      if(!choose_list) choose_list ++;
+    } else if (event == Event::CtrlB) {
+      if(choose_list) choose_list --;
+    }
+    return false;
+  });
+  this->content = echatpage;
+}
+
+// friend list
+FriendPage::List::List(FriendPage* friend__) : friend_(friend__){
+  auto clist = Container::Vertical({}, &selected);
   auto rlist = Renderer(clist, [=]{
     clist->DetachAllChildren();
-    for(auto& n : Friend::friends_map) {
-      auto but = Button(' ' + Info::info->friendinfo[n.first].friendname, [&]{
-        Friend::friends_selected = n.first;
-        page_selected = FRIENDS_PAGE;
+    for(auto& n : friend_->friends) {
+      auto but = Button("   " + Info::info->friendinfo[n.first].friendname + ' ', [&]{
+        friends_selected = n.first;
       }, ButtonOption::Ascii());
       clist->Add(but);
     }
     if(!clist->ChildCount())
       clist->Add(Renderer([=](bool focused){ return text("   一个好友都没有哎..."); }));
-    return clist->Render();
+    return clist->Render() ;
   });
-  friendslist = rlist;
-}
-
-// 生成侧边栏个人列表
-void Vchat::getmyselflist() {
-  auto clist = Container::Vertical({},&myself_selected);
-  auto rlist = Renderer(clist, [=]{
-    clist->DetachAllChildren();
-    for(auto& n : Info::info->requestaddlist) {
-     auto buts = Container::Horizontal({
-        Button("Y添加", [&]{ function.responseadd(n.first, 1); }, ButtonOption::Ascii()),
-        Button("N拒绝", [&]{ function.responseadd(n.first, 0); }, ButtonOption::Ascii())
-      }, &lr);
-      auto rbuts = Renderer(buts, [=]{
-        Element show;
-        show = vbox(
-          text("账号" + n.second["username"].asString() + "请求添加为好友"),
-          buts->Render()
-        );
-        return show;
-      });
-      auto ebuts = CatchEvent(rbuts, [&](Event event){
-        if(event == Event::Y) { lr = 0; }
-        else if(event == Event::N) { lr = 1; }
-        return false;
-      });
-      clist->Add(ebuts);
-    }
-    if(!clist->ChildCount())
-      clist->Add(Renderer([=](bool focused){ return text("当前没有好友申请..."); }));
-    return clist->Render();
-  });
-  myselflist = rlist;
-}
-
-// 综合所有侧边栏列表
-void Vchat::getcatalogue() {
-  getmessagelist();
-  getfriendlist();
-  getmyselflist();
-  auto option = Container::Horizontal({
-    Button( " 消息", [&] { page_selected = CHAT_PAGE; }, ButtonOption::Ascii()),
-    Button( " 好友", [&] { page_selected = FRIENDS_PAGE; }, ButtonOption::Ascii()),
-    Button( " 自己", [&] { page_selected = MYSELF_PAGE; }, ButtonOption::Ascii())},
-  &option_selected);
-  auto list = Container::Tab({messageslist, friendslist, myselflist}, &option_selected);
-  auto catalogue = Container::Vertical({option, list});
-  auto ecatalogue = CatchEvent(catalogue, [=](Event event) {
-    if (event == Event::CtrlP) {
-      if (!option->Focused())
-        switch (option_selected) {
-          case 0: if (messages_selected) messages_selected --; break;
-          case 1: if (friends_selected) friends_selected --; break;
-          case 2: if (myself_selected) myself_selected --; break;
-        }
-      list->TakeFocus();
-    } else if (event == Event::CtrlN) {
-      if (!option->Focused())
-        switch (option_selected) {
-        case 0: if (messages_selected != Chat::chats_map.size() - 1) messages_selected ++; break;
-        case 1: if (friends_selected != Friend::friends_map.size() - 1) friends_selected ++; break;
-        case 2: if (myself_selected != Info::info->requestaddlist.size()) myself_selected ++; break;
-        }
-      list->TakeFocus();
-    } else if (event == Event::CtrlB) {
-      if (!list->Focused())
-        if (!list_selected && option_selected)
-          option_selected--;
-      option->TakeFocus();
-    } else if (event == Event::CtrlF) {
-      if (!list->Focused())
-        if (!list_selected && option_selected != 2)
-          option_selected++;
-      option->TakeFocus();
+  auto elist = CatchEvent(rlist, [&](Event event){
+    if(event == Event::CtrlP) {
+      if (selected) {
+        selected --;
+      }
+      return true;
+    } else if(event == Event::CtrlN) {
+      if (selected != Info::info->friendinfo.size() - 1) {
+        selected ++;
+      }
+      return true;
     }
     return false;
   });
-  this->catalogue = ecatalogue | border;
+  this->content = rlist | border | size(WIDTH, EQUAL, 24);
 }
 
-// 主窗口与控制侧栏
-Vchat::Vchat(int& now_, Function& function_, ScreenInteractive* screen_)
-  : now(now_), function(function_), screen(screen_) {
-  for(auto& v : Info::info->friendinfo)
-    Chat::chats_map[v.first] = new Chat(v.first, function, screen);
-  for(auto& v : Info::info->friendinfo)
-    Friend::friends_map[v.first] = new Friend(v.first, function, &page_selected);
-  this->myself = new Myself(function);
-  // 初始化页面与侧边栏目录
-  this->getpage();
-  this->getcatalogue();
-  // 整合页面与侧边栏目录组件
-  auto cmain = Container::Tab({catalogue, pages}, &catalogue_toggle);
-  auto rmain = Renderer(cmain, [=] {
-    Element show = pages->Render();
-    if (!catalogue_toggle) {
-      show = hbox(catalogue->Render(), show);
-      catalogue->TakeFocus();
-    }
-    return show;
-  });
-  auto emain = CatchEvent(rmain, [=](Event event) {
-    if (event == Event::CtrlL) {
-      catalogue_toggle = catalogue_toggle ? 0 : 1;
+// friend
+FriendPage::Friend::Friend(int id_) : id(id_) {
+  auto container = Container::Vertical({
+    Button("󰍡 发送消息 ", [&]{
+      ChatPage::chats_selected = id;
+      Vchat::pages_selected = CHAT;
+      ChatPage::choose_list = 1;
+    }, ButtonOption::Ascii()),
+    Button(" 编辑信息", [&]{
+    }, ButtonOption::Ascii()),
+  }, &friend_op_selected);
+  auto rcontainer = Renderer(container, [=]{
+    std::string username = Info::info->friendinfo[id].friendname;
+    return hbox({
+      vbox(
+        text("  账号  :" + std::to_string(id)),
+        text(" 用户名 :" + username)
+      ),
+      container->Render()
+    });
+  }) | border | flex;
+  auto econtainer = CatchEvent(rcontainer, [&](Event event){
+    if(event == Event::CtrlP) {
+      friend_op_selected = 0;
       return true;
-    } else if(event == Event::Special("accept_addfd")) {
-      Chat::chats_map.clear();
-      Friend::friends_map.clear();
-      for(auto& v : Info::info->friendinfo)
-        Chat::chats_map[v.first] = new Chat(v.first, function, screen);
-      for(auto& v : Info::info->friendinfo)
-        Friend::friends_map[v.first] = new Friend(v.first, function, &page_selected);
-      Chat::chats_selected = Friend::friends_selected = Info::info->friendinfo.begin()->first;
+    } else if(event == Event::CtrlN) {
+      friend_op_selected = 1;
+      return true;
     }
-    else if(event == Event::Special("refuse_addfd")) {}
+    return false;
+  });
+  content = econtainer;
+}
+
+// friend page
+FriendPage::FriendPage() : list(this) {
+  for(auto& v : Info::info->friendinfo)
+    friends[v.first] = new Friend(v.first);
+  choose_list = 0;
+  auto cfriendpage = Container::Horizontal({}, &choose_list);
+  auto rfriendpage = Renderer(cfriendpage, [=]{
+    cfriendpage->DetachAllChildren();
+    cfriendpage->Add(list.content);
+    if (friends.size())
+      cfriendpage->Add(friends[ChatPage::chats_selected]->content);
+    else
+      cfriendpage->Add(Renderer([&](bool focused){
+        return paragraph_imp(graph::SMALL_COW) | center;
+      }));
+    return cfriendpage->Render();
+  });
+  auto echatpage = CatchEvent(rfriendpage, [&](Event event){
+    if (event == Event::Special("accept_addfd")) {
+      friends.clear();
+      for(auto& v : Info::info->friendinfo)
+        friends[v.first] = new Friend(v.first);
+    } else if (event == Event::CtrlF) {
+      if(!choose_list) choose_list ++;
+    } else if (event == Event::CtrlB) {
+      if(choose_list) choose_list --;
+    }
+    return false;
+  });
+  this->content = echatpage;
+}
+
+void Vchat::getoptions() {
+  options_selected = 2;
+  auto coptions = Container::Vertical({
+    Renderer([&](bool focused){ return text(" "); }),
+    Renderer([&](bool focused){ return text("──"); }),
+    Renderer([&](bool focused){ if(focused) return text(" "); return text(" "); }),
+    Renderer([&](bool focused){ if(focused) return text("󰭹 "); return text("󰻞 "); }),
+    Renderer([&](bool focused){ if(focused) return text("󰅟 "); return text(" "); }),
+    Renderer([&](bool focused){ return filler(); }),
+    Renderer([&](bool focused){ if(focused) return text("󰋗 "); return text("󰘥 "); }),
+    Renderer([&](bool focused){ if(focused) return text("󰋼 "); return text("󰋽 "); }),
+    Renderer([&](bool focused){ if(focused) return text("󰅙 "); return text("󰅚 "); }),
+  }, &options_selected) | border;
+  auto eoptions = CatchEvent(coptions, [&](Event event){
+    if(event == Event::Return) {
+      switch (options_selected) {
+        case 2: pages_selected = MYSELF; break;
+        case 3: pages_selected = CHAT;   break;
+        case 4: pages_selected = FRIEND; break;
+        case 6: now = HELP;              break;
+        case 7: now = ABOUT;             break;
+        case 8: screen->Exit();          break;
+        default: break;
+      }
+      return false;
+    } else if(event == Event::CtrlN) {
+      if(options_selected != 8 && options_selected != 4) options_selected ++;
+      else if(options_selected != 8 && options_selected == 4) options_selected += 2;
+      return true;
+    } else if(event == Event::CtrlP) {
+      if(options_selected != 2 && options_selected != 6) options_selected --;
+      else if(options_selected != 2 && options_selected == 6) options_selected -= 2;
+      return true;
+    }
+    return false;
+  });
+  this->options = eoptions;
+}
+
+// main show
+Vchat::Vchat(int& now_) : now(now_) {
+  chat = new ChatPage();
+  friend_ = new FriendPage();
+  myself = new MyselfPage();
+  this->getoptions();
+  selected = 0;
+  pages_selected = 0;
+  ChatPage::chats_selected
+    = FriendPage::friends_selected
+    = Info::info->friendinfo.begin()->first;
+  auto page = Container::Tab({
+    myself->content, chat->content, friend_->content
+  }, &pages_selected) | flex;
+  auto cmain = Container::Horizontal({options, page}, &selected);
+  auto emain = CatchEvent(cmain, [=](Event event) {
+    if(event == Event::CtrlB) {
+      if(selected) {
+        if(pages_selected == MYSELF && !MyselfPage::choose_list) selected --;
+        else if(pages_selected == CHAT && !ChatPage::choose_list) selected --;
+        else if(pages_selected == FRIEND && !FriendPage::choose_list) selected --;
+      }
+    }
+    else if(event == Event::CtrlF) {
+      if(!selected) {
+        selected ++;
+        return true;
+      }
+    }
+    else if(event == Event::Special("accept_addfd")) {
+      ChatPage::chats_selected = FriendPage::friends_selected = Info::info->friendinfo.begin()->first;
+    }
     return false;
   });
   content = emain;
 }
+
+} // namespace vchat

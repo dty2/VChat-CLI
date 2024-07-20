@@ -24,6 +24,8 @@
 #include "info.h" // data
 #include "absl/flags/parse.h" // parse the command line
 #include "absl/flags/flag.h" // parse the command line
+#include "ui.h"
+#include "function.h"
 #include <filesystem>
 
 ABSL_FLAG(std::string, language, "EN",        "Default: EN(English). Option: EN(English), CH(Chinese)");
@@ -41,6 +43,8 @@ void start_log(std::string log_file) {
 
 void stop_log() { google::ShutdownGoogleLogging(); }
 
+std::unique_ptr<Function> function = nullptr;
+
 int main(int argc, char **argv) {
   // parse command line
   absl::ParseCommandLine(argc, argv);
@@ -53,7 +57,8 @@ int main(int argc, char **argv) {
   LOG(INFO) << "VChat-Client start...";
   try {
     Info::getinstance();
-    Tui ui(language, address, port);
+    function = std::make_unique<Function>(address, port);
+    Tui ui(language);
   } catch (const std::exception &e) {
     LOG(ERROR) << e.what();
   }

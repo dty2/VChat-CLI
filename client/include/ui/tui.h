@@ -28,27 +28,26 @@
 #include "vchat.h"
 #include "help.h"
 #include "about.h"
+#include "function.h"
 
 using namespace ftxui;
-
-enum dialog { option = 0, quit };
 
 class Tui {
 private:
   std::string language;
   int now_page;
-  ScreenInteractive screen;
-  Function function;
-  std::unique_ptr<dashboard::Dashboard> window_dashboard = nullptr;
-  std::unique_ptr<Vchat> window_chat = nullptr;
-  std::unique_ptr<Help> window_help = nullptr;
-  std::unique_ptr<About> window_about = nullptr;
+  std::unique_ptr<dashboard::Dashboard> dashboard;
+  std::unique_ptr<vchat::Vchat> chat;
+  std::unique_ptr<Help> help;
+  std::unique_ptr<About> about;
   void changewindow(int);
   Component content;
-  void postevent(std::string); // 接收消息，好友申请
 
 public:
-  Tui(std::string, std::string, std::string);
+  void postevent(std::string); // post a new event
+  Tui(std::string);
 };
+
+extern std::unique_ptr<Function> function;
 
 #endif // TUI_H

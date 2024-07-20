@@ -23,97 +23,127 @@
 #ifndef CHAT_H
 #define CHAT_H
 
-#include "function.h"
 #include "ui.h"
+#include "function.h"
 #include "data.hpp"
+
+extern ScreenInteractive* screen;
+extern std::unique_ptr<Function> function;
 
 using namespace ftxui;
 
-// page
-enum { CHAT_PAGE = 0, FRIENDS_PAGE, MYSELF_PAGE };
+namespace vchat{
 
-// 页面父类，三种初始化方式分别对应不同的页面子类
-class Page {
+enum { MYSELF = 0, CHAT, FRIEND, SEARCH };
+
+// myself
+class MyselfPage {
+private:
+  struct List {
+    Component content;
+    int selected;
+    MyselfPage* myself;
+    List(MyselfPage*);
+  }list;
+  int choose_notify; // choose notify or list
+
 public:
-  int id;
-  Function &function;
-  ScreenInteractive *screen;
-  Page(int, Function&, ScreenInteractive*);
-  Page(int, Function&);
-  Page(Function&);
+  int choose_add;
+  static int choose_list; // choose list or myself info
+  MyselfPage();
   Component content;
 };
 
-// 聊天页面
-class Chat : public Page {
+// chat page
+class ChatPage {
 private:
-  int selected_msg = 0;
-  int inputfocus = 0; // 默认为0,焦点在消息框中
-  std::string input;
-  Component inputarea;
-  Component list;
-  void getinputarea();
-  void getmessagelist();
+  struct Chat {
+    int id;
+    int selected_msg = 0;
+    int inputfocus = 0;
+    std::string input;
+    Component inputarea;
+    Component messagelist;
+    bool showlist;
+    std::string lastmsg;
+    void getinput();
+    void getmessage();
+    Chat(int);
+    Component content;
+  };
+  struct List {
+    Component content;
+    int selected;
+    ChatPage* chat;
+    List(ChatPage*);
+  }list;
+  std::unordered_map<int, struct Chat*> chats;
 
 public:
-  static std::unordered_map<int, Chat*> chats_map;
   static int chats_selected;
-  bool show_list;
-  Chat(int, Function&, ScreenInteractive*);
-  std::string lastmsg;
-};
-
-// 朋友页面
-class Friend : public Page{
-private:
-  int* page_selected;
-  int friend_op_selected = 0;
-public:
-  static std::unordered_map<int, Friend*> friends_map;
-  static int friends_selected;
-  Friend(int, Function&, int*);
+  static int choose_list; // choose list or chat info
   Component content;
+  ChatPage();
 };
 
-// 个人页面
-class Myself : public Page {
+// friend
+class FriendPage {
 private:
-  std::string friend_input;
+  struct Friend {
+    int friend_op_selected = 0;
+    int id;
+    Component content;
+    Friend(int);
+  };
+  struct List {
+    Component content;
+    int selected;
+    FriendPage* friend_;
+    List(FriendPage*);
+  }list;
+  std::unordered_map<int, struct Friend*> friends;
+
 public:
-  Myself(Function&);
+  static int friends_selected;
+  static int choose_list; // choose list or friendinfo
+  Component content;
+  FriendPage();
 };
 
-// 聊天主页面
+// search
+class Search {
+private:
+  struct Show {
+    Component content;
+    Show();
+  };
+  int list_selected;
+
+public:
+  static int choose_list; // choose input or show
+  Component content;
+  Search();
+
+};
+
+// vchat
 class Vchat {
 private:
-  int catalogue_toggle = 1;
-  int option_selected = 0;
   int &now;
-  Function &function;
-  ScreenInteractive *screen;
-  // 页面信息
-  int page_selected = 0;
-  Myself *myself;
-  Component pages;
-  void getpage();
-  // 侧边栏目录信息
-  int list_selected = 0;
-  Component catalogue;
-  int messages_selected = 0;
-  Component messageslist;
-  int friends_selected = 0;
-  Component friendslist;
-  int myself_selected = 0;
-  Component myselflist;
-  int lr = 0;
-  void getmessagelist();
-  void getfriendlist();
-  void getmyselflist();
-  void getcatalogue();
+  int selected; // choose options, pages
+  Component options;
+  MyselfPage* myself;
+  ChatPage* chat;
+  FriendPage* friend_;
+  void getoptions();
+  int options_selected;
 
 public:
+  static int pages_selected;
   Component content;
-  Vchat(int&, Function&, ScreenInteractive*);
+  Vchat(int&);
 };
+
+} // namespace vchat
 
 #endif // CHAT_H

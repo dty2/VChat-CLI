@@ -21,7 +21,6 @@
  */
 
 #include "ui.h"
-
 // offered by ftxui author see more for
 // https://github.com/ArthurSonzogni/FTXUI/issues/336
 Elements split(std::string the_text) {

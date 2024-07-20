@@ -41,6 +41,7 @@ private:
 
 public:
   Function(std::string, std::string);
+  std::function<void(std::string)> postevent;
   void start();
   void end();
   bool login(int, int);
@@ -52,7 +53,6 @@ public:
   bool addfriend(int);
   bool responseadd(int, bool);
   bool deletefriend(int);
-  std::function<void(std::string)> postevent;
 
 };
 

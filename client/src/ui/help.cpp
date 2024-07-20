@@ -22,11 +22,10 @@
 
 #include "help.h"
 
-Help::Help(int& now_, Function& function_, ScreenInteractive& screen_)
-  : now(now_), function(function_), screen(screen_) {
+Help::Help(int& now_) : now(now_) {
   auto cmain = Container::Horizontal({
-    Button(" 󰌑  返回 ", [&]{ this->now = DASHBOARD; }, ButtonOption::Ascii()),
-    Button(" 󰩈  退出 ", [&]{ this->screen.Exit(); }, ButtonOption::Ascii()),
+    Button(" 󰌑  返回 ", [&]{ now = DASHBOARD; }, ButtonOption::Ascii()),
+    Button(" 󰩈  退出 ", [&]{ screen->Exit(); }, ButtonOption::Ascii()),
   }, &main_selected);
   auto rmain = Renderer(cmain, [=]{
     return vbox(
@@ -35,13 +34,10 @@ Help::Help(int& now_, Function& function_, ScreenInteractive& screen_)
     ) | center;
   });
   auto emain = CatchEvent(rmain, [&](Event event){
-    if(event == Event::CtrlB) {
-      main_selected = 0;
-      return true;
-    } else if(event == Event::CtrlF) {
-      main_selected = 1;
-      return true;
-    } else return false;
+    if(event == Event::CtrlB) main_selected = 0;
+    else if(event == Event::CtrlF) main_selected = 1;
+    else if(event == Event::Return) return false;
+    return true;
   });
   content = emain;
 }

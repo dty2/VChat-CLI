@@ -21,41 +21,43 @@
  */
 
 #include "tui.h"
-#include "ui.h"
 
-Tui::Tui(std::string language_, std::string address, std::string port)
-  : screen(ScreenInteractive::Fullscreen()), language(language_), function(address, port) {
+ScreenInteractive* screen;
+
+Tui::Tui(std::string language_)
+  : language(language_) {
+  screen = new ScreenInteractive(ScreenInteractive::Fullscreen());
   this->now_page = DASHBOARD;
-  window_dashboard = std::make_unique<dashboard::Dashboard>(now_page, function, screen);
-  window_help = std::make_unique<Help>(now_page, function, screen);
-  window_about = std::make_unique<About>(now_page, function, screen);
-  std::thread t([&] {
-    function.postevent = std::bind(&Tui::postevent, this, std::placeholders::_1);
-    function.start();
-  });
+  dashboard = std::make_unique<dashboard::Dashboard>(now_page);
+  help = std::make_unique<Help>(now_page);
+  about = std::make_unique<About>(now_page);
   auto cpages = Container::Tab({
-    window_dashboard->content,
-    window_help->content,
-    window_about->content
+    dashboard->content,
+    help->content,
+    about->content
   }, &now_page);
   auto rpages = Renderer(cpages, [=]{ return cpages->Render() | flex | color(Color::Blue); });
   auto epages = CatchEvent(rpages, [&](Event event){
     if(event == Event::Special("login_suc")) {
       LOG(INFO) << "Catch a event login_suc";
-      window_chat = std::make_unique<Vchat>(now_page, function, &screen);
-      cpages->Add(window_chat->content);
+      chat = std::make_unique<vchat::Vchat>(now_page);
+      cpages->Add(chat->content);
     }
     return false;
   });
   this->content = epages;
   now_page = DASHBOARD;
-  screen.Loop(content);
-  function.end();
+  std::thread t([&]{
+    function->postevent = std::bind(&Tui::postevent, this, std::placeholders::_1);
+    function->start();
+  });
+  screen->Loop(content);
+  function->end();
   t.join();
 }
 
 // function post event to tui to make it update
 void Tui::postevent(std::string ss) {
   LOG(INFO) << "post a event: " << ss;
-  screen.PostEvent(Event::Special(ss));
+  screen->PostEvent(Event::Special(ss));
 }

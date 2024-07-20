@@ -24,18 +24,20 @@
 #define Help_H
 
 #include "ui.h"
+#include "function.h"
 
 using namespace ftxui;
+
+extern ScreenInteractive* screen;
+extern std::unique_ptr<Function> function;
 
 class Help {
 private:
   int &now;
-  Function& function;
-  ScreenInteractive& screen;
   int main_selected = 0;
 public:
   Component content;
-  Help(int&, Function&, ScreenInteractive&);
+  Help(int&);
 };
 
 #endif // Help_H
