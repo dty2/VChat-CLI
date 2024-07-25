@@ -20,21 +20,66 @@
  * SOFTWARE.
  */
 
-#include "ui.h"
-// offered by ftxui author see more for
-// https://github.com/ArthurSonzogni/FTXUI/issues/336
-Elements split(std::string the_text) {
-  Elements output;
-  std::stringstream ss(the_text);
-  std::string word;
-  while (std::getline(ss, word, '\n'))
-    output.push_back(text(word));
-  return output;
-}
+#ifndef TELESCOPE_H
+#define TELESCOPE_H
 
-Element paragraph_imp(std::string the_text) {
-  Elements lines;
-  for (Element &line : split(std::move(the_text)))
-    lines.push_back(line);
-  return vbox(std::move(lines));
-}
+#include "function.h"
+#include "ui.h"
+
+using namespace ftxui;
+
+extern ScreenInteractive* screen;
+extern std::unique_ptr<Function> function;
+
+enum { CHAT = 0, FRIEND, GROUP };
+
+class Vchat;
+class Telescope;
+
+class Chats {
+public:
+  static int selected;
+  Chats(Telescope*);
+  Component list;
+  std::unordered_map<int, Element> previews;
+};
+
+class Friends {
+public:
+  static int selected;
+  Friends(Telescope*);
+  Component list;
+  std::unordered_map<int, Element> previews;
+};
+
+class Inform {
+private:
+  std::map<int, int> id;
+public:
+  static int selected;
+  Inform(Telescope*);
+  Component list;
+  std::unordered_map<int, Element> previews;
+};
+
+class Telescope {
+private:
+  Chats chats;
+  Friends friends;
+  std::string ss;
+  Component input;
+  int selected = CHAT;
+  Component content;
+
+public:
+  int *toggle;
+  Vchat *vchat;
+  Telescope(Vchat*, int*);
+  ~Telescope();
+  Component gettelescope(int);
+  Telescope(Telescope &&) = delete;
+  Telescope(const Telescope &) = delete;
+
+};
+
+#endif // TELESCOPE_H

@@ -28,33 +28,43 @@
 
 using namespace ftxui;
 
-extern ScreenInteractive* screen;
+extern ScreenInteractive* screen; // define at tui.cpp
 extern std::unique_ptr<Function> function;
 
 namespace dashboard {
 
-enum { none = 0, log, sign };
+enum { DASHBOARD = 0, HELP, ABOUT };
+enum { NONE = 0, LOG, SIGN };
 
 class Dashboard {
 private:
-  int &now;
-
-  int dialog = none;
-  int choice = 0;
-  InputOption option;
-  int log_selected = 0;
-  int sign_selected = 0;
-  std::string id, username, password;
-
-  // dialog
-  Component dialog_log();
-  int log_but = 0;
-  Component dialog_sign();
-  int sign_but = 0;
+  struct Log {
+    std::string id, password;
+    int selected = 0; // choose which input box
+    int but = 0; // choose which button
+    Component content;
+    int status; // logging or cancel
+    Log(Dashboard*);
+  }log; // log dialog
+  struct Sign {
+    std::string id, username, password;
+    int selected = 0; // choose which input box
+    int but = 0; // choose which button
+    int status; // signing or cancel
+    Component content;
+    Sign(Dashboard*);
+  }sign; // sign dialog
+  Component help; // Help page
+  Component about; // About page
+  void init_help(); // init Help page
+  void init_about(); // init about page
+  int dialog = NONE; // choose log dialog or sign dialog
+  int page = DASHBOARD; // choose Dashboard page or About page or Help page
+  int selected = 0;
 
 public:
-  Component content;
-  Dashboard(int&);
+  Component content; // Dashboard page
+  Dashboard();
 };
 
 } // namespace dashboard

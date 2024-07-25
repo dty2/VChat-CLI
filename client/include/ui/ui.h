@@ -36,8 +36,6 @@
 
 using namespace ftxui;
 
-enum page { DASHBOARD = 0, HELP, ABOUT, CHAT };
-
 namespace graph {
 static std::string SMALL_COW = "\
     这里一片空白...                \n\
@@ -47,46 +45,62 @@ static std::string SMALL_COW = "\
                          ||--||     ";
 
 static std::string LOGO = "\
-     ██╗   ██╗ ██████╗██╗  ██╗ █████╗ ████████╗ \n\
-     ██║   ██║██╔════╝██║  ██║██╔══██╗╚══██╔══╝ \n\
-     ██║   ██║██║     ███████║███████║   ██║    \n\
-     ╚██╗ ██╔╝██║     ██╔══██║██╔══██║   ██║    \n\
-      ╚████╔╝ ╚██████╗██║  ██║██║  ██║   ██║    \n\
-       ╚═══╝   ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝    \n\
-                                                \n\
-                VChat 欢迎您...                 \n\
-                                                \n";
+                                                    \n\n\n\n\
+     ██╗   ██╗  ██████╗ ██╗  ██╗  █████╗  ████████╗ \n\
+     ██║   ██║ ██╔════╝ ██║  ██║ ██╔══██╗ ╚══██╔══╝ \n\
+     ██║   ██║ ██║      ███████║ ███████║    ██║    \n\
+     ╚██╗ ██╔╝ ██║      ██╔══██║ ██╔══██║    ██║    \n\
+      ╚████╔╝  ╚██████╗ ██║  ██║ ██║  ██║    ██║    \n\
+       ╚═══╝    ╚═════╝ ╚═╝  ╚═╝ ╚═╝  ╚═╝    ╚═╝    \n\
+                                                    \n\n\n";
 
 static std::string HELPINFO = "\
-                                                  \n\
-                  食用说明书                      \n\
-                                                  \n\
-一· 操作                                          \n\
-  上                                    Ctrl + p \n\
-  下                                    Ctrl + n \n\
-  左                                    Ctrl + b \n\
-  右                                    Ctrl + f \n\
-  确定                                  Enter    \n\
-                                                  \n \n \n \n \n \n \n \n";
+                                              \n\
+                 VChat Cook Book             \n\
+                                              \n\
+一·   window                                 \n\
+  Previous                          Ctrl + p\n\
+  Next                              Ctrl + n\n\
+  Back                              Ctrl + b\n\
+  Front                             Ctrl + f\n\
+  Enter                             Enter   \n\
+󱊷  Esc                               Cancel  \n\
+                                              \n\
+二.   telescope                              \n\
+󰻞  messages                          Ctrl + j\n\
+  friends                           Ctrl + k\n\
+  groups                            Ctrl + l\n\
+                                              \n\
+                                              \n\
+                                              \n";
 
 static std::string ABOUTINFO = "\
-                                   关于                                          \n\
-碎碎念:                                                                          \n\
-在功能上，本项目完成了基本的登陆注册，查询，添加和删除好友，与好友聊天等基础功能 \n\
-在测试上，测试覆盖率高达10%，基本没咋测试，仅仅是功能串起来好使罢了。            \n\
-在安全上，没有安全。                                                             \n\
-在性能上... 等等，还有性能？                                                     \n\
-                                                                                 \n\
-有关FTXUI：                                                                      \n\
-在这里强推一波 FTXUI，该库确实不错，非常适合像我这种C++新手阅读                  \n\
-而且尽管是TUI库，但很多效果都能实现，并且该库作者较为友好，提的issue都会认真回复 \n\
-在这里感谢FTXUI库的作者，他回答了我几个issue，要不然也不会有这个项目，hhh        \n\
-项目地址在这里：https://github.com/ArthurSonzogni/FTXUI，感兴趣的小伙伴可以去看看\n\
-                                                                                 \n\
-                                                                                 \n\n\n\n\n\
-                                                                菜狗作者: 执着   \n";
+                 󱍢  About VChat                  \n\
+                                                 \n\
+               TUI  󰭹  Chat    MIT             \n\
+                                                 \n\
+VChat is a TUI (Text User Interface) chat program\n\
+licensed under the MIT License.                  \n\
+The current version is 0.1.0. You can get the    \n\
+latest version from its repository:              \n\
+https://github.com/dty2/VChat                    \n\
+                                                 \n\
+I created VChat not only for my graduation       \n\
+project but also out of a personal passion.      \n\
+For the TUI, I used FTXUI, which can be found at \n\
+https://github.com/ArthurSonzogni/FTXUI          \n\
+                                                 \n\
+Reference program:                               \n\
+wechat, qq, vim, nvim, emacs,                    \n\
+nerdtree(vim plugin), airline(vim plugin)        \n\
+telescope(nvim plugin) dashboard(nvim plugin)    \n\
+noise(nvim plugin), ranger, alsamixer, polybar   \n\
+                                                 \n\
+                            Author: 执着(Hunter) \n\
+                                                 \n";
 
 } // namespace graph
+extern Component myinput(std::string*, const std::string, bool, const std::string cursor = "│");
 extern Elements split(std::string);
 extern Element paragraph_imp(std::string);
 

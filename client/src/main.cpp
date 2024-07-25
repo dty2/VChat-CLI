@@ -28,7 +28,6 @@
 #include "function.h"
 #include <filesystem>
 
-ABSL_FLAG(std::string, language, "EN",        "Default: EN(English). Option: EN(English), CH(Chinese)");
 ABSL_FLAG(std::string, address,  "127.0.0.1", "Default: 127.0.0.1");
 ABSL_FLAG(std::string, port,     "2500",      "Default: 2500");
 ABSL_FLAG(std::string, log_file, "",          "Default: running directory");
@@ -48,8 +47,7 @@ std::unique_ptr<Function> function = nullptr;
 int main(int argc, char **argv) {
   // parse command line
   absl::ParseCommandLine(argc, argv);
-  std::string language = absl::GetFlag(FLAGS_language),
-              address  = absl::GetFlag(FLAGS_address),
+  std::string address  = absl::GetFlag(FLAGS_address),
               port     = absl::GetFlag(FLAGS_port),
               logfile  = absl::GetFlag(FLAGS_log_file);
   if (logfile.empty()) logfile = std::filesystem::current_path();
@@ -58,7 +56,7 @@ int main(int argc, char **argv) {
   try {
     Info::getinstance();
     function = std::make_unique<Function>(address, port);
-    Tui ui(language);
+    Tui ui;
   } catch (const std::exception &e) {
     LOG(ERROR) << e.what();
   }

@@ -26,28 +26,23 @@
 #include "ui.h"
 #include "dashboard.h"
 #include "vchat.h"
-#include "help.h"
-#include "about.h"
 #include "function.h"
+
+extern std::unique_ptr<Function> function;
+extern ScreenInteractive* screen; // define at tui.cpp
 
 using namespace ftxui;
 
 class Tui {
 private:
-  std::string language;
-  int now_page;
-  std::unique_ptr<dashboard::Dashboard> dashboard;
-  std::unique_ptr<vchat::Vchat> chat;
-  std::unique_ptr<Help> help;
-  std::unique_ptr<About> about;
-  void changewindow(int);
+  int selected = 0;
+  dashboard::Dashboard* dashboard;
+  Vchat* vchat;
   Component content;
 
 public:
   void postevent(std::string); // post a new event
-  Tui(std::string);
+  Tui();
 };
-
-extern std::unique_ptr<Function> function;
 
 #endif // TUI_H

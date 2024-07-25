@@ -136,13 +136,15 @@ void Function::handle_addfd(int op, Json::Value &value) {
       int id = value["userid"].asInt();
       std::string name = value["username"].asString();
       Info::info->friendinfo[id] = FriendInfo(id, name);
+      Info::info->requestaddlist[value["userid"].asInt()].second = 1;
     });
   }
 }
 
 void Function::handle_addfd(Json::Value &value) {
   Info::info->change([&] {
-    Info::info->requestaddlist[value["userid"].asInt()] = value;
+    Info::info->requestaddlist[value["userid"].asInt()].first = value;
+    Info::info->requestaddlist[value["userid"].asInt()].second = 0;
   });
 }
 
@@ -249,7 +251,7 @@ bool Function::addfriend(int id) {
 }
 
 bool Function::responseadd(int id, bool isagree) {
-  Json::Value receiveinfo = Info::info->requestaddlist[id];
+  Json::Value receiveinfo = Info::info->requestaddlist[id].first;
   Json::Value sendinfo;
   sendinfo["userid"] = Info::info->myself.id;
   sendinfo["username"] = Info::info->myself.username;

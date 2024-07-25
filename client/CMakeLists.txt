@@ -27,12 +27,11 @@ list(APPEND SOURCES
   "${SRC_DIR}/net.cpp"
   "${SRC_DIR}/data/package.cpp"
   "${SRC_DIR}/data/info.cpp"
-  "${SRC_DIR}/ui/ui.cpp"
+  "${SRC_DIR}/ui/tool.cpp"
   "${SRC_DIR}/ui/tui.cpp"
   "${SRC_DIR}/ui/dashboard.cpp"
+  "${SRC_DIR}/ui/telescope.cpp"
   "${SRC_DIR}/ui/vchat.cpp"
-  "${SRC_DIR}/ui/help.cpp"
-  "${SRC_DIR}/ui/about.cpp"
 )
 
 # .out file

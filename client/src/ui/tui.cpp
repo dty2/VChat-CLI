@@ -24,34 +24,28 @@
 
 ScreenInteractive* screen;
 
-Tui::Tui(std::string language_)
-  : language(language_) {
+Tui::Tui() {
   screen = new ScreenInteractive(ScreenInteractive::Fullscreen());
-  this->now_page = DASHBOARD;
-  dashboard = std::make_unique<dashboard::Dashboard>(now_page);
-  help = std::make_unique<Help>(now_page);
-  about = std::make_unique<About>(now_page);
-  auto cpages = Container::Tab({
-    dashboard->content,
-    help->content,
-    about->content
-  }, &now_page);
-  auto rpages = Renderer(cpages, [=]{ return cpages->Render() | flex | color(Color::Blue); });
-  auto epages = CatchEvent(rpages, [&](Event event){
+  dashboard = new dashboard::Dashboard();
+  auto cmain = Container::Tab({ dashboard->content }, &selected);
+  auto rmain = Renderer(cmain, [=]{ return cmain->Render() | flex; });
+  auto emain = CatchEvent(rmain, [&](Event event){
     if(event == Event::Special("login_suc")) {
-      LOG(INFO) << "Catch a event login_suc";
-      chat = std::make_unique<vchat::Vchat>(now_page);
-      cpages->Add(chat->content);
+      vchat = new Vchat();
+      cmain->DetachAllChildren();
+      cmain->Add(vchat->content);
+      delete dashboard;
+      return true;
     }
     return false;
   });
-  this->content = epages;
-  now_page = DASHBOARD;
+  this->content = emain;
   std::thread t([&]{
     function->postevent = std::bind(&Tui::postevent, this, std::placeholders::_1);
     function->start();
   });
   screen->Loop(content);
+  delete screen;
   function->end();
   t.join();
 }
