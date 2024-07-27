@@ -25,7 +25,6 @@
 
 #include "ui.h"
 #include "function.h"
-#include "telescope.h"
 #include "data.hpp"
 
 extern ScreenInteractive* screen;
@@ -66,21 +65,34 @@ public:
   Friend(int);
 };
 
+class Telescope;
+
 // vchat
 class Vchat {
 private:
-  int telescope_selected = CHAT;
   int selected = 0;
   int page_selected = 0;
   int dialog_selected = 0;
-  Telescope telescope;
+  Telescope* telescope;
   Component dialog;
+  Component help; // Help page
+  Component about; // About page
+  void init_help(); // init Help page
+  void init_about(); // init about page
+  void init_page(); // init all page
+  void open(Component target);
+  void close();
+  Components pages;
 
 public:
-  void createdialog(Component);
-  Components pages;
+  Component page;
   Component content;
+  void open_chat(int);
+  void open_friend(int);
+  void open_other(bool);
+  void close(int kinds);
   Vchat();
+  ~Vchat();
   Vchat(Vchat &&) = delete;
   Vchat(const Vchat &) = delete;
 };

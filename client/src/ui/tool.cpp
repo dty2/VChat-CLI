@@ -50,14 +50,18 @@ Component myinput(std::string *ss, const std::string placeholder,
     Element show;
     if (focused) {
       if (ispassword) {
-        std::string temp = *ss;
-        show = text(temp.assign(temp.size(), '*') + cursor);
+        std::string password;
+        for(int i = 0 ; i < ss->size(); i ++)
+          password += "•";
+        show = text(password + cursor);
       }
       else show = text(*ss + cursor);
     } else {
       if (ispassword) {
-        std::string temp = *ss;
-        show = text(temp.assign(temp.size(), '*'));
+        std::string password;
+        for(int i = 0 ; i < ss->size(); i ++)
+          password += "•";
+        show = text(password + cursor);
       }
       else show = text(*ss);
       if (!ss->size()) show = text(placeholder);

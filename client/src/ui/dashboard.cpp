@@ -120,11 +120,7 @@ void Dashboard::init_help() {
   auto rmain = Renderer(cmain, [=]{
     return vbox( paragraph_imp(graph::HELPINFO_CN), cmain->Render() | center) | center;
   });
-  auto emain = CatchEvent(rmain, [&](Event event){
-    if(event == Event::Return) return false;
-    return true;
-  });
-  this->help = emain | color(Color::Blue);
+  this->help = rmain | color(Color::Blue);
 }
 
 void Dashboard::init_about() {
@@ -132,11 +128,7 @@ void Dashboard::init_about() {
   auto rmain = Renderer(cmain, [=]{
     return vbox( paragraph_imp(graph::ABOUTINFO_CN), cmain->Render() | center) | center;
   });
-  auto emain = CatchEvent(rmain, [&](Event event){
-    if(event == Event::Return) return false;
-    return true;
-  });
-  this->about = emain | color(Color::Blue);
+  this->about = rmain | color(Color::Blue);
 }
 
 Dashboard::Dashboard() : log(this), sign(this) {

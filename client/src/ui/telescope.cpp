@@ -79,6 +79,27 @@ Common::Common(Telescope* telescope) {
     if(event == Event::CtrlN) { if(selected != 6) selected ++; return true; }
     else if(event == Event::CtrlP) { if(selected != 1) selected --; return true; }
     else if(event == Event::Return) {
+      switch (selected) {
+        case 1 : screen->Exit(); break;
+        case 2 : telescope->vchat->open_other(1); break;
+        case 3 : telescope->vchat->open_other(0); break;
+        case 4 :
+          telescope->selected = INPUT;
+          telescope->inform.selected = Info::info->requestaddlist.size();
+          telescope->list_selected = GROUP;
+          break;
+        case 5 :
+          telescope->selected = INPUT;
+          telescope->chats.selected = 1;
+          telescope->list_selected = CHAT;
+          break;
+        case 6 :
+          telescope->selected = INPUT;
+          telescope->friends.selected = 1;
+          telescope->list_selected = FRIEND;
+          break;
+      }
+      *(telescope->toggle) = 0;
       return true;
     }
     return true;
@@ -151,8 +172,10 @@ Chats::Chats(Telescope* telescope) {
     if (event == Event::CtrlN) {
       if(selected != Info::info->friendinfo.size()) selected ++;
     } else if (event == Event::CtrlP) {
-      if(selected) selected --;
-    } else if(event == Event::Return) { return true; } // TODO:
+      if(selected != 1) selected --;
+    } else if(event == Event::Return) {
+      telescope->vchat->open_chat(selected);
+    }
     return false;
   });
   this->list = elist;
@@ -208,7 +231,7 @@ Friends::Friends(Telescope* telescope) {
   });
   auto elist = CatchEvent(rlist, [&](Event event){
     if(event == Event::CtrlP) {
-      if (selected) selected --;
+      if (selected != 1) selected --;
     } else if(event == Event::CtrlN) {
       if (selected != Info::info->friendinfo.size()) selected ++;
     } else if(event == Event::Return) { return true; } // TODO:
@@ -256,12 +279,6 @@ Inform::Inform(Telescope *telescope) {
     } else if(event == Event::CtrlP) {
       if(selected) selected --;
     } else if(event == Event::Return) {
-      telescope->vchat->createdialog(
-        Container::Vertical({
-          Button(" Yes ", [=]{ function->responseadd(id[selected], 1); }),
-          Button(" No ", [=]{ function->responseadd(id[selected], 0); })
-        })
-      );
       return true;
     }
     return false;
@@ -269,19 +286,27 @@ Inform::Inform(Telescope *telescope) {
   this->list = elist;
 }
 
-Telescope::Telescope(Vchat *vchat_, int *toggle_)
-  : common(this), chats(this), friends(this), inform(this), toggle(toggle_) {
-  Telescope::vchat = vchat_;
-  auto cinput = myinput(&ss, "", false, "󱍢 ");
-  auto rinput = Renderer(cinput, [=]{
+Telescope::Input::Input() {
+  auto cmain = myinput(&ss, "", false, "󱍢 ");
+  auto rmain = Renderer(cmain, [=]{
     return window(
       text("  搜索 ") | center,
-      hbox(text("   "), cinput->Render()),
+      hbox(text("   "), cmain->Render()),
       LIGHT
     ) | color(Color::Green);
   });
+  auto emain = CatchEvent(rmain, [=](Event event){
+    return false;
+  });
+  this->content = emain;
+}
+
+Telescope::Telescope(Vchat *vchat_, int *toggle_)
+  : common(this), chats(this), friends(this), inform(this), toggle(toggle_) {
+  Telescope::vchat = vchat_;
+  list_selected = -1;
   auto clist = Container::Tab({common.list, chats.list, friends.list}, &list_selected);
-  auto cmain = Container::Vertical({clist, rinput}, &selected);
+  auto cmain = Container::Vertical({clist, input.content}, &selected);
   auto rmain = Renderer(cmain, [=]{
     if (list_selected == COMMON) {
       return hbox(cmain->Render(), common.previews[common.selected]);
@@ -299,30 +324,31 @@ Telescope::Telescope(Vchat *vchat_, int *toggle_)
       selected = INPUT;
       common.selected = 6;
       list_selected = COMMON;
-    } else if (event == Event::CtrlJ) {
+      return true;
+    } else if (event == Event::CtrlK) {
       selected = INPUT;
       chats.selected = 1;
       list_selected = CHAT;
       return true;
-    } else if (event == Event::CtrlK) {
+    } else if (event == Event::CtrlL) {
       selected = INPUT;
       friends.selected = 1;
       list_selected = FRIEND;
       return true;
-    } else if (event == Event::CtrlL) {
+    } else if (event == Event::Special(";")) {
       selected = INPUT;
       inform.selected = Info::info->requestaddlist.size();
       list_selected = GROUP;
       return true;
     } else if (event == Event::CtrlN || event == Event::CtrlP) {
-      if(cinput->Focused()) { clist->TakeFocus(); return true; }
+      if(input.content->Focused()) { clist->TakeFocus(); return true; }
       clist->TakeFocus();
       return false;
     } else if (event == Event::Escape) {
       *toggle = *toggle ? 0 : 1;
-    } else {
-      cinput->TakeFocus();
-    }
+    } else if (event == Event::Return) {
+      return false;
+    } else input.content->TakeFocus();
     return false;
   });
   this->content = emain;

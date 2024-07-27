@@ -75,15 +75,19 @@ public:
 
 class Telescope {
 private:
+  struct Input {
+    std::string ss;
+    Component content;
+    Input();
+  }input;
+
+public:
   Common common;
   Chats chats;
   Friends friends;
   Inform inform;
-  std::string ss;
-  int selected = INPUT;
+  int selected = LIST;
   int list_selected = CHAT;
-
-public:
   int *toggle;
   Vchat *vchat;
   Telescope(Vchat*, int*);

@@ -145,9 +145,11 @@ noise(nvim 插件), ranger, alsamixer, polybar     \n\
                             作者: 执着(Hunter)   \n\
                                                  \n";
 } // namespace graph
+
+// tools.cpp
 extern Component myinput(std::string*, const std::string, bool, const std::string cursor = "│");
+extern Element myseparator();
 extern Elements split(std::string);
 extern Element paragraph_imp(std::string);
-extern Element myseparator();
 
 #endif // UI_H

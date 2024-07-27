@@ -74,7 +74,7 @@ Chat::List::List(Chat *chat) {
   this->content = elist | flex;
 }
 
-// input
+// chat input
 Chat::InputBox::InputBox(Chat *chat) {
   auto cinput = Input(&ss, "Press ctrl + y to send your message");
   auto rinput = Renderer(cinput, [=]{
@@ -130,7 +130,7 @@ Chat::Chat(int id_)
   this->content = echat | flex;
 }
 
-// myself page
+// friend
 Friend::Friend(int id_) : id(id_) {
   auto container = Container::Horizontal({
     Button(" 󰚼  Edit", [&]{
@@ -161,28 +161,52 @@ Friend::Friend(int id_) : id(id_) {
   this->content = econtainer | flex | borderLight;
 }
 
-void Vchat::createdialog(Component content) {
-  dialog->Add(content);
+// init help page
+void Vchat::init_help() {
+  auto cmain = Button("  关闭 ", [&]{ }, ButtonOption::Ascii());
+  auto rmain = Renderer(cmain, [=]{
+    auto show = vbox(
+      paragraph_imp(graph::HELPINFO_CN),
+      cmain->Render() | center
+    ) | center;
+    return window(text("   食用说明书 "), show, LIGHT) | color(Color::Blue);
+  });
+  this->help = rmain;
 }
 
-// main show
-Vchat::Vchat() : telescope(this, &selected) {
+// init about page
+void Vchat::init_about() {
+  auto cmain = Button("  关闭 ", [&]{ }, ButtonOption::Ascii());
+  auto rmain = Renderer(cmain, [=]{
+    auto show = vbox(
+      paragraph_imp(graph::ABOUTINFO_CN),
+      cmain->Render() | center
+    ) | center;
+    return window(text(" 󱍢  关于 VChat "), show, LIGHT) | color(Color::Blue);
+  });
+  this->about = rmain;
+}
+
+// init all page
+void Vchat::init_page() {
+  init_about();
+  init_help();
   pages.emplace_back(Renderer([](bool focused){ return text(""); }));
   for(auto& v : Info::info->friendinfo)
     Chat::chats[v.first] = new Chat(v.first);
   for(auto& v : Info::info->friendinfo)
     Friend::friends[v.first] = new Friend(v.first);
-  auto cpage = Container::Horizontal({}, &page_selected);
-  auto rpage = Renderer(cpage, [=]{
-    cpage->DetachAllChildren();
-    for(auto& v : pages) cpage->Add(v);
+  auto cmain = Container::Horizontal({}, &page_selected);
+  auto rmain = Renderer(cmain, [=]{
+    cmain->DetachAllChildren();
+    for(auto& v : pages) cmain->Add(v);
     Element show;
-    if (cpage->ChildCount() == 1)
+    if (cmain->ChildCount() == 1)
       show = hbox(paragraph_imp(graph::LOGO) | color(Color::Blue)) | center;
-    else show = dbox(paragraph_imp(graph::LOGO) | color(Color::Blue), cpage->Render() | clear_under | center);
+    else show = dbox(paragraph_imp(graph::LOGO) | color(Color::Blue), cmain->Render() | clear_under | center);
     return show;
   });
-  auto epage = CatchEvent(rpage, [&](Event event){
+  auto emain= CatchEvent(rmain, [&](Event event){
     if(event == Event::CtrlF) {
       if(page_selected) page_selected --;
     } else if(event == Event::CtrlB) {
@@ -190,7 +214,25 @@ Vchat::Vchat() : telescope(this, &selected) {
     }
     return false;
   });
-  auto cmain = Container::Tab({epage, telescope.content}, &selected);
+  this->page = emain;
+}
+
+// add a page to pages
+void Vchat::open(Component target) {
+  pages.emplace_back(target);
+}
+
+// delete a page to pages
+void Vchat::close(int target) {
+  if (target) pages.pop_back();
+  else pages.erase(pages.begin());
+}
+
+// vchat
+Vchat::Vchat() {
+  telescope = new Telescope(this, &selected);
+  init_page();
+  auto cmain = Container::Tab({page, telescope->content}, &selected);
   auto rmain = Renderer(cmain, [=]{
     Elements status;
     status.emplace_back(text("[   VChat >") | color(Color::Blue));
@@ -202,25 +244,62 @@ Vchat::Vchat() : telescope(this, &selected) {
     status.emplace_back(text("< 提示 ]") | color(Color::Blue));
     if(selected) return vbox(
       dbox(
-        epage->Render() | flex,
-        telescope.content->Render() | clear_under | center
+        page->Render() | flex,
+        telescope->content->Render() | clear_under | center
       ) | flex,
       text(" ") | underlined | color(Color::Blue),
       hbox(status)
     );
     return vbox(
-      epage->Render() | flex,
+      page->Render() | flex,
       text(" ") | underlined | color(Color::Blue),
       hbox(status)
     );
   });
   auto emain = CatchEvent(rmain, [=](Event event) {
-    if(event == Event::CtrlO || event == Event::CtrlJ
-      || event == Event::CtrlK || event == Event::CtrlL) {
-      selected = 1;
-      return false;
+    if(event == Event::CtrlO) {
+      if (telescope->list_selected == -1) {
+        selected = 1;
+        return false;
+      } else if(telescope->list_selected == COMMON) {
+        selected = 0;
+        telescope->list_selected = -1;
+        return false;
+      } else return false;
+    } else if(event == Event::CtrlK) {
+      if (telescope->list_selected == -1) {
+        selected = 1;
+        return false;
+      } else if(telescope->list_selected == CHAT) {
+        selected = 0;
+        telescope->list_selected = -1;
+        return false;
+      } else return false;
+    } else if(event == Event::CtrlL) {
+      if (telescope->list_selected == -1) {
+        selected = 1;
+        return false;
+      } else if(telescope->list_selected == FRIEND) {
+        selected = 0;
+        telescope->list_selected = -1;
+        return false;
+      } else return false;
+    } else if(event == Event::Special(";")) {
+      if (telescope->list_selected == -1) {
+        selected = 1;
+        return false;
+      } else if(telescope->list_selected == GROUP) {
+        selected = 0;
+        telescope->list_selected = -1;
+        return false;
+      } else return false;
     } else if(event == Event::Escape) {
-      if (selected) { selected = 0; return true; }
+      if (selected) {
+        selected = 0;
+        telescope->selected = INPUT;
+        telescope->list_selected = -1;
+        return true;
+      }
     } else if(event == Event::Special("accept_addfd")) {
       for(auto& v : Info::info->requestaddlist)
         if(v.second.second) {
@@ -232,4 +311,21 @@ Vchat::Vchat() : telescope(this, &selected) {
     return false;
   });
   this->content = emain;
+}
+
+Vchat::~Vchat() {
+  delete telescope;
+}
+
+void Vchat::open_chat(int id) {
+  open(Chat::chats[id]->content);
+}
+
+void Vchat::open_friend(int id) {
+  open(Friend::friends[id]->content);
+}
+
+void Vchat::open_other(bool target) {
+  if (target) { open(about); return; }
+  open(help);
 }
