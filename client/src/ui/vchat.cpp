@@ -21,8 +21,9 @@
  */
 
 #include "vchat.h"
+#include "dashboard.h"
 #include "telescope.h"
-#include <ftxui/component/component.hpp>
+#include "ui.h"
 
 std::unordered_map<int, struct Chat*> Chat::chats;
 std::unordered_map<int, struct Friend*> Friend::friends;
@@ -166,15 +167,20 @@ void Vchat::createdialog(Component content) {
 
 // main show
 Vchat::Vchat() : telescope(this, &selected) {
+  pages.emplace_back(Renderer([](bool focused){ return text(""); }));
   for(auto& v : Info::info->friendinfo)
     Chat::chats[v.first] = new Chat(v.first);
   for(auto& v : Info::info->friendinfo)
     Friend::friends[v.first] = new Friend(v.first);
-  auto cpage = Container::Horizontal(pages, &page_selected);
+  auto cpage = Container::Horizontal({}, &page_selected);
   auto rpage = Renderer(cpage, [=]{
     cpage->DetachAllChildren();
     for(auto& v : pages) cpage->Add(v);
-    return cpage->Render();
+    Element show;
+    if (cpage->ChildCount() == 1)
+      show = hbox(paragraph_imp(graph::LOGO) | color(Color::Blue)) | center;
+    else show = dbox(paragraph_imp(graph::LOGO) | color(Color::Blue), cpage->Render() | clear_under | center);
+    return show;
   });
   auto epage = CatchEvent(rpage, [&](Event event){
     if(event == Event::CtrlF) {
@@ -184,55 +190,38 @@ Vchat::Vchat() : telescope(this, &selected) {
     }
     return false;
   });
-  auto cdialog = Container::Tab({epage}, &dialog_selected);
-  auto rdialog = Renderer(cdialog, [=]{
-    if (dialog->ChildCount()) {
-      cdialog->Add(dialog);
-    }
-    return cdialog->Render();
-  });
-  auto cmain = Container::Tab({}, &selected) | flex;
+  auto cmain = Container::Tab({epage, telescope.content}, &selected);
   auto rmain = Renderer(cmain, [=]{
-    cmain->DetachAllChildren();
     Elements status;
-    // colors is at the bottom in this file
-    status.emplace_back(
-      text("   VChat ") | color(Color::Blue) | bgcolor(Color::RGB(21, 101, 192)));
-    status.emplace_back(
-      text(" ") | color(Color::RGB(21, 101, 192)) | bgcolor(Color::RGB(30, 136, 229)));
-    if (selected) {
-      status.emplace_back(
-        text("  望远镜 ") | color(Color::Blue) | bgcolor(Color::RGB(30, 136, 229)));
-      status.emplace_back(
-        text(" ") | color(Color::RGB(30, 136, 229)) | bgcolor(Color::RGB(66, 165, 245)));
-      status.emplace_back(filler() | bgcolor(Color::RGB(66, 165, 245)));
-      status.emplace_back(text(" ") | bgcolor(Color::RGB(66, 165, 245)));
-    }
-    else {
-      status.emplace_back(
-        text("  窗口 ") | color(Color::Blue) | bgcolor(Color::RGB(30, 136, 229)));
-      status.emplace_back(
-        text(" ") | color(Color::RGB(30, 136, 229)) | bgcolor(Color::RGB(66, 165, 245)));
-      status.emplace_back(filler() | bgcolor(Color::RGB(66, 165, 245)));
-      status.emplace_back(text(" ") | bgcolor(Color::RGB(66, 165, 245)));
-    }
-    cmain->Add(rdialog);
-    Component show;
-    if(selected) {
-      show = telescope.gettelescope(telescope_selected);
-      cmain->Add(show);
-    }
+    status.emplace_back(text("[   VChat >") | color(Color::Blue));
+    if (selected) status.emplace_back(text("  望远镜 >") | color(Color::Blue));
+    else status.emplace_back(text("  窗口 >") | color(Color::Blue));
+    if(!pages.size()) status.emplace_back(text(" 背景 >") | color(Color::Blue));
+    else status.emplace_back(text(" 小明 >") | color(Color::Blue));
+    status.emplace_back(filler());
+    status.emplace_back(text("< 提示 ]") | color(Color::Blue));
     if(selected) return vbox(
       dbox(
-        epage->Render(),
-        show->Render() | clear_under | center
+        epage->Render() | flex,
+        telescope.content->Render() | clear_under | center
       ) | flex,
+      text(" ") | underlined | color(Color::Blue),
       hbox(status)
     );
-    return vbox(epage->Render() | flex, hbox(status));
+    return vbox(
+      epage->Render() | flex,
+      text(" ") | underlined | color(Color::Blue),
+      hbox(status)
+    );
   });
   auto emain = CatchEvent(rmain, [=](Event event) {
-    if(event == Event::Special("accept_addfd")) {
+    if(event == Event::CtrlO || event == Event::CtrlJ
+      || event == Event::CtrlK || event == Event::CtrlL) {
+      selected = 1;
+      return false;
+    } else if(event == Event::Escape) {
+      if (selected) { selected = 0; return true; }
+    } else if(event == Event::Special("accept_addfd")) {
       for(auto& v : Info::info->requestaddlist)
         if(v.second.second) {
           Chat::chats[v.first] = new Chat(v.first);
@@ -242,18 +231,5 @@ Vchat::Vchat() : telescope(this, &selected) {
     }
     return false;
   });
-  //this->content = emain;
-  this->content = Button("test", []{});
+  this->content = emain;
 }
-
-/*
-  * blue
-  * 0D47A1 -> RGB (13, 71, 161)
-  * 1565C0 -> RGB (21, 101, 192)
-  * 1976D2 -> RGB (25, 118, 210)
-  * 1E88E5 -> RGB (30, 136, 229)
-  * 2196F3 -> RGB (33, 150, 243)
-  * 42A5F5 -> RGB (66, 165, 245)
-  * 64B5F6 -> RGB (100, 181, 246)
-  * 90CAF9 -> RGB (144, 202, 249)
-  */

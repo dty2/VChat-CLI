@@ -49,7 +49,6 @@ void Net::start() {
 Net::~Net() { free(head); free(body); }
 
 void Net::close() {
-  this->socket.close();
   this->io.stop();
 }
 

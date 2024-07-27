@@ -21,49 +21,135 @@
  */
 
 #include "telescope.h"
+#include "ui.h"
 #include "vchat.h"
 
-int Chats::selected;
-int Friends::selected;
-int Inform::selected;
+Common::Common(Telescope* telescope) {
+  for(int i = 1; i < 7; i ++) {
+    Element show;
+    switch (i) {
+      case 1 : show = text("退出VChat"); break;
+      case 2 : show = text("帮助页面");  break;
+      case 3 : show = text("关于页面");  break;
+      case 4 : show = text("群组列表");  break;
+      case 5 : show = text("好友列表");  break;
+      case 6 : show = text("消息列表");  break;
+    }
+    previews[i] = window(text(" 󰐩  预览 ") | center, show, LIGHT)
+    | size(WIDTH, EQUAL, 30) | size(HEIGHT, EQUAL, 15) | color(Color::Yellow);
+  }
+  auto clist = Container::Vertical({
+    Renderer([=](bool focused){ return filler(); }),
+    Renderer([=](bool focused){
+      if(focused) return hbox(text("󱍢 "), text("󰩈 退出"), filler())
+      | bgcolor(Color::Blue) | color(Color::Yellow);
+      else return hbox(text(" 󰩈 退出"), filler());
+    }),
+    Renderer([=](bool focused){
+      if(focused) return hbox(text("󱍢 "), text(" 关于"), filler())
+      | bgcolor(Color::Blue) | color(Color::Yellow);
+      else return hbox(text("  关于"), filler());
+    }),
+    Renderer([=](bool focused){
+      if(focused) return hbox(text("󱍢 "), text("󰞋 帮助"), filler())
+      | bgcolor(Color::Blue) | color(Color::Yellow);
+      else return hbox(text(" 󰞋 帮助"), filler());
+    }),
+    Renderer([=](bool focused){
+      if(focused) return hbox(text("󱍢 "), text(" 群组"), filler(), text("  Ctrl + l "))
+      | bgcolor(Color::Blue) | color(Color::Yellow);
+      else return hbox(text("  群组"), filler(), text("  Ctrl + l "));
+    }),
+    Renderer([=](bool focused){
+      if(focused) return hbox(text("󱍢 "), text(" 好友"), filler(), text("  Ctrl + k "))
+      | bgcolor(Color::Blue) | color(Color::Yellow);
+      else return hbox(text("  好友"), filler(), text("  Ctrl + k "));
+    }),
+    Renderer([=](bool focused){
+      if(focused) return hbox(text("󱍢 "), text("󰭹 消息"), filler(), text("  Ctrl + j "))
+      | bgcolor(Color::Blue) | color(Color::Yellow);
+      else return hbox(text(" 󰭹 消息"), filler(), text("  Ctrl + j "));
+    }),
+  }, &selected);
+  auto rlist = Renderer(clist, [=]{
+    return window(text(" 󰨝  选项 ") | center, clist->Render(), LIGHT)
+    | size(WIDTH, EQUAL, 40) | size(HEIGHT, EQUAL, 14) | color(Color::Blue);
+  });
+  auto elist = CatchEvent(rlist, [=](Event event) {
+    if(event == Event::CtrlN) { if(selected != 6) selected ++; return true; }
+    else if(event == Event::CtrlP) { if(selected != 1) selected --; return true; }
+    else if(event == Event::Return) {
+      return true;
+    }
+    return true;
+  });
+  this->list = elist;
+}
+
+void Chats::refresh_preview() {
+  for(auto& v : Info::info->friendinfo) {
+    int count = 1;
+    Elements show;
+    for(auto vv : Info::info->messageinfo[v.first]) {
+      if(vv.sender == v.first) {
+        show.emplace_back(hbox(text(" > "), text(vv.msg), filler()));
+      } else if(vv.receiver == v.first){
+        show.emplace_back(hbox(filler(), text(vv.msg), text(" < ")));
+      }
+    }
+    previews[count] =
+      window(text(" 󰐩  预览 ") | center, vbox(show) | flex, LIGHT)
+      | size(WIDTH, EQUAL, 30) | size(HEIGHT, EQUAL, 15) | color(Color::Yellow);
+    count ++;
+  }
+}
 
 Chats::Chats(Telescope* telescope) {
+  refresh_preview();
   auto clist = Container::Vertical({}, &selected);
   auto rlist = Renderer(clist, [=]{
     clist->DetachAllChildren();
     clist->Add(Renderer([=](bool focused){ return filler(); }));
+    int count = 1;
     for(auto& v : Info::info->friendinfo) {
       clist->Add(Renderer([=](bool focused){
-        auto show = hbox(
-          text("  " + v.second.friendname + " >"),
-          filler(),
-          text(Info::info->messageinfo[v.first].back().msg)
-        );
-        if(focused) return hbox(text("> "), show) | bgcolor(Color::Blue);
-        else return show;
-      }));
-      for(auto vv : Info::info->messageinfo[v.first]) {
+        int64_t time_int = Info::info->messageinfo[v.first].back().time;
+        std::string time_ss = std::to_string(time_int);
+        time_ss =
+          time_ss.substr(2, 2) + "月" +
+          time_ss.substr(4, 2) + "日" +
+          time_ss.substr(6, 2) + "时" +
+          time_ss.substr(8, 2) + "分";
         Element show;
-        if(vv.sender == v.first) {
-          show = hbox(text(" > "), text(vv.msg), filler());
-        } else if(vv.receiver == v.first){
-          show = hbox(filler(), text(vv.msg), text(" < "));
+        if(focused) {
+          show = hbox(
+            text("󱍢 " + v.second.friendname + " >"),
+            text(Info::info->messageinfo[v.first].back().msg),
+            filler(), text(time_ss)
+          ) | color(Color::Yellow) | bgcolor(Color::Blue);
+        } else {
+          show = hbox(
+            text(v.second.friendname + " >"),
+            text(Info::info->messageinfo[v.first].back().msg),
+            filler(), text(time_ss)
+          ) | color(Color::Blue) | bgcolor(Color::Default);
         }
-        previews[v.first] = window(text(" 󰐩  Preview "), vbox(show) | center, LIGHT);
-      }
+        return show;
+      }));
     }
+    refresh_preview();
     if(clist->ChildCount() == 1) {
       clist->DetachAllChildren();
       clist->Add(Renderer(
-        [=](bool focused){ return text("  no message infomation...") | center; })
+        [=](bool focused){ return text("  没有消息...") | center; })
       );
     }
-    return window(text(" 󰨝  Messages ") | center, clist->Render(), LIGHT)
-    | size(WIDTH, EQUAL, 40) | size(HEIGHT, EQUAL, 14);
+    return window(text(" 󰨝  消息 ") | center, clist->Render(), LIGHT)
+    | size(WIDTH, EQUAL, 40) | size(HEIGHT, EQUAL, 14) | color(Color::Blue);
   });
   auto elist = CatchEvent(rlist, [&](Event event){
     if (event == Event::CtrlN) {
-      if(selected != Info::info->messageinfo.size() - 1) selected ++;
+      if(selected != Info::info->friendinfo.size()) selected ++;
     } else if (event == Event::CtrlP) {
       if(selected) selected --;
     } else if(event == Event::Return) { return true; } // TODO:
@@ -72,37 +158,59 @@ Chats::Chats(Telescope* telescope) {
   this->list = elist;
 }
 
+void Friends::refresh_preview() {
+  for(auto v : Info::info->friendinfo) {
+    int count = 1;
+    previews[count] = window(
+      text(" 󰐩  预览 ") | center,
+      vbox(
+        text("[     ID    ] :" + std::to_string(v.first)),
+        text("[  Username ] :" + v.second.friendname)
+      ) | flex,
+      LIGHT
+    ) | size(WIDTH, EQUAL, 30)
+      | size(HEIGHT, EQUAL, 15)
+      | color(Color::Yellow);
+    count ++;
+  }
+}
+
 Friends::Friends(Telescope* telescope) {
+  refresh_preview();
   auto clist = Container::Vertical({}, &selected);
   auto rlist = Renderer(clist, [=]{
     clist->DetachAllChildren();
     clist->Add(Renderer([=](bool focused){ return filler(); }));
     for(auto v : Info::info->friendinfo) {
       clist->Add(Renderer([=](bool focused){
-        auto show = hbox(
-          text("  " + v.second.friendname + ' '),
-          filler()
-        );
-        if(focused) return hbox(text("> "), show) | bgcolor(Color::Blue);
-        else return show;
+        Element show;
+        if(focused) {
+          show = hbox(
+            text("󱍢 " + v.second.friendname),
+            filler()
+          ) | color(Color::Yellow) | bgcolor(Color::Blue);
+        } else {
+          show = hbox(
+            text(v.second.friendname),
+            filler()
+          ) | color(Color::Blue) | bgcolor(Color::Default);
+        }
+        return show;
       }));
-      previews[v.first] = window(text(" 󰐩  Preview "), vbox(
-        text("[     ID    ] :" + std::to_string(v.first)),
-        text("[  Username ] :" + v.second.friendname)
-      ) | center, LIGHT);
     }
+    refresh_preview();
     if(clist->ChildCount() == 1) {
       clist->DetachAllChildren();
-      clist->Add(Renderer([=](bool focused){ return text("  no friends...") | center; }));
+      clist->Add(Renderer([=](bool focused){ return text("  没有朋友...") | center; }));
     }
-    return window(text(" 󰨝  Friends ") | center, clist->Render(), LIGHT)
-    | size(WIDTH, EQUAL, 40) | size(HEIGHT, EQUAL, 14);
+    return window(text(" 󰨝  朋友 ") | center, clist->Render(), LIGHT)
+    | size(WIDTH, EQUAL, 40) | size(HEIGHT, EQUAL, 14) | color(Color::Blue);
   });
   auto elist = CatchEvent(rlist, [&](Event event){
     if(event == Event::CtrlP) {
       if (selected) selected --;
     } else if(event == Event::CtrlN) {
-      if (selected != Info::info->friendinfo.size() - 1) selected ++;
+      if (selected != Info::info->friendinfo.size()) selected ++;
     } else if(event == Event::Return) { return true; } // TODO:
     return false;
   });
@@ -162,49 +270,62 @@ Inform::Inform(Telescope *telescope) {
 }
 
 Telescope::Telescope(Vchat *vchat_, int *toggle_)
-  : chats(this), friends(this), toggle(toggle_) {
+  : common(this), chats(this), friends(this), inform(this), toggle(toggle_) {
   Telescope::vchat = vchat_;
-  auto cinput = Input(&ss, "");
+  auto cinput = myinput(&ss, "", false, "󱍢 ");
   auto rinput = Renderer(cinput, [=]{
-    return window(text("  搜索 ") | center, cinput->Render(), LIGHT);
+    return window(
+      text("  搜索 ") | center,
+      hbox(text("   "), cinput->Render()),
+      LIGHT
+    ) | color(Color::Green);
   });
-  input = rinput;
-  auto clist = Container::Tab({chats.list, friends.list}, &selected);
-  auto elist = CatchEvent(clist, [&](Event event){
-    if(event == Event::CtrlJ) {
-      if(selected == CHAT) selected ++;
-    } else if(event == Event::CtrlK) {
-      if(selected == FRIEND) selected --;
-    }
-    return false;
-  });
-  auto cmain = Container::Vertical({ elist, input }, &selected);
+  auto clist = Container::Tab({common.list, chats.list, friends.list}, &list_selected);
+  auto cmain = Container::Vertical({clist, rinput}, &selected);
   auto rmain = Renderer(cmain, [=]{
-    if (selected == CHAT)
-      return hbox(cmain->Render(), chats.previews[Chats::selected]);
-    else if (selected == FRIEND)
-      return hbox(cmain->Render(), friends.previews[Friends::selected]);
+    if (list_selected == COMMON) {
+      return hbox(cmain->Render(), common.previews[common.selected]);
+    } else if (list_selected == CHAT) {
+      return hbox(cmain->Render(), chats.previews[1]);
+    } else if (list_selected == FRIEND) {
+      return hbox(cmain->Render(), friends.previews[friends.selected]);
+    } else if (list_selected == FRIEND) {
+      return hbox(cmain->Render(), friends.previews[inform.selected]);
+    }
     return text("Error");
   });
-  auto emain = CatchEvent(rmain, [&](Event event){
-    if (event == Event::CtrlN
-        || event == Event::CtrlP
-        || event == Event::CtrlJ
-        || event == Event::CtrlK
-        || event == Event::Return
-      ) {
+  auto emain = CatchEvent(rmain, [=](Event event){
+    if (event == Event::CtrlO) {
+      selected = INPUT;
+      common.selected = 6;
+      list_selected = COMMON;
+    } else if (event == Event::CtrlJ) {
+      selected = INPUT;
+      chats.selected = 1;
+      list_selected = CHAT;
+      return true;
+    } else if (event == Event::CtrlK) {
+      selected = INPUT;
+      friends.selected = 1;
+      list_selected = FRIEND;
+      return true;
+    } else if (event == Event::CtrlL) {
+      selected = INPUT;
+      inform.selected = Info::info->requestaddlist.size();
+      list_selected = GROUP;
+      return true;
+    } else if (event == Event::CtrlN || event == Event::CtrlP) {
+      if(cinput->Focused()) { clist->TakeFocus(); return true; }
       clist->TakeFocus();
       return false;
+    } else if (event == Event::Escape) {
+      *toggle = *toggle ? 0 : 1;
+    } else {
+      cinput->TakeFocus();
     }
-    else input->TakeFocus();
     return false;
   });
-  this->content = emain | center;
+  this->content = emain;
 }
 
 Telescope::~Telescope() {}
-
-Component Telescope::gettelescope(int selected_) {
-  this->selected = selected_;
-  return this->content;
-}

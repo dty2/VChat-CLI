@@ -21,6 +21,9 @@
  */
 
 #include "ui.h"
+#include <ftxui/dom/elements.hpp>
+#include <ftxui/dom/node.hpp>
+#include <ftxui/screen/color.hpp>
 #include <string>
 
 // offered by ftxui author see more for

@@ -81,6 +81,8 @@ public:
   Components pages;
   Component content;
   Vchat();
+  Vchat(Vchat &&) = delete;
+  Vchat(const Vchat &) = delete;
 };
 
 #endif // VCHAT_H

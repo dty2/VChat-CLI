@@ -25,6 +25,7 @@
 
 #include "common.h"
 #include "data.hpp"
+#include <unordered_set>
 #include <utility>
 
 class Info {

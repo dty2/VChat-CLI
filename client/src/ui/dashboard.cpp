@@ -26,16 +26,16 @@
 namespace dashboard {
 
 Dashboard::Log::Log(Dashboard* dashboard) {
-  auto cid = myinput(&id, "input id", false, "󱍢 ") | size(WIDTH, EQUAL, 20);
-  auto cpassword = myinput(&password, "input password", true, "󱍢 ")
+  auto cid = myinput(&id, "", false, "󱍢 ") | size(WIDTH, EQUAL, 20);
+  auto cpassword = myinput(&password, "", true, "󱍢 ")
     | size(WIDTH, EQUAL, 20);
   auto cinput = Container::Vertical({
     Renderer(cid, [=]{
-      return hbox(text("[    ID    ]: "), cid->Render() | bgcolor(Color::Default)); }),
+      return hbox(text("[ 账号 ]: "), cid->Render() | bgcolor(Color::Default)); }),
     Renderer(cpassword, [=]{
-      return hbox(text("[ USERNAME ]: "), cpassword->Render() | bgcolor(Color::Default)); }),
+      return hbox(text("[ 密码 ]: "), cpassword->Render() | bgcolor(Color::Default)); }),
     Container::Horizontal({
-      Button(" log ", [=]{
+      Button(" 登陆 ", [=]{
         if(!id.empty() && !password.empty()) {
           function->login(std::stoi(id), std::stoi(password));
           id = "";
@@ -43,19 +43,19 @@ Dashboard::Log::Log(Dashboard* dashboard) {
           status = 1;
         }
       }, ButtonOption::Ascii()),
-      Button(" cancel ", [=]{
+      Button(" 取消 ", [=]{
         id = ""; password = "";
         dashboard->dialog = NONE;
         status = 0;
       }, ButtonOption::Ascii())
     }, &but) | center
   }, &selected) | center | vcenter;
-  auto clogging = Renderer([=](bool focused){ return text("logging...") | center; });
+  auto clogging = Renderer([=](bool focused){ return text("登陆中...") | center; });
   auto cmain = Container::Tab({cinput, clogging}, &status);
   auto rmain = Renderer(cmain, [=]{
     Element show;
-    if (!status) show = window(text(" LOG ") | center, cinput->Render());
-    else show = window(text(" LOG ") | center, clogging->Render());
+    if (!status) show = window(text(" 登陆 ") | center, cinput->Render());
+    else show = window(text(" 登陆 ") | center, clogging->Render());
     return show | color(Color::Yellow)
       | size(WIDTH, EQUAL, 36) | size(HEIGHT, EQUAL, 5)
       | clear_under | center;
@@ -71,36 +71,36 @@ Dashboard::Log::Log(Dashboard* dashboard) {
 }
 
 Dashboard::Sign::Sign(Dashboard* dashboard) {
-  auto cid = myinput(&id, "input id", false, "󱍢 ")
+  auto cid = myinput(&id, "", false, "󱍢 ")
   | size(WIDTH, EQUAL, 20) | bgcolor(Color::Default);
-  auto cusername = myinput(&username, "input username", false, "󱍢 ")
+  auto cusername = myinput(&username, "", false, "󱍢 ")
   | size(WIDTH, EQUAL, 20) | bgcolor(Color::Default);
-  auto cpassword = myinput(&password, "input password", true, "󱍢 ")
+  auto cpassword = myinput(&password, "", true, "󱍢 ")
   | size(WIDTH, EQUAL, 20) | bgcolor(Color::Default);
   auto cinput = Container::Vertical({
     Renderer(cid, [=]{
-      return hbox(text("[    ID    ]: "), cid->Render() | bgcolor(Color::Default)); }),
+      return hbox(text("[  账号  ]: "), cid->Render() | bgcolor(Color::Default)); }),
     Renderer(cusername, [=]{
-      return hbox(text("[ USERNAME ]: "), cusername->Render() | bgcolor(Color::Default)); }),
+      return hbox(text("[ 用户名 ]: "), cusername->Render() | bgcolor(Color::Default)); }),
     Renderer(cpassword, [=]{
-      return hbox(text("[ PASSWORD ]: "), cpassword->Render() | bgcolor(Color::Default)); }),
+      return hbox(text("[  密码  ]: "), cpassword->Render() | bgcolor(Color::Default)); }),
     Container::Horizontal({
-      Button( " sign ", [=] {
+      Button( " 注册 ", [=] {
         if(!id.empty() && !password.empty() && !username.empty())
           function->signin(std::stoi(id), std::stoi(password), username);
         id = ""; username = ""; password = "";
         }, ButtonOption::Ascii()),
-      Button( " cancel ", [=] {
+      Button( " 取消 ", [=] {
         id = ""; username = ""; password = ""; dashboard->dialog = NONE;
       }, ButtonOption::Ascii()),
     }, &but) | center
   }, &selected) | center | vcenter;
-  auto csigning = Renderer([=](bool focused){ return text("signing...") | center; });
+  auto csigning = Renderer([=](bool focused){ return text("注册中...") | center; });
   auto cmain = Container::Tab({cinput, csigning}, &status);
   auto rmain = Renderer(cmain, [=]{
     Element show;
-    if (!status) show = window(text(" SIGN ") | center, cinput->Render());
-    else show = window(text(" SIGN ") | center, csigning->Render());
+    if (!status) show = window(text(" 注册 ") | center, cinput->Render());
+    else show = window(text(" 注册 ") | center, csigning->Render());
     return show | color(Color::Yellow)
       | size(WIDTH, EQUAL, 36) | size(HEIGHT, EQUAL, 6)
       | clear_under | center;
@@ -116,9 +116,9 @@ Dashboard::Sign::Sign(Dashboard* dashboard) {
 }
 
 void Dashboard::init_help() {
-  auto cmain = Button(" 󰌑  RETURN ", [&]{ page = DASHBOARD; }, ButtonOption::Ascii());
+  auto cmain = Button(" 󰌑  返回 ", [&]{ page = DASHBOARD; }, ButtonOption::Ascii());
   auto rmain = Renderer(cmain, [=]{
-    return vbox( paragraph_imp(graph::ABOUTINFO), cmain->Render() | center) | center;
+    return vbox( paragraph_imp(graph::HELPINFO_CN), cmain->Render() | center) | center;
   });
   auto emain = CatchEvent(rmain, [&](Event event){
     if(event == Event::Return) return false;
@@ -128,9 +128,9 @@ void Dashboard::init_help() {
 }
 
 void Dashboard::init_about() {
-  auto cmain = Button(" 󰌑  RETURN ", [&]{ page = DASHBOARD; }, ButtonOption::Ascii());
+  auto cmain = Button(" 󰌑  返回 ", [&]{ page = DASHBOARD; }, ButtonOption::Ascii());
   auto rmain = Renderer(cmain, [=]{
-    return vbox( paragraph_imp(graph::HELPINFO), cmain->Render() | center) | center;
+    return vbox( paragraph_imp(graph::ABOUTINFO_CN), cmain->Render() | center) | center;
   });
   auto emain = CatchEvent(rmain, [&](Event event){
     if(event == Event::Return) return false;
@@ -144,24 +144,24 @@ Dashboard::Dashboard() : log(this), sign(this) {
   init_help();
   auto cchoice = Container::Vertical({
     Renderer([=](bool focused){
-      if(focused) return hbox(text("󱍢  󰌆  登陆")) | color(Color::Yellow);
-      else return hbox(text("   󰌆  登陆") | color(Color::Blue));
+      if(focused) return hbox(text("󱍢  󰌆  登陆   ")) | color(Color::Yellow);
+      else return hbox(text("   󰌆  登陆   ") | color(Color::Blue));
     }),
     Renderer([=](bool focused){
-      if(focused) return hbox(text("󱍢  󰗛  注册")) | color(Color::Yellow);
-      else return hbox(text("   󰗛  注册") | color(Color::Blue));
+      if(focused) return hbox(text("󱍢  󰗛  注册   ")) | color(Color::Yellow);
+      else return hbox(text("   󰗛  注册   ") | color(Color::Blue));
     }),
     Renderer([=](bool focused){
-      if(focused) return hbox(text("󱍢  󰞋  帮助")) | color(Color::Yellow);
-      else return hbox(text("   󰞋  帮助") | color(Color::Blue));
+      if(focused) return hbox(text("󱍢  󰞋  帮助   ")) | color(Color::Yellow);
+      else return hbox(text("   󰞋  帮助   ") | color(Color::Blue));
     }),
     Renderer([=](bool focused){
-      if(focused) return hbox(text("󱍢    关于")) | color(Color::Yellow);
-      else return hbox(text("     关于") | color(Color::Blue));
+      if(focused) return hbox(text("󱍢    关于   ")) | color(Color::Yellow);
+      else return hbox(text("     关于   ") | color(Color::Blue));
     }),
     Renderer([=](bool focused){
-      if(focused) return hbox(text("󱍢  󰩈  退出")) | color(Color::Yellow);
-      else return hbox(text("   󰩈  退出") | color(Color::Blue));
+      if(focused) return hbox(text("󱍢  󰩈  退出   ")) | color(Color::Yellow);
+      else return hbox(text("   󰩈  退出   ") | color(Color::Blue));
     }),
   }, &selected);
   auto rchoice = Renderer(cchoice, [=]{
@@ -169,7 +169,7 @@ Dashboard::Dashboard() : log(this), sign(this) {
       paragraph_imp(graph::LOGO) | color(Color::Blue),
       cchoice->Render() | center,
       text("") | center, text("") | center,
-      text("Press ctrl + n/p to choose option...") | color(Color::Blue) | center
+      text("按 ctrl + n/p 上下切换选项...") | color(Color::Blue) | center
     ) | center;
   });
   auto echoice = CatchEvent(rchoice, [&](Event event) {

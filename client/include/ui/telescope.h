@@ -31,14 +31,24 @@ using namespace ftxui;
 extern ScreenInteractive* screen;
 extern std::unique_ptr<Function> function;
 
-enum { CHAT = 0, FRIEND, GROUP };
+enum { COMMON = 0, CHAT, FRIEND, GROUP };
+enum { LIST = 0, INPUT };
 
 class Vchat;
 class Telescope;
 
+class Common {
+public:
+  int selected;
+  Common(Telescope*);
+  Component list;
+  std::unordered_map<int, Element> previews;
+};
+
 class Chats {
 public:
-  static int selected;
+  void refresh_preview();
+  int selected;
   Chats(Telescope*);
   Component list;
   std::unordered_map<int, Element> previews;
@@ -46,7 +56,8 @@ public:
 
 class Friends {
 public:
-  static int selected;
+  void refresh_preview();
+  int selected;
   Friends(Telescope*);
   Component list;
   std::unordered_map<int, Element> previews;
@@ -56,7 +67,7 @@ class Inform {
 private:
   std::map<int, int> id;
 public:
-  static int selected;
+  int selected;
   Inform(Telescope*);
   Component list;
   std::unordered_map<int, Element> previews;
@@ -64,21 +75,22 @@ public:
 
 class Telescope {
 private:
+  Common common;
   Chats chats;
   Friends friends;
+  Inform inform;
   std::string ss;
-  Component input;
-  int selected = CHAT;
-  Component content;
+  int selected = INPUT;
+  int list_selected = CHAT;
 
 public:
   int *toggle;
   Vchat *vchat;
   Telescope(Vchat*, int*);
-  ~Telescope();
-  Component gettelescope(int);
   Telescope(Telescope &&) = delete;
   Telescope(const Telescope &) = delete;
+  ~Telescope();
+  Component content;
 
 };
 
