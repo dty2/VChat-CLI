@@ -37,6 +37,7 @@ Store::Store() {
     );
   }
   catch (const std::exception& e) {
+    LOG(INFO) << "database error";
     exit(0);
   }
 }
@@ -50,10 +51,11 @@ bool Store::getPersional(PersionalInfo& persionalinfo, const int id) {
       persionalinfo.password = query.getColumn(1).getInt();
       persionalinfo.username = query.getColumn(2).getString();
     }
+    if(persionalinfo.id && persionalinfo.password && persionalinfo.username.empty()) return true;
+    else return false;
   } catch (std::exception& e) {
+    return false;
   }
-  if(persionalinfo.id && persionalinfo.password && persionalinfo.username.empty()) return true;
-  else return false;
 }
 
 bool Store::getFriend(std::list<FriendInfo>& friendlist, const int id) {
@@ -62,9 +64,10 @@ bool Store::getFriend(std::list<FriendInfo>& friendlist, const int id) {
     query.bind(1, id);
     while (query.executeStep())
       friendlist.push_back(FriendInfo(query.getColumn(1).getInt(), query.getColumn(2).getString()));
+    return friendlist.empty();
   } catch (std::exception& e) {
+    return false;
   }
-  return friendlist.empty();
 }
 
 bool Store::getMessage(std::list<MessageInfo>& messagelist, const int id) {
@@ -79,9 +82,10 @@ bool Store::getMessage(std::list<MessageInfo>& messagelist, const int id) {
       int64_t time = querysid.getColumn(3).getInt64();
       messagelist.push_back(MessageInfo(sender, receiver, msg, time));
     }
+    return messagelist.empty();
   } catch (std::exception& e) {
+    return false;
   }
-  return messagelist.empty();
 }
 
 bool Store::getUser(UserInfo& userinfo, const int id) {

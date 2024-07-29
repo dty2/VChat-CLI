@@ -30,27 +30,31 @@ namespace method {
 enum method {
   // 注册
   signin = 100,
-  signin_suc, // 101
-  signin_err, // 102
-  signout, // 103
+  signin_suc,
+  signin_idexist,
+  signin_fmerr,
+  signin_err,
+  signout,
   // 登陆
-  login, // 104
-  login_suc, // 105
-  login_err, // 106
-  logout, // 107
+  login,
+  login_suc,
+  login_noid,
+  login_pwerr,
+  login_err,
+  logout,
   // 好友
   // 查询
-  findfd, // 108
-  findfd_suc, // 109
-  findfd_err, // 110
+  findfd,
+  findfd_suc,
+  findfd_err,
   // 添加
-  addfd, // 111
-  accept_addfd, // 112
-  refuse_addfd, // 113
+  addfd,
+  accept_addfd,
+  refuse_addfd,
   // 删除
-  deletefd, // 114
+  deletefd,
   // 发消息
-  sendmsg, // 115
+  sendmsg,
 };
 
 } // namespace method

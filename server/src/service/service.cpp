@@ -46,12 +46,32 @@ void Service::serve(int method, Json::Value value, Connection *connection) {
   }
 }
 
+void Service::signin(Json::Value value, Connection* connection) {
+  try {
+    PersionalInfo persionalinfo;
+    persionalinfo.id = value["id"].asInt();
+    persionalinfo.password = value["password"].asInt();
+    persionalinfo.username = value["username"].asString();
+    if(Store::store->insertPersional(persionalinfo)) {
+      connection->write(method::signin_suc, 0);
+    } else {
+      connection->write(method::signin_idexist, 0);
+    }
+  } catch (const std::exception& e) {
+    connection->write(method::signin_fmerr, 0);
+  }
+}
+
 void Service::login(Json::Value value, Connection* connection) {
   try {
     int id = value["id"].asInt();
     int password = value["password"].asInt();
     PersionalInfo persionalinfo;
-    Store::store->getPersional(persionalinfo, id);
+    if(Store::store->getPersional(persionalinfo, id)) {
+      LOG(INFO) << id << " log error" << " because no id";
+      connection->write(method::login_noid, value);
+      return;
+    }
     if (persionalinfo.password == password) {
       UserInfo userinfo;
       Store::store->getUser(userinfo, id);
@@ -81,20 +101,12 @@ void Service::login(Json::Value value, Connection* connection) {
       connection->write(method::login_suc, root);
       for (auto x : this->cache.addfriendapply[id])
         connection->write(method::addfd, x);
+    } else {
+      LOG(INFO) << id << " log error" << " because password error";
+      connection->write(method::login_pwerr, value);
     }
   } catch (const std::exception& e) {
-  }
-}
-
-void Service::signin(Json::Value value, Connection* connection) {
-  try {
-    PersionalInfo persionalinfo;
-    persionalinfo.id = value["id"].asInt();
-    persionalinfo.password = value["password"].asInt();
-    persionalinfo.username = value["username"].asString();
-    bool op = Store::store->insertPersional(persionalinfo);
-    connection->write(method::signin_suc, 0);
-  } catch (const std::exception& e) {
+    connection->write(method::login_err, 0);
   }
 }
 

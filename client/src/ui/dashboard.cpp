@@ -26,6 +26,7 @@
 namespace dashboard {
 
 Dashboard::Log::Log(Dashboard* dashboard) {
+  status = INPUT;
   auto cid = myinput(&id, "", false, "󱍢 ") | size(WIDTH, EQUAL, 20);
   auto cpassword = myinput(&password, "", true, "󱍢 ")
     | size(WIDTH, EQUAL, 20);
@@ -38,25 +39,31 @@ Dashboard::Log::Log(Dashboard* dashboard) {
       Button(" 登陆 ", [=]{
         if(!id.empty() && !password.empty()) {
           function->login(std::stoi(id), std::stoi(password));
-          id = "";
-          password = "";
-          status = 1;
+          id = ""; password = ""; status = ING;
         }
       }, ButtonOption::Ascii()),
       Button(" 取消 ", [=]{
         id = ""; password = "";
         dashboard->dialog = NONE;
-        status = 0;
+        status = INPUT;
       }, ButtonOption::Ascii())
     }, &but) | center
   }, &selected) | center | vcenter;
   auto clogging = Renderer([=](bool focused){ return text("登陆中...") | center; });
-  auto cmain = Container::Tab({cinput, clogging}, &status);
+  auto clogerror = Button("确定", [=]{
+    dashboard->dialog = NONE; selected = 0; status = INPUT; }, ButtonOption::Ascii());
+  auto rlogerror = Renderer(clogerror, [=]{
+    std::string ss = errinfo ? "登陆失败，账号密码错误..." : "登陆失败，账号不存在...";
+    return vbox(text(ss) | color(Color::Red), clogerror->Render() | center) | center;
+  });
+  auto elogerror = CatchEvent(rlogerror, [=](Event event){
+    if(event == Event::Special("login_noid")) { errinfo = 0; }
+    else if(event == Event::Special("login_pwerr")) { errinfo = 1; }
+    return false;
+  });
+  auto cmain = Container::Tab({cinput, clogging, elogerror}, &status);
   auto rmain = Renderer(cmain, [=]{
-    Element show;
-    if (!status) show = window(text(" 登陆 ") | center, cinput->Render());
-    else show = window(text(" 登陆 ") | center, clogging->Render());
-    return show | color(Color::Yellow)
+    return window(text(" 登陆 "), cmain->Render(), LIGHT) | color(Color::Yellow)
       | size(WIDTH, EQUAL, 36) | size(HEIGHT, EQUAL, 5)
       | clear_under | center;
   });
@@ -65,6 +72,11 @@ Dashboard::Log::Log(Dashboard* dashboard) {
     else if(event == Event::CtrlN) { if(selected != 2) selected ++; return true; }
     else if(event == Event::CtrlB) { if(selected == 2) but = 0; return true; }
     else if(event == Event::CtrlF) { if(selected == 2) but = 1; return true; }
+    else if(event == Event::Special("login_noid")
+      || event == Event::Special("login_pwerr")) { 
+      status = END;
+      return false;
+    }
     return false;
   });
   this->content = emain;
@@ -88,7 +100,7 @@ Dashboard::Sign::Sign(Dashboard* dashboard) {
       Button( " 注册 ", [=] {
         if(!id.empty() && !password.empty() && !username.empty())
           function->signin(std::stoi(id), std::stoi(password), username);
-        id = ""; username = ""; password = "";
+        id = ""; username = ""; password = ""; status = ING;
         }, ButtonOption::Ascii()),
       Button( " 取消 ", [=] {
         id = ""; username = ""; password = ""; dashboard->dialog = NONE;
@@ -96,12 +108,20 @@ Dashboard::Sign::Sign(Dashboard* dashboard) {
     }, &but) | center
   }, &selected) | center | vcenter;
   auto csigning = Renderer([=](bool focused){ return text("注册中...") | center; });
-  auto cmain = Container::Tab({cinput, csigning}, &status);
+  auto csignerror = Button("确定", [=]{
+    dashboard->dialog = NONE; status = INPUT; selected = 0; }, ButtonOption::Ascii());
+  auto rsignerror = Renderer(csignerror, [=]{
+    std::string ss = errinfo ? "注册失败，账号密码格式错误..." : "注册失败，账号已存在...";
+    return vbox(text(ss), csignerror->Render() | center) | center;
+  });
+  auto esignerror = CatchEvent(rsignerror, [=](Event event){
+    if(event == Event::Special("signin_idexist")) { errinfo = 0; }
+    else if(event == Event::Special("signin_fmerr")) { errinfo = 1; }
+    return false;
+  });
+  auto cmain = Container::Tab({cinput, csigning, esignerror}, &status);
   auto rmain = Renderer(cmain, [=]{
-    Element show;
-    if (!status) show = window(text(" 注册 ") | center, cinput->Render());
-    else show = window(text(" 注册 ") | center, csigning->Render());
-    return show | color(Color::Yellow)
+    return window(text(" 注册 "), cmain->Render(), LIGHT) | color(Color::Yellow)
       | size(WIDTH, EQUAL, 36) | size(HEIGHT, EQUAL, 6)
       | clear_under | center;
   });
@@ -110,6 +130,9 @@ Dashboard::Sign::Sign(Dashboard* dashboard) {
     else if(event == Event::CtrlN) { if(selected != 3) selected ++; return true; }
     else if(event == Event::CtrlB) { if(selected == 3) but = 0; return true; }
     else if(event == Event::CtrlF) { if(selected == 3) but = 1; return true; }
+    else if(event == Event::Special("signin_suc")) { dashboard->dialog = NONE; return true; }
+    else if(event == Event::Special("signin_fmerr")
+      || event == Event::Special("signin_idexist")) { status = END; }
     return false;
   });
   this->content = emain;

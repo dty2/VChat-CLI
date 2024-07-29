@@ -44,18 +44,26 @@ void Function::handle(int op, Json::Value value) {
     DLOG(INFO) << "signin_suc";
     postevent("signin_suc");
     break;
-  case method::signin_err:
-    DLOG(INFO) << "signin_err";
-    postevent("signin_err");
+  case method::signin_idexist:
+    DLOG(INFO) << "signin_idexist";
+    postevent("signin_idexist");
+    break;
+  case method::signin_fmerr:
+    DLOG(INFO) << "signin_fmerr";
+    postevent("signin_fmerr");
     break;
   case method::login_suc:
     LOG(INFO) << "login_suc";
     this->handle_login(value);
     postevent("login_suc");
     break;
-  case method::login_err:
-    DLOG(INFO) << "login_err";
-    postevent("login_err");
+  case method::login_noid:
+    DLOG(INFO) << "login_noid";
+    postevent("login_noid");
+    break;
+  case method::login_pwerr:
+    DLOG(INFO) << "login_pwerr";
+    postevent("login_pwerr");
     break;
   case method::findfd_suc:
     DLOG(INFO) << "findfd_suc";

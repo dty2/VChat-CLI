@@ -35,31 +35,34 @@ namespace dashboard {
 
 enum { DASHBOARD = 0, HELP, ABOUT };
 enum { NONE = 0, LOG, SIGN };
+enum STATUS { INPUT = 0, ING, END };
 
 class Dashboard {
 private:
   struct Log {
+    int errinfo;
     std::string id, password;
-    int selected = 0; // choose which input box
-    int but = 0; // choose which button
+    int selected = 0;
+    int but = 0;
     Component content;
-    int status; // logging or cancel
+    int status;
     Log(Dashboard*);
-  }log; // log dialog
+  }log;
   struct Sign {
+    int errinfo;
     std::string id, username, password;
-    int selected = 0; // choose which input box
-    int but = 0; // choose which button
-    int status; // signing or cancel
+    int selected = 0;
+    int but = 0;
+    int status;
     Component content;
     Sign(Dashboard*);
-  }sign; // sign dialog
-  Component help; // Help page
-  Component about; // About page
-  void init_help(); // init Help page
-  void init_about(); // init about page
-  int dialog = NONE; // choose log dialog or sign dialog
-  int page = DASHBOARD; // choose Dashboard page or About page or Help page
+  }sign;
+  Component help;
+  Component about;
+  void init_help();
+  void init_about();
+  int dialog = NONE;
+  int page = DASHBOARD;
   int selected = 0;
 
 public:
