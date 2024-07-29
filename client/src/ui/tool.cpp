@@ -79,6 +79,10 @@ Component myinput(std::string *ss, const std::string placeholder,
     }
     for (char c = '0'; c <= '9'; c ++)
       if (handleCharacterEvent(event, c, ss)) return true;
+    if (event == Event::Special(" ")) {
+      if (handleCharacterEvent(event, ' ', ss))
+        return true;
+    }
     if (event == Event::Backspace) { if(ss->size()) ss->pop_back(); return true; }
     return false;
   });

@@ -57,19 +57,19 @@ Common::Common(Telescope* telescope) {
       else return hbox(text(" 󰞋 帮助"), filler());
     }),
     Renderer([=](bool focused){
-      if(focused) return hbox(text("󱍢  群组"), filler(), text("  Ctrl + l "))
+      if(focused) return hbox(text("󱍢  群组"), filler(), text("  Ctrl + o "))
       | bgcolor(Color::Blue) | color(Color::Yellow);
-      else return hbox(text("  群组"), filler(), text("  Ctrl + l "));
+      else return hbox(text("  群组"), filler(), text("  Ctrl + o "));
     }),
     Renderer([=](bool focused){
-      if(focused) return hbox(text("󱍢  好友"), filler(), text("  Ctrl + k "))
+      if(focused) return hbox(text("󱍢  好友"), filler(), text("  Ctrl + i "))
       | bgcolor(Color::Blue) | color(Color::Yellow);
-      else return hbox(text("  好友"), filler(), text("  Ctrl + k "));
+      else return hbox(text("  好友"), filler(), text("  Ctrl + i "));
     }),
     Renderer([=](bool focused){
-      if(focused) return hbox(text("󱍢 󰭹 消息"), filler(), text("  Ctrl + j "))
+      if(focused) return hbox(text("󱍢 󰭹 消息"), filler(), text("  Ctrl + u "))
       | bgcolor(Color::Blue) | color(Color::Yellow);
-      else return hbox(text(" 󰭹 消息"), filler(), text("  Ctrl + j "));
+      else return hbox(text(" 󰭹 消息"), filler(), text("  Ctrl + u "));
     }),
   }, &selected);
   auto rlist = Renderer(clist, [=]{
@@ -100,7 +100,6 @@ Common::Common(Telescope* telescope) {
           telescope->list_selected = CHAT;
           break;
       }
-      *(telescope->toggle) = 0;
       return true;
     }
     return true;
@@ -315,10 +314,10 @@ Telescope::Telescope(Vchat *vchat_, int *toggle_)
     if (list_selected == COMMON) {
       return hbox(cmain->Render(), common.previews[common.selected]);
     } else if (list_selected == CHAT) {
-      return hbox(cmain->Render(), chats.previews[1]);
+      return hbox(cmain->Render(), chats.previews[chats.selected]);
     } else if (list_selected == FRIEND) {
       return hbox(cmain->Render(), friends.previews[friends.selected]);
-    } else if (list_selected == FRIEND) {
+    } else if (list_selected == GROUP) {
       return hbox(cmain->Render(), friends.previews[inform.selected]);
     }
     return text("Error");

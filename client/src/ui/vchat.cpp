@@ -47,18 +47,18 @@ Chat::List::List(Chat *chat) {
           Element element;
           if(focused) {
             if(value.sender == chat->id) {
-              element = hbox(text("  > " + value.msg), filler())
+              element = hbox(text("  $ " + value.msg), filler())
               | color(Color::Black) | bgcolor(Color::Blue);
             } else if(value.receiver == chat->id){
-              element = hbox(filler(), text(value.msg + " <  "))
+              element = hbox(filler(), text(value.msg + " #  "))
               | color(Color::Black) | bgcolor(Color::Blue);
             }
             element |= focus;
           } else {
             if(value.sender == chat->id) {
-              element = hbox(text("  > "), text(value.msg), filler());
+              element = hbox(text("  $ "), text(value.msg), filler());
             } else if(value.receiver == chat->id){
-              element = hbox(filler(), text(value.msg), text(" <  "));
+              element = hbox(filler(), text(value.msg), text(" #  "));
             }
           }
           return element;
