@@ -39,11 +39,11 @@ Tui::Tui() {
     }
     return false;
   });
-  this->content = emain;
   std::thread t([&]{
     function->postevent = std::bind(&Tui::postevent, this, std::placeholders::_1);
     function->start();
   });
+  this->content = emain;
   screen->Loop(content);
   delete screen;
   function->end();

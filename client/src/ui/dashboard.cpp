@@ -118,7 +118,7 @@ Dashboard::Sign::Sign(Dashboard* dashboard) {
 void Dashboard::init_help() {
   auto cmain = Button(" 󰌑  返回 ", [&]{ page = DASHBOARD; }, ButtonOption::Ascii());
   auto rmain = Renderer(cmain, [=]{
-    return vbox( paragraph_imp(graph::HELPINFO_CN), cmain->Render() | center) | center;
+    return vbox( paragraph_imp(graph::HELPINFO_CN) | center, cmain->Render() | center) | center;
   });
   this->help = rmain | color(Color::Blue);
 }
@@ -126,7 +126,7 @@ void Dashboard::init_help() {
 void Dashboard::init_about() {
   auto cmain = Button(" 󰌑  返回 ", [&]{ page = DASHBOARD; }, ButtonOption::Ascii());
   auto rmain = Renderer(cmain, [=]{
-    return vbox( paragraph_imp(graph::ABOUTINFO_CN), cmain->Render() | center) | center;
+    return vbox( paragraph_imp(graph::ABOUTINFO_CN) | center, cmain->Render() | center) | center;
   });
   this->about = rmain | color(Color::Blue);
 }
@@ -190,13 +190,7 @@ Dashboard::Dashboard() : log(this), sign(this) {
     return document;
   });
   auto cmain = Container::Tab({ rdialog, help, about }, &page);
-  auto rmain = Renderer(cmain, [=]{
-    return cmain->Render();
-  });
-  auto emain = CatchEvent(rmain, [&](Event event){
-    return false;
-  });
-  this->content = emain;
+  this->content = cmain;
 }
 
 } // namespace dashboard

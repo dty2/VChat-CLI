@@ -21,6 +21,7 @@
  */
 
 #include "telescope.h"
+#include "dashboard.h"
 #include "ui.h"
 #include "vchat.h"
 
@@ -41,32 +42,32 @@ Common::Common(Telescope* telescope) {
   auto clist = Container::Vertical({
     Renderer([=](bool focused){ return filler(); }),
     Renderer([=](bool focused){
-      if(focused) return hbox(text("󱍢 "), text("󰩈 退出"), filler())
+      if(focused) return hbox(text("󱍢 󰩈 退出"), filler())
       | bgcolor(Color::Blue) | color(Color::Yellow);
       else return hbox(text(" 󰩈 退出"), filler());
     }),
     Renderer([=](bool focused){
-      if(focused) return hbox(text("󱍢 "), text(" 关于"), filler())
+      if(focused) return hbox(text("󱍢  关于"), filler())
       | bgcolor(Color::Blue) | color(Color::Yellow);
       else return hbox(text("  关于"), filler());
     }),
     Renderer([=](bool focused){
-      if(focused) return hbox(text("󱍢 "), text("󰞋 帮助"), filler())
+      if(focused) return hbox(text("󱍢 󰞋 帮助"), filler())
       | bgcolor(Color::Blue) | color(Color::Yellow);
       else return hbox(text(" 󰞋 帮助"), filler());
     }),
     Renderer([=](bool focused){
-      if(focused) return hbox(text("󱍢 "), text(" 群组"), filler(), text("  Ctrl + l "))
+      if(focused) return hbox(text("󱍢  群组"), filler(), text("  Ctrl + l "))
       | bgcolor(Color::Blue) | color(Color::Yellow);
       else return hbox(text("  群组"), filler(), text("  Ctrl + l "));
     }),
     Renderer([=](bool focused){
-      if(focused) return hbox(text("󱍢 "), text(" 好友"), filler(), text("  Ctrl + k "))
+      if(focused) return hbox(text("󱍢  好友"), filler(), text("  Ctrl + k "))
       | bgcolor(Color::Blue) | color(Color::Yellow);
       else return hbox(text("  好友"), filler(), text("  Ctrl + k "));
     }),
     Renderer([=](bool focused){
-      if(focused) return hbox(text("󱍢 "), text("󰭹 消息"), filler(), text("  Ctrl + j "))
+      if(focused) return hbox(text("󱍢 󰭹 消息"), filler(), text("  Ctrl + j "))
       | bgcolor(Color::Blue) | color(Color::Yellow);
       else return hbox(text(" 󰭹 消息"), filler(), text("  Ctrl + j "));
     }),
@@ -90,13 +91,13 @@ Common::Common(Telescope* telescope) {
           break;
         case 5 :
           telescope->selected = INPUT;
-          telescope->chats.selected = 1;
-          telescope->list_selected = CHAT;
+          telescope->friends.selected = telescope->friends.list.size();
+          telescope->list_selected = FRIEND;
           break;
         case 6 :
           telescope->selected = INPUT;
-          telescope->friends.selected = 1;
-          telescope->list_selected = FRIEND;
+          telescope->chats.selected = telescope->chats.list.size();
+          telescope->list_selected = CHAT;
           break;
       }
       *(telescope->toggle) = 0;
@@ -104,11 +105,37 @@ Common::Common(Telescope* telescope) {
     }
     return true;
   });
-  this->list = elist;
+  this->content = elist;
 }
 
-void Chats::refresh_preview() {
+void Chats::refresh() {
+  list.clear();
+  previews.clear();
   for(auto& v : Info::info->friendinfo) {
+    list.emplace_back(std::make_pair(v.first, Renderer([=](bool focused){
+      int64_t time_int = Info::info->messageinfo[v.first].back().time;
+      std::string time_ss = std::to_string(time_int);
+      time_ss =
+        time_ss.substr(2, 2) + "月" +
+        time_ss.substr(4, 2) + "日" +
+        time_ss.substr(6, 2) + "时" +
+        time_ss.substr(8, 2) + "分";
+      Element show;
+      if(focused) {
+        show = hbox(
+          text("󱍢 " + v.second.friendname + " >"),
+          text(Info::info->messageinfo[v.first].back().msg),
+          filler(), text(time_ss)
+        ) | color(Color::Yellow) | bgcolor(Color::Blue);
+      } else {
+        show = hbox(
+          text(v.second.friendname + " >"),
+          text(Info::info->messageinfo[v.first].back().msg),
+          filler(), text(time_ss)
+        ) | color(Color::Blue) | bgcolor(Color::Default);
+      }
+      return show;
+    })));
     int count = 1;
     Elements show;
     for(auto vv : Info::info->messageinfo[v.first]) {
@@ -126,69 +153,61 @@ void Chats::refresh_preview() {
 }
 
 Chats::Chats(Telescope* telescope) {
-  refresh_preview();
+  refresh();
   auto clist = Container::Vertical({}, &selected);
   auto rlist = Renderer(clist, [=]{
-    clist->DetachAllChildren();
-    clist->Add(Renderer([=](bool focused){ return filler(); }));
-    int count = 1;
-    for(auto& v : Info::info->friendinfo) {
-      clist->Add(Renderer([=](bool focused){
-        int64_t time_int = Info::info->messageinfo[v.first].back().time;
-        std::string time_ss = std::to_string(time_int);
-        time_ss =
-          time_ss.substr(2, 2) + "月" +
-          time_ss.substr(4, 2) + "日" +
-          time_ss.substr(6, 2) + "时" +
-          time_ss.substr(8, 2) + "分";
-        Element show;
-        if(focused) {
-          show = hbox(
-            text("󱍢 " + v.second.friendname + " >"),
-            text(Info::info->messageinfo[v.first].back().msg),
-            filler(), text(time_ss)
-          ) | color(Color::Yellow) | bgcolor(Color::Blue);
-        } else {
-          show = hbox(
-            text(v.second.friendname + " >"),
-            text(Info::info->messageinfo[v.first].back().msg),
-            filler(), text(time_ss)
-          ) | color(Color::Blue) | bgcolor(Color::Default);
-        }
-        return show;
-      }));
-    }
-    refresh_preview();
-    if(clist->ChildCount() == 1) {
+    if(list.size() != clist->ChildCount()) {
       clist->DetachAllChildren();
-      clist->Add(Renderer(
-        [=](bool focused){ return text("  没有消息...") | center; })
-      );
+      clist->Add(Renderer([=](bool focused){ return filler(); }));
+      for(auto& v : list) clist->Add(v.second);
+      if(clist->ChildCount() == 1) {
+        clist->DetachAllChildren();
+        clist->Add(Renderer(
+          [=](bool focused){ return text("  没有消息...") | center; })
+        );
+      }
     }
     return window(text(" 󰨝  消息 ") | center, clist->Render(), LIGHT)
     | size(WIDTH, EQUAL, 40) | size(HEIGHT, EQUAL, 14) | color(Color::Blue);
   });
-  auto elist = CatchEvent(rlist, [&](Event event){
+  auto elist = CatchEvent(rlist, [=](Event event){
     if (event == Event::CtrlN) {
       if(selected != Info::info->friendinfo.size()) selected ++;
     } else if (event == Event::CtrlP) {
       if(selected != 1) selected --;
     } else if(event == Event::Return) {
-      telescope->vchat->open_chat(selected);
+      telescope->vchat->open_chat(list[selected - 1].first);
     }
     return false;
   });
-  this->list = elist;
+  this->content = elist;
 }
 
-void Friends::refresh_preview() {
+void Friends::refresh() {
+  list.clear();
+  previews.clear();
   for(auto v : Info::info->friendinfo) {
+    list.emplace_back(std::make_pair(v.first, Renderer([=](bool focused){
+      Element show;
+      if(focused) {
+        show = hbox(
+          text("󱍢 " + v.second.friendname),
+          filler()
+        ) | color(Color::Yellow) | bgcolor(Color::Blue);
+      } else {
+        show = hbox(
+          text(v.second.friendname),
+          filler()
+        ) | color(Color::Blue) | bgcolor(Color::Default);
+      }
+      return show;
+    })));
     int count = 1;
     previews[count] = window(
       text(" 󰐩  预览 ") | center,
       vbox(
-        text("[     ID    ] :" + std::to_string(v.first)),
-        text("[  Username ] :" + v.second.friendname)
+        text("    ID    :" + std::to_string(v.first)),
+        text(" Username :" + v.second.friendname)
       ) | flex,
       LIGHT
     ) | size(WIDTH, EQUAL, 30)
@@ -199,33 +218,18 @@ void Friends::refresh_preview() {
 }
 
 Friends::Friends(Telescope* telescope) {
-  refresh_preview();
+  refresh();
   auto clist = Container::Vertical({}, &selected);
   auto rlist = Renderer(clist, [=]{
-    clist->DetachAllChildren();
-    clist->Add(Renderer([=](bool focused){ return filler(); }));
-    for(auto v : Info::info->friendinfo) {
-      clist->Add(Renderer([=](bool focused){
-        Element show;
-        if(focused) {
-          show = hbox(
-            text("󱍢 " + v.second.friendname),
-            filler()
-          ) | color(Color::Yellow) | bgcolor(Color::Blue);
-        } else {
-          show = hbox(
-            text(v.second.friendname),
-            filler()
-          ) | color(Color::Blue) | bgcolor(Color::Default);
-        }
-        return show;
-      }));
-    }
-    refresh_preview();
-    if(clist->ChildCount() == 1) {
+    if (clist->ChildCount() != list.size()) {
       clist->DetachAllChildren();
-      clist->Add(Renderer([=](bool focused){ return text("  没有朋友...") | center; }));
-    }
+      clist->Add(Renderer([=](bool focused){ return filler(); }));
+      for(auto& v : list) clist->Add(v.second);
+      if(clist->ChildCount() == 1) {
+        clist->DetachAllChildren();
+        clist->Add(Renderer([=](bool focused){ return text("  没有朋友...") | center; }));
+      }
+  }
     return window(text(" 󰨝  朋友 ") | center, clist->Render(), LIGHT)
     | size(WIDTH, EQUAL, 40) | size(HEIGHT, EQUAL, 14) | color(Color::Blue);
   });
@@ -237,7 +241,7 @@ Friends::Friends(Telescope* telescope) {
     } else if(event == Event::Return) { return true; } // TODO:
     return false;
   });
-  this->list = elist;
+  this->content = elist;
 }
 
 Inform::Inform(Telescope *telescope) {
@@ -305,7 +309,7 @@ Telescope::Telescope(Vchat *vchat_, int *toggle_)
   : common(this), chats(this), friends(this), inform(this), toggle(toggle_) {
   Telescope::vchat = vchat_;
   list_selected = -1;
-  auto clist = Container::Tab({common.list, chats.list, friends.list}, &list_selected);
+  auto clist = Container::Tab({common.content, chats.content, friends.content}, &list_selected);
   auto cmain = Container::Vertical({clist, input.content}, &selected);
   auto rmain = Renderer(cmain, [=]{
     if (list_selected == COMMON) {
@@ -320,22 +324,22 @@ Telescope::Telescope(Vchat *vchat_, int *toggle_)
     return text("Error");
   });
   auto emain = CatchEvent(rmain, [=](Event event){
-    if (event == Event::CtrlO) {
+    if (event == Event::CtrlK) {
       selected = INPUT;
       common.selected = 6;
       list_selected = COMMON;
       return true;
-    } else if (event == Event::CtrlK) {
+    } else if (event == Event::CtrlU) {
       selected = INPUT;
-      chats.selected = 1;
+      chats.selected = chats.list.size();
       list_selected = CHAT;
       return true;
-    } else if (event == Event::CtrlL) {
+    } else if (event == Event::CtrlI) {
       selected = INPUT;
-      friends.selected = 1;
+      friends.selected = friends.list.size();
       list_selected = FRIEND;
       return true;
-    } else if (event == Event::Special(";")) {
+    } else if (event == Event::CtrlO) {
       selected = INPUT;
       inform.selected = Info::info->requestaddlist.size();
       list_selected = GROUP;
@@ -348,6 +352,10 @@ Telescope::Telescope(Vchat *vchat_, int *toggle_)
       *toggle = *toggle ? 0 : 1;
     } else if (event == Event::Return) {
       return false;
+    } else if ( event == Event::Special("sendmsg")
+      || event == Event::Special("accept_addfd")) {
+      chats.refresh();
+      friends.refresh();
     } else input.content->TakeFocus();
     return false;
   });

@@ -39,9 +39,11 @@ private:
   dashboard::Dashboard* dashboard;
   Vchat* vchat;
   Component content;
+  Components test;
+  int test_selected = 0;
 
 public:
-  void postevent(std::string); // post a new event
+  void postevent(std::string);
   Tui();
 };
 

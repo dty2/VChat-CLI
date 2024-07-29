@@ -41,25 +41,27 @@ class Common {
 public:
   int selected;
   Common(Telescope*);
-  Component list;
+  Component content;
   std::unordered_map<int, Element> previews;
 };
 
 class Chats {
 public:
-  void refresh_preview();
+  std::vector<std::pair<int, Component>> list;
+  void refresh();
   int selected;
   Chats(Telescope*);
-  Component list;
+  Component content;
   std::unordered_map<int, Element> previews;
 };
 
 class Friends {
 public:
-  void refresh_preview();
+  std::vector<std::pair<int, Component>> list;
+  void refresh();
   int selected;
   Friends(Telescope*);
-  Component list;
+  Component content;
   std::unordered_map<int, Element> previews;
 };
 
@@ -82,14 +84,14 @@ private:
   }input;
 
 public:
+  Vchat *vchat;
+  int *toggle;
   Common common;
   Chats chats;
   Friends friends;
   Inform inform;
   int selected = LIST;
   int list_selected = CHAT;
-  int *toggle;
-  Vchat *vchat;
   Telescope(Vchat*, int*);
   Telescope(Telescope &&) = delete;
   Telescope(const Telescope &) = delete;

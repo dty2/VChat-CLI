@@ -89,7 +89,6 @@ void Function::handle(int op, Json::Value value) {
     this->handle_msg(value);
     postevent("sendmsg");
     break;
-  default : LOG(WARNING) << "Strange method";
   }
 }
 

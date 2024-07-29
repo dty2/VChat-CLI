@@ -32,24 +32,25 @@ extern std::unique_ptr<Function> function;
 
 using namespace ftxui;
 
+class Vchat;
+
 // chat
 class Chat {
 private:
+  int id;
+  int selected;
   struct List {
     Component content;
-    int selected = 0;
+    int selected;
     List(Chat*);
   }list;
-  struct InputBox {
+  struct Input{
     std::string ss;
     Component content;
-    InputBox(Chat*);
+    Input(Chat*);
   }input;
-  int id;
-  int selected = 0;
 
 public:
-  static std::unordered_map<int, struct Chat*> chats;
   Component content;
   Chat(int);
 };
@@ -60,10 +61,10 @@ private:
   int id;
   int selected = 0;
 public:
-  static std::unordered_map<int, struct Friend*> friends;
   Component content;
   Friend(int);
 };
+
 
 class Telescope;
 
@@ -74,15 +75,11 @@ private:
   int page_selected = 0;
   int dialog_selected = 0;
   Telescope* telescope;
-  Component dialog;
-  Component help; // Help page
-  Component about; // About page
-  void init_help(); // init Help page
-  void init_about(); // init about page
+  std::unordered_map<int, Chat*> chats;
+  std::unordered_map<int, Friend*> friends;
+  Component about, help, pages, dialog, empty;
   void init_page(); // init all page
-  void open(Component target);
-  void close();
-  Components pages;
+  bool handleEvent(Event, int);
 
 public:
   Component page;
@@ -90,7 +87,6 @@ public:
   void open_chat(int);
   void open_friend(int);
   void open_other(bool);
-  void close(int kinds);
   Vchat();
   ~Vchat();
   Vchat(Vchat &&) = delete;
