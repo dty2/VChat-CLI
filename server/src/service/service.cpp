@@ -47,18 +47,21 @@ void Service::serve(int method, Json::Value value, Connection *connection) {
 }
 
 void Service::signin(Json::Value value, Connection* connection) {
+  PersionalInfo persionalinfo;
   try {
-    PersionalInfo persionalinfo;
     persionalinfo.id = value["id"].asInt();
     persionalinfo.password = value["password"].asInt();
     persionalinfo.username = value["username"].asString();
-    if(Store::store->insertPersional(persionalinfo)) {
-      connection->write(method::signin_suc, 0);
-    } else {
-      connection->write(method::signin_idexist, 0);
-    }
   } catch (const std::exception& e) {
+    LOG(INFO) << persionalinfo.id << "sign error" << " because format error";
     connection->write(method::signin_fmerr, 0);
+  }
+  if(Store::store->insertPersional(persionalinfo)) {
+    LOG(INFO) << persionalinfo.id << "sign successful";
+    connection->write(method::signin_suc, 0);
+  } else {
+    LOG(INFO) << persionalinfo.id << " sign error" << " because id exist";
+    connection->write(method::signin_idexist, 0);
   }
 }
 

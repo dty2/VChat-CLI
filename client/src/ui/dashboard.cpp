@@ -38,8 +38,13 @@ Dashboard::Log::Log(Dashboard* dashboard) {
     Container::Horizontal({
       Button(" 登陆 ", [=]{
         if(!id.empty() && !password.empty()) {
-          function->login(std::stoi(id), std::stoi(password));
-          id = ""; password = ""; status = ING;
+          try {
+            function->login(std::stoi(id), std::stoi(password));
+            id = ""; password = ""; status = ING;
+          } catch (const std::exception& e) {
+            id = ""; password = ""; status = END;
+            errinfo = 2;
+          }
         }
       }, ButtonOption::Ascii()),
       Button(" 取消 ", [=]{
@@ -53,7 +58,12 @@ Dashboard::Log::Log(Dashboard* dashboard) {
   auto clogerror = Button("确定", [=]{
     dashboard->dialog = NONE; selected = 0; status = INPUT; }, ButtonOption::Ascii());
   auto rlogerror = Renderer(clogerror, [=]{
-    std::string ss = errinfo ? "登陆失败，账号密码错误..." : "登陆失败，账号不存在...";
+    std::string ss;
+    switch (errinfo) {
+      case 0 : ss = "登陆失败，账号不存在..."; break;
+      case 1 : ss = "登陆失败，账号密码错误..."; break;
+      case 2 : ss = "登陆失败，输入格式错误..."; break;
+    }
     return vbox(text(ss) | color(Color::Red), clogerror->Render() | center) | center;
   });
   auto elogerror = CatchEvent(rlogerror, [=](Event event){
@@ -98,10 +108,16 @@ Dashboard::Sign::Sign(Dashboard* dashboard) {
       return hbox(text("[  密码  ]: "), cpassword->Render() | bgcolor(Color::Default)); }),
     Container::Horizontal({
       Button( " 注册 ", [=] {
-        if(!id.empty() && !password.empty() && !username.empty())
-          function->signin(std::stoi(id), std::stoi(password), username);
-        id = ""; username = ""; password = ""; status = ING;
-        }, ButtonOption::Ascii()),
+        if(!id.empty() && !password.empty() && !username.empty()) {
+          try {
+            function->signin(std::stoi(id), std::stoi(password), username);
+            id = ""; username = ""; password = ""; status = ING;
+          } catch (const std::exception& e) {
+            id = ""; username = ""; password = ""; status = END;
+            errinfo = 2;
+          }
+        }
+      }, ButtonOption::Ascii()),
       Button( " 取消 ", [=] {
         id = ""; username = ""; password = ""; dashboard->dialog = NONE;
       }, ButtonOption::Ascii()),
@@ -111,8 +127,13 @@ Dashboard::Sign::Sign(Dashboard* dashboard) {
   auto csignerror = Button("确定", [=]{
     dashboard->dialog = NONE; status = INPUT; selected = 0; }, ButtonOption::Ascii());
   auto rsignerror = Renderer(csignerror, [=]{
-    std::string ss = errinfo ? "注册失败，账号密码格式错误..." : "注册失败，账号已存在...";
-    return vbox(text(ss), csignerror->Render() | center) | center;
+    std::string ss;
+    switch (errinfo) {
+      case 0 : ss = "注册失败，账号已存在..."; break;
+      case 1 : ss = "注册失败，账号密码格式错误..."; break;
+      case 2 : ss = "注册失败，账号格式不对"; break;
+    }
+    return vbox(text(ss) | color(Color::Red), csignerror->Render() | center) | center;
   });
   auto esignerror = CatchEvent(rsignerror, [=](Event event){
     if(event == Event::Special("signin_idexist")) { errinfo = 0; }
