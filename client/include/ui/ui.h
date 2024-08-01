@@ -38,40 +38,39 @@ using namespace ftxui;
 
 namespace graph {
 static std::string EMPTY = "\
-       空空如也 ...                \n\
-                   .  ,__,         \n\
-                    . (oo)____     \n\
-                      (__)    )\\  \n\
-                         ||--||     ";
+空空如也 ...              \n\
+            .  ,__,       \n\
+             . (oo)____   \n\
+               (__)    )\\\n\
+                  ||--||   ";
 
 static std::string LOGO = "\
-                                                    \n\n\n\n\
-     ██╗   ██╗  ██████╗ ██╗  ██╗  █████╗  ████████╗ \n\
-     ██║   ██║ ██╔════╝ ██║  ██║ ██╔══██╗ ╚══██╔══╝ \n\
-     ██║   ██║ ██║      ███████║ ███████║    ██║    \n\
-     ╚██╗ ██╔╝ ██║      ██╔══██║ ██╔══██║    ██║    \n\
-      ╚████╔╝  ╚██████╗ ██║  ██║ ██║  ██║    ██║    \n\
-       ╚═══╝    ╚═════╝ ╚═╝  ╚═╝ ╚═╝  ╚═╝    ╚═╝    \n\
-                                                    \n\n\n";
+                                                   \n\n\n\n\
+    ██╗   ██╗  ██████╗ ██╗  ██╗  █████╗  ████████╗ \n\
+    ██║   ██║ ██╔════╝ ██║  ██║ ██╔══██╗ ╚══██╔══╝ \n\
+    ██║   ██║ ██║      ███████║ ███████║    ██║    \n\
+    ╚██╗ ██╔╝ ██║      ██╔══██║ ██╔══██║    ██║    \n\
+     ╚████╔╝  ╚██████╗ ██║  ██║ ██║  ██║    ██║    \n\
+      ╚═══╝    ╚═════╝ ╚═╝  ╚═╝ ╚═╝  ╚═╝    ╚═╝    \n\
+                                                   \n\n\n";
 
 static std::string HELPINFO_EN = "\
-                                               \n\
                       Cook Book               \n\
                                                \n\
- 1·   operation                               \n\
-   Previous                          Ctrl + p\n\
-   Next                              Ctrl + n\n\
-   Back                              Ctrl + b\n\
-   Front                             Ctrl + f\n\
-   Enter                             Enter   \n\
- 󰜺  Escape                            Esc     \n\
+1·   operation                                \n\
+    Previous                         Ctrl + p\n\
+    Next                             Ctrl + n\n\
+    Back                             Ctrl + b\n\
+    Front                            Ctrl + f\n\
+    Enter                            Enter   \n\
+  󰜺  Escape                           Esc     \n\
                                                \n\
- 2.   function                                \n\
-   option                            Ctrl + k\n\
- 󰻞  messages                          Ctrl + u\n\
-   friends                           Ctrl + i\n\
-   groups                            Ctrl + o\n\
-                                               \n\
+2.   function                                 \n\
+    option                           Ctrl + k\n\
+  󰻞  messages                         Ctrl + u\n\
+    friends                          Ctrl + i\n\
+    groups                           Ctrl + o\n\
+                                               \n\n\n\
                    Move like Emacs             \n\
                                .  ,__,         \n\
                                 . (oo)____     \n\
@@ -79,23 +78,22 @@ static std::string HELPINFO_EN = "\
                                      ||--||     ";
 
 static std::string HELPINFO_CN = "\
-                                               \n\
                      食用说明书               \n\
                                                \n\
- 一·   操作                                   \n\
-   上    Previous                    Ctrl + p\n\
-   下    Next                        Ctrl + n\n\
-   左    Back                        Ctrl + b\n\
-   右    Front                       Ctrl + f\n\
-   确定  Enter                       Enter   \n\
- 󰜺  取消  Escape                      Esc     \n\
+一·   操作                                    \n\
+    上    Previous                   Ctrl + p\n\
+    下    Next                       Ctrl + n\n\
+    左    Back                       Ctrl + b\n\
+    右    Front                      Ctrl + f\n\
+    确定  Enter                      Enter   \n\
+  󰜺  取消  Escape                     Esc     \n\
                                                \n\
- 二.   功能                                   \n\
-   选项                              Ctrl + k\n\
- 󰻞  消息                              Ctrl + u\n\
-   朋友                              Ctrl + i\n\
-   群组                              Ctrl + o\n\
-                                               \n\
+二.   功能                                    \n\
+    选项                             Ctrl + k\n\
+  󰻞  消息                             Ctrl + u\n\
+    朋友                             Ctrl + i\n\
+    群组                             Ctrl + o\n\
+                                               \n\n\n\
                     Emacs用户大喜              \n\
                                .  ,__,         \n\
                                 . (oo)____     \n\
@@ -122,7 +120,7 @@ nerdtree(vim plugin), airline(vim plugin)        \n\
 telescope(nvim plugin) dashboard(nvim plugin)    \n\
 noise(nvim plugin), ranger, alsamixer, polybar   \n\
                                                  \n\
-                                                 \n\n\n\
+                                                 \n\n\n\n\n\
                             Author: 执着(Hunter) \n\
                                                  \n";
 
@@ -145,7 +143,7 @@ nerdtree(vim 插件), airline(vim 插件)         \n\
 telescope(nvim 插件) dashboard(nvim 插件)     \n\
 noise(nvim 插件), ranger, alsamixer, polybar  \n\
                                               \n\
-                                              \n\n\n\
+                                              \n\n\n\n\n\
                             作者: 执着(Hunter)\n\
                                               \n";
 } // namespace graph

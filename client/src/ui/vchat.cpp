@@ -28,46 +28,74 @@
 // chat list
 Chat::List::List(Chat *chat) {
   this->selected = Info::info->messageinfo[chat->id].size();
-  auto cmain = Container::Vertical({}, &selected);
+  cmain = Container::Vertical({}, &selected);
   auto rmain = Renderer(cmain, [=]{
-    cmain->DetachAllChildren();
     std::string name = Info::info->friendinfo[chat->id].friendname;
-    cmain->Add(
-      Renderer([=](bool focused){
-        Element element = text(
-          "您已添加" + name + "，现在可以开始聊天了"
-        ) | center;
-        if(focused) element |= focus;
-        return element;
-      })
-    );
-    for(auto& value : Info::info->messageinfo[chat->id]) {
+    cmain->DetachAllChildren();
+    if (!chat->selected) {
       cmain->Add(
         Renderer([=](bool focused){
-          Element element;
-          if(focused) {
-            if(value.sender == chat->id) {
-              element = hbox(text("  $ " + value.msg), filler())
-              | color(Color::Black) | bgcolor(Color::Blue);
-            } else if(value.receiver == chat->id){
-              element = hbox(filler(), text(value.msg + " #  "))
-              | color(Color::Black) | bgcolor(Color::Blue);
-            }
-            element |= focus;
-          } else {
-            if(value.sender == chat->id) {
-              element = hbox(text("  $ "), text(value.msg), filler());
-            } else if(value.receiver == chat->id){
-              element = hbox(filler(), text(value.msg), text(" #  "));
-            }
-          }
+          Element element = text(
+            "您已添加" + name + "，现在可以开始聊天了"
+          ) | center;
+          if(focused) element |= focus;
           return element;
         })
       );
+      for(auto& value : Info::info->messageinfo[chat->id]) {
+        cmain->Add(
+          Renderer([=](bool focused){
+            Element element;
+            if(focused) {
+              if(value.sender == chat->id) {
+                element = hbox(text("  $ " + value.msg), filler())
+                | color(Color::Yellow) | bgcolor(Color::Blue);
+              } else if(value.receiver == chat->id){
+                element = hbox(filler(), text(value.msg + " #     "))
+                | color(Color::Yellow) | bgcolor(Color::Blue);
+              }
+              element |= focus;
+            } else {
+              if(value.sender == chat->id) {
+                element = hbox(text("  $ "), text(value.msg), filler());
+              } else if(value.receiver == chat->id){
+                element = hbox(filler(), text(value.msg), text(" #     "));
+              }
+            }
+            return element | size(WIDTH, EQUAL, 54) | size(HEIGHT, EQUAL, 1);
+          })
+        );
+      }
+    } else {
+      for(auto it = Info::info->messageinfo[chat->id].end() - 21;
+        it != Info::info->messageinfo[chat->id].end(); it ++) {
+        cmain->Add(
+          Renderer([=](bool focused){
+            Element element;
+            if(focused) {
+              if(it->sender == chat->id) {
+                element = hbox(text("  $ " + it->msg), filler())
+                | color(Color::Yellow) | bgcolor(Color::Blue);
+              } else if(it->receiver == chat->id){
+                element = hbox(filler(), text(it->msg + " #     "))
+                | color(Color::Yellow) | bgcolor(Color::Blue);
+              }
+              element |= focus;
+            } else {
+              if(it->sender == chat->id) {
+                element = hbox(text("  $ "), text(it->msg), filler());
+              } else if(it->receiver == chat->id){
+                element = hbox(filler(), text(it->msg), text(" #     "));
+              }
+            }
+            return element | size(WIDTH, EQUAL, 54) | size(HEIGHT, EQUAL, 1);
+          })
+        );
+      }
     }
-    return cmain->Render() | color(Color::Blue)
-      | size(WIDTH, EQUAL, 47) | size(HEIGHT, EQUAL, 22);
-  }) | vscroll_indicator | frame;
+    return cmain->Render() | vscroll_indicator | frame | color(Color::Blue)
+      | size(WIDTH, EQUAL, 54) | size(HEIGHT, EQUAL, 24);
+  });
   auto emain = CatchEvent(rmain, [=](Event event){
     if(event == Event::CtrlN) {
       if(selected != Info::info->messageinfo[chat->id].size()) selected ++;
@@ -86,7 +114,7 @@ Chat::Input::Input(Chat *chat) {
   auto cinput = myinput(&ss, "按CtrlY发送消息", false, "󱍢 ");
   auto rinput = Renderer(cinput, [=]{
    return hbox(text("   > "), cinput->Render())
-    | size(WIDTH, EQUAL, 47) | size(HEIGHT, EQUAL, 3);
+    | size(WIDTH, EQUAL, 54) | size(HEIGHT, EQUAL, 3);
   });
   auto einput = CatchEvent(rinput, [=](Event event){
     if(event == Event::Return) {
@@ -115,11 +143,12 @@ Chat::Chat(int id_) : id(id_), list(this), input(this) {
   this->selected = 0;
   auto cchat = Container::Vertical({list.content, input.content }, &selected);
   auto rchat = Renderer(cchat, [=]{
-    return window(
+    Element show = window(
       text(" 󱍢 " + Info::info->friendinfo[id].friendname + " "),
       vbox(list.content->Render(), separator(), input.content->Render())
-      , LIGHT
-    ) | color(Color::Blue);
+      , LIGHT) | vcenter | center;
+    if (cchat->Focused()) show |= color(Color::Yellow);
+    return show | color(Color::Blue);
   });
   auto echat = CatchEvent(rchat, [=](Event event){
     if(event == Event::CtrlN || event == Event::CtrlP) {
@@ -130,73 +159,67 @@ Chat::Chat(int id_) : id(id_), list(this), input(this) {
       }
       return false;
     } else {
-      input.content->TakeFocus();
       selected = 1;
+      input.content->TakeFocus();
     }
     return false;
   });
-  this->content = echat | size(WIDTH, EQUAL, 50) | size(HEIGHT, EQUAL, 24);
+  this->content = echat | size(WIDTH, EQUAL, 54) | size(HEIGHT, EQUAL, 27);
 }
 
-// friend
-Friend::Friend(int id_) : id(id_) {
-  auto container = Container::Horizontal({
-    Button(" 󰚼  Edit", [&]{
-    }, ButtonOption::Ascii()),
-    Button("   Delete ", [&]{
-    }, ButtonOption::Ascii()),
-  }, &selected);
-  auto rcontainer = Renderer(container, [=]{
-    std::string username = Info::info->friendinfo[id].friendname;
-    return hbox({
-      vbox(
-        text("[    ID    ]: " + std::to_string(id)),
-        text("[ username ]: " + username)
-      ),
-      container->Render()
-    });
-  }) | flex;
-  auto econtainer = CatchEvent(rcontainer, [=](Event event){
-    if(event == Event::e) {
-      selected = 0;
-      return true;
-    } else if(event == Event::d) {
-      selected = 1;
-      return true;
-    }
-    return false;
-  });
-  this->content = econtainer | flex | borderLight;
+void Vchat::open_chat(int id) {
+  if (pages->ChildCount() == 2)
+    pages->ChildAt(0)->Detach();
+  selected = 0;
+  telescope->selected = INPUT;
+  telescope->list_selected = -1;
+  page_selected = pages->ChildCount() - 1;
+  pages->Add(chats[id]->content);
+}
+
+void Vchat::open_other(bool target) {
+  if (pages->ChildCount() == 2)
+    pages->ChildAt(0)->Detach();
+  selected = 0;
+  telescope->selected = INPUT;
+  telescope->list_selected = -1;
+  page_selected = pages->ChildCount() - 1;
+  if (target) {
+    pages->Add(about);
+    return;
+  }
+  pages->Add(help);
 }
 
 // init all page
 void Vchat::init_page() {
-  for(auto& v : Info::info->friendinfo) {
+  page_selected = 0;
+  for(auto& v : Info::info->friendinfo)
     chats[v.first] = new Chat(v.first);
-    friends[v.first] = new Friend(v.first);
-  }
   this->about = Renderer([](bool focused){
-    return paragraph_imp(graph::ABOUTINFO_CN) | center
-    | borderLight | color(Color::Blue)
-    | size(WIDTH, EQUAL, 50) | size(HEIGHT, EQUAL, 26);
+    Element show = paragraph_imp(graph::ABOUTINFO_CN) | color(Color::Blue)
+    | center | vcenter | borderLight | size(WIDTH, EQUAL, 54) | size(HEIGHT, EQUAL, 27);
+    if (focused) show |= color(Color::Yellow);
+    return show | color(Color::Blue);
   });
   this->help = Renderer([](bool focused){
-    return paragraph_imp(graph::HELPINFO_CN) | center
-    | borderLight | color(Color::Blue)
-    | size(WIDTH, EQUAL, 50) | size(HEIGHT, EQUAL, 26);
+    Element show = paragraph_imp(graph::HELPINFO_CN) | color(Color::Blue)
+    | center | vcenter | borderLight | size(WIDTH, EQUAL, 54) | size(HEIGHT, EQUAL, 27);
+    if (focused) show |= color(Color::Yellow);
+    return show | color(Color::Blue);
   });
   empty = Renderer([](bool focused){ return paragraph_imp(graph::EMPTY); });
   pages = Container::Horizontal({empty}, &page_selected);
   auto rmain = Renderer(pages, [=]{
     if(!pages->ChildCount()) pages->Add(empty);
     else if(pages->ChildCount() > 1) empty->Detach();
-    return pages->Render() | center;
+    return pages->Render() | vcenter | center;
   });
   auto emain= CatchEvent(rmain, [=](Event event){
     if(event == Event::CtrlB) {
-      if(!page_selected) page_selected --;
+      page_selected = 0;
     } else if(event == Event::CtrlF) {
-      if(page_selected != pages->ChildCount()) page_selected ++;
+      page_selected = 1;
     }
     return false;
   });
@@ -205,6 +228,7 @@ void Vchat::init_page() {
 
 bool Vchat::handleEvent(Event event, int listSelection) {
   if (telescope->list_selected == -1) {
+    telescope->input->TakeFocus();
     selected = 1;
     return false;
   } else if(telescope->list_selected == listSelection) {
@@ -225,20 +249,23 @@ Vchat::Vchat() {
     if (selected) status.emplace_back(text("  望远镜 >") | color(Color::Blue));
     else status.emplace_back(text("  窗口 >") | color(Color::Blue));
     status.emplace_back(filler());
-    status.emplace_back(text("< 提示 ]") | color(Color::Blue));
-    if(selected) return vbox(
+    status.emplace_back(text("< " + Info::info->myself.username + "]") | color(Color::Blue));
+    Element show;
+    if(selected) {
+    show = vbox(
       dbox(
-        page->Render(),
-        telescope->content->Render() | clear_under | center
-      ) | flex,
-      text(" ") | underlined | color(Color::Blue),
-      hbox(status)
-    );
-    return vbox(
-      page->Render() | flex,
-      text(" ") | underlined | color(Color::Blue),
-      hbox(status)
-    );
+        page->Render(), telescope->content->Render() | clear_under | center) | flex,
+        text(" ") | underlined | color(Color::Blue),
+        hbox(status)
+      );
+    } else {
+      show = vbox(
+        page->Render() | flex,
+        text(" ") | underlined | color(Color::Blue),
+        hbox(status)
+      );
+    }
+    return show;
   });
   auto emain = CatchEvent(rmain, [=](Event event) {
     if(event == Event::CtrlK) {
@@ -258,11 +285,10 @@ Vchat::Vchat() {
       } else {
         pages->ChildAt(page_selected)->Detach();
       }
-    } else if(event == Event::Custom) {
+    } else if(event == Event::Special("accept_addfd")) {
       for(auto& v : Info::info->requestaddlist)
         if(v.second.second) {
           chats[v.first] = new Chat(v.first);
-          friends[v.first] = new Friend(v.first);
           break;
         }
     }
@@ -273,29 +299,4 @@ Vchat::Vchat() {
 
 Vchat::~Vchat() {
   delete telescope;
-}
-
-void Vchat::open_chat(int id) {
-  selected = 0;
-  telescope->selected = INPUT;
-  telescope->list_selected = -1;
-  pages->Add(chats[id]->content);
-}
-
-void Vchat::open_friend(int id) {
-  selected = 0;
-  telescope->selected = INPUT;
-  telescope->list_selected = -1;
-  pages->Add(friends[id]->content);
-}
-
-void Vchat::open_other(bool target) {
-  selected = 0;
-  telescope->selected = INPUT;
-  telescope->list_selected = -1;
-  if (target) {
-    pages->Add(about);
-    return;
-  }
-  pages->Add(help);
 }

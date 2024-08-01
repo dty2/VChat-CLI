@@ -26,6 +26,7 @@
 #include "ui.h"
 #include "function.h"
 #include "data.hpp"
+#include <ftxui/component/component_base.hpp>
 
 extern ScreenInteractive* screen;
 extern std::unique_ptr<Function> function;
@@ -40,6 +41,7 @@ private:
   int id;
   int selected;
   struct List {
+    Component cmain;
     Component content;
     int selected;
     List(Chat*);
@@ -55,28 +57,16 @@ public:
   Chat(int);
 };
 
-// friend
-class Friend {
-private:
-  int id;
-  int selected = 0;
-public:
-  Component content;
-  Friend(int);
-};
-
-
 class Telescope;
 
 // vchat
 class Vchat {
 private:
   int selected = 0;
-  int page_selected = 0;
+  int page_selected;
   int dialog_selected = 0;
   Telescope* telescope;
   std::unordered_map<int, Chat*> chats;
-  std::unordered_map<int, Friend*> friends;
   Component about, help, pages, dialog, empty;
   void init_page(); // init all page
   bool handleEvent(Event, int);
@@ -85,7 +75,6 @@ public:
   Component page;
   Component content;
   void open_chat(int);
-  void open_friend(int);
   void open_other(bool);
   Vchat();
   ~Vchat();

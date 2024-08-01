@@ -29,7 +29,7 @@
 using namespace ftxui;
 
 extern ScreenInteractive* screen; // define at tui.cpp
-extern std::unique_ptr<Function> function;
+extern std::unique_ptr<Function> function; // define at function.cpp
 
 namespace dashboard {
 

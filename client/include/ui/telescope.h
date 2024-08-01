@@ -46,6 +46,10 @@ public:
 };
 
 class Chats {
+private:
+  Telescope* telescope;
+  std::pair<int, Component> addlist(FriendInfo);
+ 
 public:
   std::vector<std::pair<int, Component>> list;
   void refresh();
@@ -53,44 +57,37 @@ public:
   Chats(Telescope*);
   Component content;
   std::unordered_map<int, Element> previews;
+
 };
 
 class Friends {
+private:
+  Telescope* telescope;
+  std::pair<int, Component> addlist(FriendInfo);
+
 public:
   std::vector<std::pair<int, Component>> list;
   void refresh();
+  int friend_selected;
+  int function_selected;
   int selected;
   Friends(Telescope*);
   Component content;
   std::unordered_map<int, Element> previews;
 };
 
-class Inform {
-private:
-  std::map<int, int> id;
-public:
-  int selected;
-  Inform(Telescope*);
-  Component list;
-  std::unordered_map<int, Element> previews;
-};
-
 class Telescope {
-private:
-  struct Input {
-    std::string ss;
-    Component content;
-    Input();
-  }input;
+  void getinput();
 
 public:
-  Vchat *vchat;
-  int *toggle;
+  Component input;
   Common common;
   Chats chats;
   Friends friends;
-  Inform inform;
+  Vchat *vchat;
+  int *toggle;
   int selected = LIST;
+  std::string ss;
   int list_selected = CHAT;
   Telescope(Vchat*, int*);
   Telescope(Telescope &&) = delete;
