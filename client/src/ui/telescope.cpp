@@ -286,7 +286,7 @@ void Friends::refresh() {
   for(auto v : Info::info->requestaddlist) {
     list.emplace_back(-v.first, Renderer([=](bool focused){
       Element show = text(" 账号" +
-        v.second.first["username"].asString() + "请求添加为好友") | color(Color::Blue);
+        v.second["username"].asString() + "请求添加为好友") | color(Color::Blue);
       if (focused) show |= bgcolor(Color::Blue) | color(Color::Yellow);
       return show;
     }));
@@ -318,6 +318,8 @@ Friends::Friends(Telescope* telescope_) : telescope(telescope_) {
       return true;
     } else if(event == Event::CtrlN) {
       if (friend_selected < list.size()) friend_selected ++;
+      return true;
+    } else if(event == Event::Special("accept_addfd")) {
       return true;
     } else if(event == Event::Return) {
       selected = 1;

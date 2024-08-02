@@ -24,12 +24,6 @@
 #include "dashboard.h"
 #include "telescope.h"
 #include "ui.h"
-#include <ftxui/component/animation.hpp>
-#include <ftxui/component/component.hpp>
-#include <ftxui/component/component_base.hpp>
-#include <ftxui/component/event.hpp>
-#include <ftxui/dom/elements.hpp>
-#include <ftxui/dom/node.hpp>
 
 // chat list
 Chat::List::List(Chat *chat) {
@@ -295,7 +289,7 @@ Vchat::Vchat() {
       }
     } else if(event == Event::Special("accept_addfd")) {
       for(auto& v : Info::info->requestaddlist)
-        if(v.second.second) {
+        if(v.second) {
           chats[v.first] = new Chat(v.first);
           break;
         }

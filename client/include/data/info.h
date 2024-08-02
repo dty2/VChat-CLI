@@ -37,7 +37,7 @@ public:
   PersionalInfo myself;
   std::map<int, FriendInfo> friendinfo;
   std::map<int, std::vector<MessageInfo>> messageinfo;
-  std::map<int, std::pair<Json::Value, bool>> requestaddlist; // 好友请求添加列表
+  std::map<int, Json::Value> requestaddlist; // 好友请求添加列表
   std::map<int, Json::Value> findlist; // 搜索列表
   static Info *info;
   static void getinstance();
