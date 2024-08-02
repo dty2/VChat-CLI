@@ -31,7 +31,7 @@ using namespace ftxui;
 extern ScreenInteractive* screen;
 extern std::unique_ptr<Function> function;
 
-enum { COMMON = 0, CHAT, FRIEND, GROUP };
+enum { COMMON = 0, MYSELF, CHAT, FRIEND, GROUP };
 enum { LIST = 0, INPUT };
 
 class Vchat;
@@ -64,36 +64,58 @@ class Friends {
 private:
   Telescope* telescope;
   std::pair<int, Component> addlist(FriendInfo);
+  int but_selected = 0;
 
 public:
   std::vector<std::pair<int, Component>> list;
   void refresh();
   int friend_selected;
   int function_selected;
+  int function1_selected;
+  int function2_selected;
   int selected;
   Friends(Telescope*);
   Component content;
   std::unordered_map<int, Element> previews;
 };
 
-class Telescope {
-  void getinput();
-
+class Myself {
 public:
-  Component input;
-  Common common;
-  Chats chats;
-  Friends friends;
+  int function_selected;
+  int selected;
+  Component content;
+  std::unordered_map<int, Element> previews;
+  Myself(Telescope*);
+
+private:
+  Telescope* telescope;
+  struct AddFriend {
+    int selected;
+    Component content;
+    AddFriend(Myself*);
+  }addfriend;
+};
+
+class Telescope {
+public:
   Vchat *vchat;
   int *toggle;
   int selected = LIST;
-  std::string ss;
   int list_selected = CHAT;
+  std::string ss;
+  Component input;
+  Component content;
+  Common common;
+  Myself myself;
+  Chats chats;
+  Friends friends;
   Telescope(Vchat*, int*);
   Telescope(Telescope &&) = delete;
   Telescope(const Telescope &) = delete;
   ~Telescope();
-  Component content;
+
+private:
+  void getinput();
 
 };
 

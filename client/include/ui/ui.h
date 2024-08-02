@@ -70,7 +70,8 @@ static std::string HELPINFO_EN = "\
   󰻞  messages                         Ctrl + u\n\
     friends                          Ctrl + i\n\
     groups                           Ctrl + o\n\
-                                               \n\n\n\
+  󱈸  inform                           Ctrl + y\n\
+                                               \n\n\
                    Move like Emacs             \n\
                                .  ,__,         \n\
                                 . (oo)____     \n\
@@ -93,7 +94,8 @@ static std::string HELPINFO_CN = "\
   󰻞  消息                             Ctrl + u\n\
     朋友                             Ctrl + i\n\
     群组                             Ctrl + o\n\
-                                               \n\n\n\
+  󱈸  通知                             Ctrl + y\n\
+                                               \n\n\
                     Emacs用户大喜              \n\
                                .  ,__,         \n\
                                 . (oo)____     \n\

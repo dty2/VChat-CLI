@@ -25,6 +25,7 @@
 
 #include "data.hpp"
 #include "common.h"
+#include <vector>
 
 class Store {
 private:
@@ -39,6 +40,7 @@ public:
   Store& operator=(const Store&) = delete;
 
   bool getPersional(PersionalInfo&, const int);
+  bool getPersional(std::vector<PersionalInfo>&, const std::string);
   bool getFriend(std::list<FriendInfo>&, const int);
   bool getMessage(std::list<MessageInfo>&, const int);
   bool getUser(UserInfo&, const int);

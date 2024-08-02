@@ -50,6 +50,7 @@ public:
   bool signout(int, int);
   bool sendmsg(int, int, std::string, int64_t);
   bool find(int);
+  bool find(std::string);
   bool addfriend(int);
   bool responseadd(int, bool);
   bool deletefriend(int);

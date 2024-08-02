@@ -129,9 +129,10 @@ Dashboard::Sign::Sign(Dashboard* dashboard) {
   auto rsignerror = Renderer(csignerror, [=]{
     std::string ss;
     switch (errinfo) {
-      case 0 : ss = "注册失败，账号已存在..."; break;
-      case 1 : ss = "注册失败，账号密码格式错误..."; break;
-      case 2 : ss = "注册失败，账号格式不对"; break;
+      case 0 : ss = "注册成功，请登陆..."; break;
+      case 1 : ss = "注册失败，账号已存在..."; break;
+      case 2 : ss = "注册失败，账号密码格式错误..."; break;
+      case 3 : ss = "注册失败，账号格式不对"; break;
     }
     return vbox(text(ss) | color(Color::Red), csignerror->Render() | center) | center;
   });
@@ -151,8 +152,8 @@ Dashboard::Sign::Sign(Dashboard* dashboard) {
     else if(event == Event::CtrlN) { if(selected != 3) selected ++; return true; }
     else if(event == Event::CtrlB) { if(selected == 3) but = 0; return true; }
     else if(event == Event::CtrlF) { if(selected == 3) but = 1; return true; }
-    else if(event == Event::Special("signin_suc")) { dashboard->dialog = NONE; return true; }
-    else if(event == Event::Special("signin_fmerr")
+    else if(event == Event::Special("signin_suc")
+      || event == Event::Special("signin_fmerr")
       || event == Event::Special("signin_idexist")) { status = END; }
     return false;
   });
@@ -180,8 +181,8 @@ Dashboard::Dashboard() : log(this), sign(this) {
   init_help();
   auto cchoice = Container::Vertical({
     Renderer([=](bool focused){
-      if(focused) return hbox(text("󱍢  󰌆  登陆   ")) | color(Color::Yellow);
-      else return hbox(text("   󰌆  登陆   ") | color(Color::Blue));
+      if(focused) return hbox(text("󱍢    登陆   ")) | color(Color::Yellow);
+      else return hbox(text("     登陆   ") | color(Color::Blue));
     }),
     Renderer([=](bool focused){
       if(focused) return hbox(text("󱍢  󰗛  注册   ")) | color(Color::Yellow);
@@ -192,8 +193,8 @@ Dashboard::Dashboard() : log(this), sign(this) {
       else return hbox(text("   󰞋  帮助   ") | color(Color::Blue));
     }),
     Renderer([=](bool focused){
-      if(focused) return hbox(text("󱍢    关于   ")) | color(Color::Yellow);
-      else return hbox(text("     关于   ") | color(Color::Blue));
+      if(focused) return hbox(text("󱍢  󰋽  关于   ")) | color(Color::Yellow);
+      else return hbox(text("   󰋽  关于   ") | color(Color::Blue));
     }),
     Renderer([=](bool focused){
       if(focused) return hbox(text("󱍢  󰩈  退出   ")) | color(Color::Yellow);

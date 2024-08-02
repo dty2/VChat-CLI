@@ -37,7 +37,7 @@ void Service::serve(int method, Json::Value value, Connection *connection) {
     //case method::signout: service->signout(value, connection); break;
     case method::login: service->login(value, connection); break;
     //case method::logout: service->logout(value, connection); break;
-    //case method::findfd: service->find(value, connection); break;
+    case method::findfd: service->find(value, connection); break;
     case method::addfd: service->addfriend(value, connection); break;
     case method::accept_addfd: service->addfriend(method, value, connection); break;
     case method::refuse_addfd: service->addfriend(method, value, connection); break;
@@ -70,7 +70,7 @@ void Service::login(Json::Value value, Connection* connection) {
     int id = value["id"].asInt();
     int password = value["password"].asInt();
     PersionalInfo persionalinfo;
-    if(Store::store->getPersional(persionalinfo, id)) {
+    if(!Store::store->getPersional(persionalinfo, id)) {
       LOG(INFO) << id << " log error" << " because no id";
       connection->write(method::login_noid, value);
       return;
@@ -125,6 +125,53 @@ void Service::sendmsg(Json::Value value) {
       Service::cache.online[messageinfo.receiver]->write(method::sendmsg, value);
     }
   } catch (const std::exception& e) {
+    LOG(INFO) << e.what();
+  }
+}
+
+void Service::find(Json::Value value, Connection* connection) {
+  try {
+    int type = value["method"].asInt();
+    int id = value["id"].asInt();
+    LOG(INFO) << "type is" << type << id << "find";
+    if(!type) {
+      PersionalInfo persionalinfo;
+      int findid = value["findid"].asInt();
+      LOG(INFO) << "findid :" << findid;
+      if (Store::store->getPersional(persionalinfo, findid)) {
+        Json::Value root, findlist, findinfo;
+        findinfo["id"] = persionalinfo.id;
+        findinfo["name"] = persionalinfo.username;
+        findlist.append(findinfo);
+        root["findlist"] = findlist;
+        LOG(INFO) << id << "find" << persionalinfo.id << " " << persionalinfo.username;
+        if(Service::cache.online[id])
+            Service::cache.online[id]->write(method::findfd_suc, root);
+      } else {
+        if(Service::cache.online[id])
+          Service::cache.online[id]->write(method::findfd_err, 0);
+      }
+    } else {
+      std::vector<PersionalInfo> persionalinfolist;
+      std::string name = value["name"].asString();
+      if (Store::store->getPersional(persionalinfolist, name)) {
+        Json::Value root, findlist;
+        for(auto& v : persionalinfolist) {
+          Json::Value findinfo;
+          findinfo["id"] = v.id;
+          findinfo["name"] = v.username;
+          findinfo.append(findinfo);
+        }
+        root["findlist"] = findlist;
+        if(Service::cache.online[id])
+          Service::cache.online[id]->write(method::findfd_suc, root);
+      } else {
+        if(Service::cache.online[id])
+          Service::cache.online[id]->write(method::findfd_err, 0);
+      }
+    }
+  } catch (const std::exception& e) {
+    LOG(INFO) << e.what();
   }
 }
 
@@ -136,15 +183,10 @@ void Service::addfriend(Json::Value value, Connection* connection) {
     else
       Service::cache.addfriendapply[friendid].emplace_back(value);
   } catch (const std::exception& e) {
+    LOG(INFO) << e.what();
   }
 }
 
-// 这里添加好友比较复杂，在接受好友申请方同意后
-// 需要对数据库添加两个好友记录如 1 2 test1 和 2 1 test2
-// 置于为什么要添加两次，因为当初在设计的时候考虑到取数据的时候方便写因此就这么设计了
-// 但是由于这里的函数内部变量名字起得乱七八糟，因此这里压根看不出来谁是被加好友的，谁是主动加好友的
-// 这里在之后的版本百分之百会进行修改，因为这里的变量名字起得真的是太糟糕了，在写的时候就给自己绕懵了
-// 为什么不在写的时候就起一个好名字？好问题，因为想给日后的自己留个天坑
 void Service::addfriend(int method, Json::Value value, Connection* connection) {
   try {
     FriendInfo friendinfo;
@@ -166,5 +208,6 @@ void Service::addfriend(int method, Json::Value value, Connection* connection) {
         Service::cache.online[friendinfo.friendid]->write(method::refuse_addfd, value);
     }
   } catch (const std::exception& e) {
+    LOG(INFO) << e.what();
   }
 }

@@ -44,7 +44,7 @@ private:
   void signin(Json::Value, Connection*);
   //void signout(Json::Value, Connection*);
   void sendmsg(Json::Value);
-  //void find(Json::Value, Connection*);
+  void find(Json::Value, Connection*);
   void addfriend(Json::Value, Connection*);
   void addfriend(int, Json::Value, Connection*);
   //void deletefriend(Json::Value, Connection*);

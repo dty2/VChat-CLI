@@ -24,6 +24,12 @@
 #include "dashboard.h"
 #include "telescope.h"
 #include "ui.h"
+#include <ftxui/component/animation.hpp>
+#include <ftxui/component/component.hpp>
+#include <ftxui/component/component_base.hpp>
+#include <ftxui/component/event.hpp>
+#include <ftxui/dom/elements.hpp>
+#include <ftxui/dom/node.hpp>
 
 // chat list
 Chat::List::List(Chat *chat) {
@@ -270,6 +276,8 @@ Vchat::Vchat() {
   auto emain = CatchEvent(rmain, [=](Event event) {
     if(event == Event::CtrlK) {
       return handleEvent(event, COMMON);
+    } else if(event == Event::CtrlY) {
+      return handleEvent(event, MYSELF);
     } else if(event == Event::CtrlU) {
       return handleEvent(event, CHAT);
     } else if(event == Event::CtrlI) {

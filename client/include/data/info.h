@@ -25,8 +25,6 @@
 
 #include "common.h"
 #include "data.hpp"
-#include <unordered_set>
-#include <utility>
 
 class Info {
 private:
@@ -40,6 +38,7 @@ public:
   std::map<int, FriendInfo> friendinfo;
   std::map<int, std::vector<MessageInfo>> messageinfo;
   std::map<int, std::pair<Json::Value, bool>> requestaddlist; // 好友请求添加列表
+  std::map<int, Json::Value> findlist; // 搜索列表
   static Info *info;
   static void getinstance();
   void change(std::function<void()>);

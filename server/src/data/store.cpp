@@ -51,7 +51,26 @@ bool Store::getPersional(PersionalInfo& persionalinfo, const int id) {
       persionalinfo.password = query.getColumn(1).getInt();
       persionalinfo.username = query.getColumn(2).getString();
     }
-    if(persionalinfo.id && persionalinfo.password && persionalinfo.username.empty()) return true;
+    DLOG(INFO) << "getPersional:" << persionalinfo.id << persionalinfo.username;
+    if(persionalinfo.id && persionalinfo.password && !persionalinfo.username.empty()) return true;
+    else return false;
+  } catch (std::exception& e) {
+    return false;
+  }
+}
+
+bool Store::getPersional(std::vector<PersionalInfo>& persionalinfolist, const std::string name) {
+  try {
+    SQLite::Statement query(*this->db, "SELECT * FROM userinfo WHERE username = '%?%'");
+    query.bind(1, name);
+    while(query.executeStep()) {
+      persionalinfolist.push_back(PersionalInfo(
+        query.getColumn(1).getInt(),
+        query.getColumn(2).getInt(),
+        query.getColumn(3).getString()
+      ));
+    }
+    if(persionalinfolist.size()) return true;
     else return false;
   } catch (std::exception& e) {
     return false;
@@ -106,7 +125,7 @@ bool Store::insertPersional(PersionalInfo& persionalinfo) {
     return true;
   } catch (std::exception& e) {
     return false;
-  } 
+  }
 }
 
 bool Store::insertFriend(FriendInfo& friendinfo, int userid) {

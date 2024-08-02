@@ -67,13 +67,12 @@ private:
   int dialog_selected = 0;
   Telescope* telescope;
   std::unordered_map<int, Chat*> chats;
-  Component about, help, pages, dialog, empty;
+  Component about, help, pages, empty;
   void init_page(); // init all page
   bool handleEvent(Event, int);
 
 public:
-  Component page;
-  Component content;
+  Component page, content;
   void open_chat(int);
   void open_other(bool);
   Vchat();

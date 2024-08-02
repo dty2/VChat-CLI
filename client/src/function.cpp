@@ -63,6 +63,7 @@ void Function::handle(int op, Json::Value value) {
     break;
   case method::findfd_suc:
     DLOG(INFO) << "findfd_suc";
+    handle_find(value);
     postevent("findfd_suc");
     break;
   case method::findfd_err:
@@ -119,7 +120,13 @@ void Function::handle_login(Json::Value &value) {
   });
 }
 
-void Function::handle_find(Json::Value &value) {}
+void Function::handle_find(Json::Value &value) {
+  Info::info->change([&] {
+    for (auto& v : value["findlist"]) {
+      Info::info->findlist[v["id"].asInt()] = v;
+    }
+  });
+}
 
 void Function::handle_msg(Json::Value &value) {
   Info::info->change([&]{
@@ -227,19 +234,35 @@ bool Function::sendmsg(int receiver, int sender, std::string message, int64_t ti
   return 0;
 }
 
+// find id
 bool Function::find(int id) {
-  Json::Value friendinfo;
-  friendinfo["userid"] = Info::info->myself.id;
-  friendinfo["friendid"] = id;
+  Json::Value findinfo;
+  findinfo["method"] = 0;
+  findinfo["id"] = Info::info->myself.id;
+  findinfo["findid"] = id;
   int signal = 0;
-  if (!(signal = net.write(method::findfd, friendinfo))) {
+  if (!(signal = net.write(method::findfd, findinfo))) {
     return 0;
   } else
     return signal;
   return 0;
 }
 
-// 添加好友
+// find username
+bool Function::find(std::string username) {
+  Json::Value findinfo;
+  findinfo["method"] = 1;
+  findinfo["id"] = Info::info->myself.id;
+  findinfo["findname"] = username;
+  int signal = 0;
+  if (!(signal = net.write(method::findfd, findinfo))) {
+    return 0;
+  } else
+    return signal;
+  return 0;
+}
+
+// add friend
 bool Function::addfriend(int id) {
   Json::Value friendinfo;
   friendinfo["userid"] = Info::info->myself.id;
