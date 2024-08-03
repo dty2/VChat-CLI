@@ -32,7 +32,36 @@ Chat::List::List(Chat *chat) {
   auto rmain = Renderer(cmain, [=]{
     std::string name = Info::info->friendinfo[chat->id].friendname;
     cmain->DetachAllChildren();
-    if (!chat->selected) {
+    // 21 is my computer screen high, you must change it your self in your computer.
+    // this if-else is used when you inputting
+    // you can comment then code block of if, then try to inputting, you will see the reason.
+    if (chat->selected && Info::info->messageinfo[chat->id].size() > 21) {
+      for(auto it = Info::info->messageinfo[chat->id].end() - 21;
+        it != Info::info->messageinfo[chat->id].end(); it ++) {
+        cmain->Add(
+          Renderer([=](bool focused){
+            Element element;
+            if(focused) {
+              if(it->sender == chat->id) {
+                element = hbox(text("  $ " + it->msg), filler())
+                | color(Color::Yellow) | bgcolor(Color::Blue);
+              } else if(it->receiver == chat->id){
+                element = hbox(filler(), text(it->msg + " #     "))
+                | color(Color::Yellow) | bgcolor(Color::Blue);
+              }
+              element |= focus;
+            } else {
+              if(it->sender == chat->id) {
+                element = hbox(text("  $ "), text(it->msg), filler());
+              } else if(it->receiver == chat->id){
+                element = hbox(filler(), text(it->msg), text(" #     "));
+              }
+            }
+            return element | size(WIDTH, EQUAL, 54) | size(HEIGHT, EQUAL, 1);
+          })
+        );
+      }
+    } else {
       cmain->Add(
         Renderer([=](bool focused){
           Element element = text(
@@ -66,32 +95,6 @@ Chat::List::List(Chat *chat) {
           })
         );
       }
-    } else {
-      for(auto it = Info::info->messageinfo[chat->id].end() - 21;
-        it != Info::info->messageinfo[chat->id].end(); it ++) {
-        cmain->Add(
-          Renderer([=](bool focused){
-            Element element;
-            if(focused) {
-              if(it->sender == chat->id) {
-                element = hbox(text("  $ " + it->msg), filler())
-                | color(Color::Yellow) | bgcolor(Color::Blue);
-              } else if(it->receiver == chat->id){
-                element = hbox(filler(), text(it->msg + " #     "))
-                | color(Color::Yellow) | bgcolor(Color::Blue);
-              }
-              element |= focus;
-            } else {
-              if(it->sender == chat->id) {
-                element = hbox(text("  $ "), text(it->msg), filler());
-              } else if(it->receiver == chat->id){
-                element = hbox(filler(), text(it->msg), text(" #     "));
-              }
-            }
-            return element | size(WIDTH, EQUAL, 54) | size(HEIGHT, EQUAL, 1);
-          })
-        );
-      }
     }
     return cmain->Render() | vscroll_indicator | frame | color(Color::Blue)
       | size(WIDTH, EQUAL, 54) | size(HEIGHT, EQUAL, 24);
@@ -112,9 +115,10 @@ Chat::List::List(Chat *chat) {
 // chat input
 Chat::Input::Input(Chat *chat) {
   auto cinput = myinput(&ss, "按CtrlY发送消息", false, "󱍢 ");
+  //auto cinput = ftxui::Input(&ss, "按CtrlY发送消息");
   auto rinput = Renderer(cinput, [=]{
    return hbox(text("   > "), cinput->Render())
-    | size(WIDTH, EQUAL, 54) | size(HEIGHT, EQUAL, 3);
+     | size(WIDTH, EQUAL, 54) | size(HEIGHT, EQUAL, 3);
   });
   auto einput = CatchEvent(rinput, [=](Event event){
     if(event == Event::Return) {
@@ -133,14 +137,15 @@ Chat::Input::Input(Chat *chat) {
         ss.clear();
         chat->list.content->TakeFocus();
         return true;
-    } else return false;
+    }
+    return false;
   });
   this->content = einput;
 }
 
 // chat
 Chat::Chat(int id_) : id(id_), list(this), input(this) {
-  this->selected = 0;
+  this->selected = 1;
   auto cchat = Container::Vertical({list.content, input.content }, &selected);
   auto rchat = Renderer(cchat, [=]{
     Element show = window(
@@ -159,8 +164,8 @@ Chat::Chat(int id_) : id(id_), list(this), input(this) {
       }
       return false;
     } else {
-      selected = 1;
       input.content->TakeFocus();
+      selected = 1;
     }
     return false;
   });

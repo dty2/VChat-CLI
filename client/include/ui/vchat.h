@@ -26,7 +26,6 @@
 #include "ui.h"
 #include "function.h"
 #include "data.hpp"
-#include <ftxui/component/component_base.hpp>
 
 extern ScreenInteractive* screen;
 extern std::unique_ptr<Function> function;
@@ -37,6 +36,10 @@ class Vchat;
 
 // chat
 class Chat {
+public:
+  Component content;
+  Chat(int);
+
 private:
   int id;
   int selected;
@@ -52,9 +55,6 @@ private:
     Input(Chat*);
   }input;
 
-public:
-  Component content;
-  Chat(int);
 };
 
 class Telescope;
